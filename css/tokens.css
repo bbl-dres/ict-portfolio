@@ -28,9 +28,12 @@
   /* ── Colours: Accent (Blue) ── */
   --accent-50:  #EFF6FF;
   --accent-100: #DBEAFE;
+  --accent-200: #BFDBFE;
+  --accent-300: #93C5FD;
   --accent-500: #3B82F6;
   --accent-600: #2563EB;
   --accent-700: #1D4ED8;
+  --accent-800: #1E40AF;
 
   /* ── Colours: Semantic ── */
   --success-50:  #F0FDF4;
@@ -173,6 +176,15 @@
   --content-max:   1600px;
 
   /* ── App Background ── */
-  --bg-app: #f8fafd;
+  --bg-app: #f5f7fb;
   --bg-primary: #ffffff;
+  --bg-surface: #fafbfd;
+  --bg-surface-hover: #f0f4fa;
+
+  /* ── Card accents (top-border color by phase) ── */
+  --card-accent-triage:         var(--phase-triage);
+  --card-accent-analysis:       var(--phase-analysis);
+  --card-accent-implementation: var(--phase-implementation);
+  --card-accent-completed:      var(--phase-completed);
+  --card-accent-rejected:       var(--phase-rejected);
 }
