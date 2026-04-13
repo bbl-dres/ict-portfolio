@@ -308,7 +308,7 @@ function renderProjectRow(p, cols, gridCols) {
       case '_title':       cells += `<div class="project-row-main"><div class="project-title">${esc(p.title)}</div>${vf.has('requestor') ? `<div class="project-requestor">${esc(p.requestor)}</div>` : ''}</div>`; break;
       case 'budget_chf':   cells += `<span class="project-budget">${formatBudgetShort(p.budget_chf)}</span>`; break;
       case 'responsible':  cells += `<span class="project-responsible">${p.responsible || '—'}</span>`; break;
-      case 'phase':        cells += `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`; break;
+      case 'phase':        cells += `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`; break;
       case 'type':         cells += typeBadge(p.type); break;
       case 'class':        cells += `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`; break;
       case 'priority':     cells += priorityBadge(p.priority); break;
@@ -316,7 +316,7 @@ function renderProjectRow(p, cols, gridCols) {
       case 'target_date':  cells += `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>`; break;
       case 'go_decision':  cells += `<span class="project-go">${p.go_decision === true ? 'Ja' : p.go_decision === false ? 'Nein' : '—'}</span>`; break;
       case 'hermes_phase': cells += `<span class="project-hermes">${p.hermes_phase || '—'}</span>`; break;
-      case 'dti_required': cells += `<span class="badge-dti" title="DTI-pflichtig">${p.dti_required ? '🚩' : ''}</span>`; break;
+      case 'dti_required': cells += p.dti_required ? '<span class="badge badge-dti">DTI</span>' : '<span></span>'; break;
       case 'created_at':   cells += `<span class="project-date">${formatDate(p.created_at)}</span>`; break;
     }
   }
@@ -353,7 +353,7 @@ function renderGalleryCard(p) {
   const infoRow = (infoLeft || infoRight) ? `<div class="gallery-card-meta-row">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
   // Phase + type row
-  const phaseBadgeHtml = vf.has('phase') ? `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>` : '';
+  const phaseBadgeHtml = vf.has('phase') ? `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>` : '';
   const typeBadgeHtml = vf.has('type') ? typeBadge(p.type) : '';
   const phaseRow = (phaseBadgeHtml || typeBadgeHtml) ? `<div class="gallery-card-meta-row">${phaseBadgeHtml}${typeBadgeHtml}</div>` : '';
 
@@ -364,7 +364,7 @@ function renderGalleryCard(p) {
 
   // Extras row: dti, hermes, go_decision, created_at
   const extras = [];
-  if (vf.has('dti_required') && p.dti_required) extras.push('🚩 DTI');
+  if (vf.has('dti_required') && p.dti_required) extras.push('DTI');
   if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
   if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
   if (vf.has('created_at')) extras.push(formatDate(p.created_at));
@@ -431,7 +431,7 @@ function renderKanbanView(container) {
 
         // Info: budget + class
         const infoLeft = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
-        const infoRight = vf.has('class') ? `<span class="badge badge-class badge-sm" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
+        const infoRight = vf.has('class') ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
         const infoRow = (infoLeft || infoRight) ? `<div class="kanban-card-meta">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
         // Type
@@ -444,7 +444,7 @@ function renderKanbanView(container) {
 
         // Extras
         const extras = [];
-        if (vf.has('dti_required') && p.dti_required) extras.push('🚩 DTI');
+        if (vf.has('dti_required') && p.dti_required) extras.push('DTI');
         if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
         if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
         const extrasRow = extras.length ? `<div class="kanban-card-responsible"><span class="project-date">${extras.join(' · ')}</span></div>` : '';
@@ -885,25 +885,22 @@ function renderFilterPanel() {
 
   const phaseOpts = PHASE_ORDER.map(k => {
     const checked = f.phase.has(k) ? 'checked' : '';
-    const color = `var(--phase-${k})`;
-    return `<label class="filter-option"><input type="checkbox" data-dim="phase" data-val="${k}" ${checked}><span class="filter-dot" style="background:${color}"></span>${PHASE_LABELS[k]}</label>`;
+    return `<label class="filter-option"><input type="checkbox" data-dim="phase" data-val="${k}" ${checked}>${PHASE_LABELS[k]}</label>`;
   }).join('');
 
   const classOpts = CLASS_ORDER.map(k => {
     const checked = f.class.has(k) ? 'checked' : '';
-    const colors = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
-    return `<label class="filter-option"><input type="checkbox" data-dim="class" data-val="${k}" ${checked}><span class="filter-dot" style="background:${colors[k]}"></span>${CLASS_LABELS[k]}</label>`;
+    return `<label class="filter-option"><input type="checkbox" data-dim="class" data-val="${k}" ${checked}>${CLASS_LABELS[k]}</label>`;
   }).join('');
 
   const typeOpts = TYPE_ORDER.map(k => {
     const checked = f.type.has(k) ? 'checked' : '';
-    return `<label class="filter-option"><input type="checkbox" data-dim="type" data-val="${k}" ${checked}><span class="filter-dot" style="background:var(--type-${k})"></span>${TYPE_LABELS[k]}</label>`;
+    return `<label class="filter-option"><input type="checkbox" data-dim="type" data-val="${k}" ${checked}>${TYPE_LABELS[k]}</label>`;
   }).join('');
 
   const prioOpts = PRIORITY_ORDER.map(k => {
     const checked = f.priority.has(k) ? 'checked' : '';
-    const colors = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
-    return `<label class="filter-option"><input type="checkbox" data-dim="priority" data-val="${k}" ${checked}><span class="filter-dot" style="background:${colors[k]}"></span>${PRIORITY_LABELS[k]}</label>`;
+    return `<label class="filter-option"><input type="checkbox" data-dim="priority" data-val="${k}" ${checked}>${PRIORITY_LABELS[k]}</label>`;
   }).join('');
 
   const dtiVal = f.dti;
@@ -1229,10 +1226,10 @@ function renderDetailPage(container) {
         <div class="detail-hero-title">${esc(p.title)}</div>
         <div class="detail-hero-subtitle">${esc(p.requestor)}${p.responsible ? ' · ' + esc(p.responsible) : ''}</div>
         <div class="detail-hero-badges">
-          <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
+          <span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>
           <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
           ${typeBadge(p.type)}
-          ${p.dti_required ? '<span class="badge-dti" title="DTI-pflichtig">🚩 DTI</span>' : ''}
+          ${p.dti_required ? '<span class="badge badge-dti">DTI</span>' : ''}
           ${p.jira_key ? `<span class="detail-hero-jira">${esc(p.jira_key)}</span>` : ''}
         </div>
         <div class="detail-hero-actions">
@@ -1253,7 +1250,7 @@ function renderDetailPage(container) {
       <div class="detail-card">
         <div class="detail-card-header">Projektdetails</div>
         <div class="detail-card-body">
-          ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`)}
+          ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`)}
           ${detailFieldRow('Klasse', `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`)}
           ${detailFieldRow('Typ', typeBadge(p.type))}
           ${detailFieldRow('Priorität', priorityBadge(p.priority))}

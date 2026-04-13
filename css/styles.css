@@ -196,7 +196,7 @@ select:focus-visible {
 .main {
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: var(--space-6) 0;
+  padding: var(--space-6) var(--space-5);
 }
 
 /* ── Page Header ── */
@@ -618,14 +618,14 @@ select:focus-visible {
 .view-content-area {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 .view-container {
   background: #fff;
-  border: 1px solid var(--gray-300);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   min-height: 400px;
   overflow: hidden;
 }
@@ -797,41 +797,25 @@ select:focus-visible {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
+  gap: 3px;
+  padding: 2px var(--space-2);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--letter-spacing-wide);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
   border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
-.badge-phase {
-  gap: var(--space-1);
-}
-
-.badge-phase .phase-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-}
+.badge svg { flex-shrink: 0; }
 
 /* Phase variants */
 .badge-phase[data-phase="triage"]          { background: var(--phase-triage-bg);         color: var(--gray-700); }
-.badge-phase[data-phase="triage"] .phase-dot         { background: var(--phase-triage); }
 .badge-phase[data-phase="analysis"]        { background: var(--phase-analysis-bg);       color: var(--info-800); }
-.badge-phase[data-phase="analysis"] .phase-dot       { background: var(--phase-analysis); }
 .badge-phase[data-phase="implementation"]  { background: var(--phase-implementation-bg); color: var(--warning-800); }
-.badge-phase[data-phase="implementation"] .phase-dot { background: var(--phase-implementation); }
 .badge-phase[data-phase="completed"]       { background: var(--phase-completed-bg);      color: var(--success-800); }
-.badge-phase[data-phase="completed"] .phase-dot      { background: var(--phase-completed); }
 .badge-phase[data-phase="rejected"]        { background: var(--phase-rejected-bg);       color: var(--error-800); }
-.badge-phase[data-phase="rejected"] .phase-dot       { background: var(--phase-rejected); }
 
 /* Priority variants */
-.badge-priority { gap: 2px; }
-.badge-priority svg { flex-shrink: 0; }
 .badge-priority[data-priority="low"]    { background: var(--priority-low-bg);    color: var(--priority-low-text); }
 .badge-priority[data-priority="medium"] { background: var(--priority-medium-bg); color: var(--priority-medium-text); }
 .badge-priority[data-priority="high"]   { background: var(--priority-high-bg);   color: var(--priority-high-text); }
@@ -841,8 +825,7 @@ select:focus-visible {
 .badge-class[data-class="standard"]   { background: var(--class-std-bg);  color: var(--class-std-text); }
 .badge-class[data-class="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
 
-.badge-type { gap: 3px; }
-.badge-type svg { flex-shrink: 0; }
+/* Type variants */
 .badge-type[data-type="incident"]  { background: var(--type-incident-bg);  color: var(--type-incident-text); }
 .badge-type[data-type="change"]    { background: var(--type-change-bg);    color: var(--type-change-text); }
 .badge-type[data-type="new"]       { background: var(--type-new-bg);       color: var(--type-new-text); }
@@ -850,25 +833,17 @@ select:focus-visible {
 .badge-type[data-type="migration"] { background: var(--type-migration-bg); color: var(--type-migration-text); }
 .badge-type[data-type="study"]     { background: var(--type-study-bg);     color: var(--type-study-text); }
 
-.badge-sm {
-  font-size: 10px;
-  padding: 1px 6px;
-}
+/* DTI badge — same base as .badge */
+.badge-dti { background: var(--error-50); color: var(--error-800); }
 
-.badge-dti {
-  color: var(--error-600);
-  font-size: var(--font-size-sm);
-  min-width: 20px;
-  text-align: center;
-}
-
+/* Tag badge — smaller, square-cornered, neutral */
 .badge-tag {
   display: inline-flex;
   align-items: center;
   padding: 1px var(--space-2);
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
-  color: var(--gray-700);
+  color: var(--gray-600);
   background: var(--gray-100);
   border-radius: var(--radius-sm);
   white-space: nowrap;
@@ -900,8 +875,8 @@ select:focus-visible {
 .view-container .badge-type:hover,
 .view-container .badge-priority:hover,
 .view-container .badge-tag:hover {
-  opacity: 0.8;
-  box-shadow: 0 0 0 2px var(--accent-100);
+  outline: 2px solid var(--gray-300);
+  outline-offset: 1px;
 }
 
 /* Filter count badge on toggle button */
@@ -982,13 +957,6 @@ select:focus-visible {
   cursor: pointer;
 }
 
-.filter-option .filter-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-}
-
 .filter-tags-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -1054,8 +1022,8 @@ select:focus-visible {
 }
 
 .filter-pill .pill-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
@@ -1145,22 +1113,21 @@ select:focus-visible {
 }
 
 .gallery-card {
-  border: none;
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: all var(--transition-normal);
   background: #fff;
-  box-shadow: var(--shadow-md);
 }
 
 .gallery-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--gray-300);
 }
 
 .gallery-card-image {
-  height: 160px;
+  height: 140px;
   position: relative;
   display: flex;
   align-items: center;
@@ -1302,18 +1269,16 @@ select:focus-visible {
 }
 
 .kanban-card {
-  background: var(--gray-50);
+  background: #fff;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .kanban-card:hover {
-  box-shadow: var(--shadow-sm);
   border-color: var(--gray-300);
-  background: #fff;
 }
 
 .kanban-card-title {
@@ -1637,8 +1602,8 @@ select:focus-visible {
 }
 
 .dashboard-legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-full);
 }
 
