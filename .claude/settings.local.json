@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -type f -not -path \"./.git/*\" -exec wc -l {} +)"
+    ]
+  }
+}

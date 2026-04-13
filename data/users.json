@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "username": "marc.brunner",
+    "display_name": "Marc Brunner",
+    "email": "marc.brunner@bbl.admin.ch",
+    "role": "admin",
+    "created_at": "2026-01-10T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "username": "sandra.keller",
+    "display_name": "Sandra Keller",
+    "email": "sandra.keller@bbl.admin.ch",
+    "role": "owner",
+    "created_at": "2026-01-10T08:15:00Z"
+  },
+  {
+    "id": 3,
+    "username": "lukas.meier",
+    "display_name": "Lukas Meier",
+    "email": "lukas.meier@bbl.admin.ch",
+    "role": "analyst",
+    "created_at": "2026-01-15T09:00:00Z"
+  },
+  {
+    "id": 4,
+    "username": "anna.wyss",
+    "display_name": "Anna Wyss",
+    "email": "anna.wyss@bbl.admin.ch",
+    "role": "analyst",
+    "created_at": "2026-02-01T10:00:00Z"
+  },
+  {
+    "id": 5,
+    "username": "thomas.graf",
+    "display_name": "Thomas Graf",
+    "email": "thomas.graf@bbl.admin.ch",
+    "role": "viewer",
+    "created_at": "2026-02-15T14:00:00Z"
+  },
+  {
+    "id": 6,
+    "username": "petra.huber",
+    "display_name": "Petra Huber",
+    "email": "petra.huber@bbl.admin.ch",
+    "role": "viewer",
+    "created_at": "2026-03-01T09:30:00Z"
+  }
+]
