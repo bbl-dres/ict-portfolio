@@ -148,19 +148,19 @@ function getFilteredProjects() {
     let va = a[state.sortField];
     let vb = b[state.sortField];
 
-    // Special sort orders
+    // Special sort orders (missing values sort to end via Infinity)
     if (state.sortField === 'phase') {
-      va = PHASE_ORDER.indexOf(va);
-      vb = PHASE_ORDER.indexOf(vb);
+      va = PHASE_ORDER.indexOf(va);  if (va === -1) va = Infinity;
+      vb = PHASE_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
     } else if (state.sortField === 'class') {
-      va = CLASS_ORDER.indexOf(va);
-      vb = CLASS_ORDER.indexOf(vb);
+      va = CLASS_ORDER.indexOf(va);  if (va === -1) va = Infinity;
+      vb = CLASS_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
     } else if (state.sortField === 'type') {
-      va = TYPE_ORDER.indexOf(va);
-      vb = TYPE_ORDER.indexOf(vb);
+      va = TYPE_ORDER.indexOf(va);  if (va === -1) va = Infinity;
+      vb = TYPE_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
     } else if (state.sortField === 'priority') {
-      va = PRIORITY_ORDER.indexOf(va);
-      vb = PRIORITY_ORDER.indexOf(vb);
+      va = PRIORITY_ORDER.indexOf(va);  if (va === -1) va = Infinity;
+      vb = PRIORITY_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
     }
 
     if (va == null) va = '';
@@ -226,45 +226,23 @@ function getGroupLabel(key) {
   return key;
 }
 
+/* ── Shared colour maps (used by groups, dashboard, filter pills) ── */
+const PHASE_COLORS = {
+  triage: 'var(--phase-triage)', analysis: 'var(--phase-analysis)',
+  implementation: 'var(--phase-implementation)', completed: 'var(--phase-completed)',
+  rejected: 'var(--phase-rejected)',
+};
+const CLASS_COLORS = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
+const TYPE_COLORS = {
+  incident: 'var(--type-incident)', change: 'var(--type-change)', new: 'var(--type-new)',
+  data: 'var(--type-data)', migration: 'var(--type-migration)', study: 'var(--type-study)',
+};
+const PRIORITY_COLORS = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
+
+const COLOR_MAPS = { phase: PHASE_COLORS, class: CLASS_COLORS, type: TYPE_COLORS, priority: PRIORITY_COLORS };
+
 function getGroupColor(key) {
-  if (state.groupBy === 'phase') {
-    const colors = {
-      triage: 'var(--phase-triage)',
-      analysis: 'var(--phase-analysis)',
-      implementation: 'var(--phase-implementation)',
-      completed: 'var(--phase-completed)',
-      rejected: 'var(--phase-rejected)',
-    };
-    return colors[key] || 'var(--gray-400)';
-  }
-  if (state.groupBy === 'class') {
-    const colors = {
-      fast_track: 'var(--success-500)',
-      standard: 'var(--accent-500)',
-      complex: 'var(--warning-500)',
-    };
-    return colors[key] || 'var(--gray-400)';
-  }
-  if (state.groupBy === 'type') {
-    const colors = {
-      incident: 'var(--type-incident)',
-      change: 'var(--type-change)',
-      new: 'var(--type-new)',
-      data: 'var(--type-data)',
-      migration: 'var(--type-migration)',
-      study: 'var(--type-study)',
-    };
-    return colors[key] || 'var(--gray-400)';
-  }
-  if (state.groupBy === 'priority') {
-    const colors = {
-      high: 'var(--priority-high)',
-      medium: 'var(--priority-medium)',
-      low: 'var(--priority-low)',
-    };
-    return colors[key] || 'var(--gray-400)';
-  }
-  return 'var(--gray-400)';
+  return (COLOR_MAPS[state.groupBy] || {})[key] || 'var(--gray-400)';
 }
 
 function getUniqueResponsibles() {

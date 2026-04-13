@@ -730,38 +730,31 @@ function renderGanttChart(projects) {
 function renderDashboardView(container) {
   const projects = getFilteredProjects();
   const total = projects.length;
-  const totalBudget = projects.reduce((s, p) => s + p.budget_chf, 0);
-  const dtiCount = projects.filter(p => p.dti_required).length;
-  const activeCount = projects.filter(p => p.phase === 'implementation').length;
 
-  // Phase distribution
+  // Single-pass aggregation
+  let totalBudget = 0, dtiCount = 0, activeCount = 0;
+  const phaseCounts = {};
+  const classCounts = {};
+  const classBudgets = {};
+  for (const p of projects) {
+    totalBudget += p.budget_chf;
+    if (p.dti_required) dtiCount++;
+    if (p.phase === 'implementation') activeCount++;
+    phaseCounts[p.phase] = (phaseCounts[p.phase] || 0) + 1;
+    classCounts[p.class] = (classCounts[p.class] || 0) + 1;
+    classBudgets[p.class] = (classBudgets[p.class] || 0) + p.budget_chf;
+  }
+
   const phaseData = PHASE_ORDER.map(ph => ({
-    key: ph,
-    label: PHASE_LABELS[ph],
-    count: projects.filter(p => p.phase === ph).length,
+    key: ph, label: PHASE_LABELS[ph], count: phaseCounts[ph] || 0,
   }));
 
-  // Class distribution
   const classData = CLASS_ORDER.map(cl => ({
-    key: cl,
-    label: CLASS_LABELS[cl],
-    count: projects.filter(p => p.class === cl).length,
-    budget: projects.filter(p => p.class === cl).reduce((s, p) => s + p.budget_chf, 0),
+    key: cl, label: CLASS_LABELS[cl], count: classCounts[cl] || 0, budget: classBudgets[cl] || 0,
   }));
 
-  const phaseColors = {
-    triage: 'var(--phase-triage)',
-    analysis: 'var(--phase-analysis)',
-    implementation: 'var(--phase-implementation)',
-    completed: 'var(--phase-completed)',
-    rejected: 'var(--phase-rejected)',
-  };
-
-  const classColors = {
-    fast_track: 'var(--success-500)',
-    standard: 'var(--accent-500)',
-    complex: 'var(--warning-500)',
-  };
+  const phaseColors = PHASE_COLORS;
+  const classColors = CLASS_COLORS;
 
   container.innerHTML = `
     <div class="dashboard">
@@ -870,14 +863,16 @@ function setupToolbar() {
     searchInput.focus();
   });
 
+  let debounce;
+
   document.getElementById('searchClearBtn').addEventListener('click', () => {
+    clearTimeout(debounce);
     searchInput.value = '';
     state.searchQuery = '';
     searchWrap.classList.remove('expanded');
     render();
   });
 
-  let debounce;
   searchInput.addEventListener('input', (e) => {
     clearTimeout(debounce);
     debounce = setTimeout(() => {
@@ -888,6 +883,7 @@ function setupToolbar() {
 
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      clearTimeout(debounce);
       searchInput.value = '';
       state.searchQuery = '';
       searchWrap.classList.remove('expanded');
@@ -961,7 +957,8 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
     document.querySelectorAll('.dropdown-menu.open').forEach(m => {
       if (m.id !== menuId) {
         m.classList.remove('open');
-        const otherBtn = m.previousElementSibling || m.parentElement.querySelector('.toolbar-btn');
+        const wrapper = m.closest('.toolbar-dropdown');
+        const otherBtn = wrapper ? wrapper.querySelector('[aria-expanded]') : null;
         if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
       }
     });
@@ -983,7 +980,10 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
 document.addEventListener('click', (e) => {
   document.querySelectorAll('.dropdown-menu.open').forEach(m => {
     m.classList.remove('open');
-    const btn = m.parentElement.querySelector('[aria-expanded]');
+    // Find the toggle button reliably: it's the sibling with aria-expanded
+    // within the same .toolbar-dropdown wrapper
+    const wrapper = m.closest('.toolbar-dropdown');
+    const btn = wrapper ? wrapper.querySelector('[aria-expanded]') : null;
     if (btn) btn.setAttribute('aria-expanded', 'false');
   });
 
@@ -1246,21 +1246,17 @@ function renderFilterPills() {
   const f = state.filters;
   let html = '<span class="filter-pills-label">Aktive Filter:</span>';
 
-  const phaseColors = { triage: 'var(--phase-triage)', analysis: 'var(--phase-analysis)', implementation: 'var(--phase-implementation)', completed: 'var(--phase-completed)', rejected: 'var(--phase-rejected)' };
-  const classColors = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
-  const prioColors = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
-
   for (const k of f.phase) {
-    html += filterPill('phase', k, PHASE_LABELS[k], phaseColors[k]);
+    html += filterPill('phase', k, PHASE_LABELS[k], PHASE_COLORS[k]);
   }
   for (const k of f.class) {
-    html += filterPill('class', k, CLASS_LABELS[k], classColors[k]);
+    html += filterPill('class', k, CLASS_LABELS[k], CLASS_COLORS[k]);
   }
   for (const k of f.type) {
-    html += filterPill('type', k, TYPE_LABELS[k], 'var(--gray-500)');
+    html += filterPill('type', k, TYPE_LABELS[k], TYPE_COLORS[k] || 'var(--gray-500)');
   }
   for (const k of f.priority) {
-    html += filterPill('priority', k, PRIORITY_LABELS[k], prioColors[k]);
+    html += filterPill('priority', k, PRIORITY_LABELS[k], PRIORITY_COLORS[k]);
   }
   for (const r of f.responsible) {
     const label = r === '__me__' ? 'Mir zugewiesen' : r === '__none__' ? 'Nicht zugewiesen' : r;
@@ -1412,7 +1408,9 @@ function afterBadgeClick() {
    ═══════════════════════════════════════════════════════════ */
 
 function openDetailPanel(projectId) {
-  state.previousView = state.currentView;
+  if (state.currentView !== 'detail') {
+    state.previousView = state.currentView;
+  }
   state.currentView = 'detail';
   state.selectedProjectId = projectId;
   state.detailTab = 'overview';
@@ -1716,9 +1714,8 @@ function saveInlineEdit() {
   p.dti_required = document.getElementById('editDti').checked;
   p.jira_key = document.getElementById('editJiraKey').value || null;
   p.gever_url = document.getElementById('editGeverUrl').value || null;
-  p.tags = document.getElementById('editTags').value
-    ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean)
-    : [];
+  const tagsRaw = document.getElementById('editTags').value;
+  p.tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
   p.updated_at = new Date().toISOString();
 
   state.detailEditing = false;
@@ -1763,9 +1760,8 @@ function closeModal() {
 }
 
 function saveProject() {
-  const tags = document.getElementById('formTags').value
-    ? document.getElementById('formTags').value.split(',').map(t => t.trim()).filter(Boolean)
-    : [];
+  const tagsInput = document.getElementById('formTags').value;
+  const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
 
   const maxId = Math.max(0, ...state.projects.map(p => p.id));
   const now = new Date().toISOString();
@@ -1905,19 +1901,19 @@ function setupImagePreview() {
     }
   }, { passive: false });
 
-  body.addEventListener('touchend', () => {
-    lastPinchDist = 0;
-    isPanning = false;
-  });
-
-  // Double-tap to toggle zoom (mobile)
+  // Touch end: reset state + double-tap to toggle zoom
   let lastTap = 0;
   body.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (now - lastTap < 300 && e.changedTouches.length === 1) {
-      zoomLevel > 1 ? resetZoom() : setZoom(2.5);
+    lastPinchDist = 0;
+    isPanning = false;
+    // Double-tap detection
+    if (e.changedTouches.length === 1) {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        zoomLevel > 1 ? resetZoom() : setZoom(2.5);
+      }
+      lastTap = now;
     }
-    lastTap = now;
   });
 
   // Download
@@ -2087,7 +2083,11 @@ function esc(str) {
 
 function escCSSUrl(url) {
   if (!url) return '';
-  return url.replace(/['"\\()]/g, '\\$&');
+  // Only allow http(s), relative paths, and data:image/* URIs
+  if (/^(https?:\/\/|data:image\/|assets\/|\.\/|\/)/.test(url)) {
+    return url.replace(/['"\\()]/g, '\\$&');
+  }
+  return '';
 }
 
 /* ═══════════════════════════════════════════════════════════
