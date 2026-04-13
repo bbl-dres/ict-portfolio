@@ -402,7 +402,7 @@ function renderProjectRow(p, cols, gridCols) {
   let cells = '';
   for (const col of cols) {
     switch (col.key) {
-      case 'jira_key':     cells += `<span class="project-jira">${p.jira_key || '—'}</span>`; break;
+      case 'jira_key':     cells += `<span class="project-jira">#${p.id}</span>`; break;
       case '_title':       cells += `<div class="project-row-main"><div class="project-title">${esc(p.title)}</div>${vf.has('requestor') ? `<div class="project-requestor">${esc(p.requestor)}</div>` : ''}</div>`; break;
       case 'budget_chf':   cells += `<span class="project-budget">${formatBudgetShort(p.budget_chf)}</span>`; break;
       case 'responsible':  cells += `<span class="project-responsible">${p.responsible || '—'}</span>`; break;
@@ -440,10 +440,10 @@ function renderGalleryCard(p) {
     ? `background-image:url('${escCSSUrl(p.thumbnail)}');background-size:cover;background-position:center`
     : `background:linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`;
 
-  // Top row: jira key + priority
-  const topLeft = vf.has('jira_key') ? `<span class="project-jira">${p.jira_key || '—'}</span>` : '';
+  // Top row: project id + priority
+  const topLeft = `<span class="project-jira">#${p.id}</span>`;
   const topRight = vf.has('priority') ? priorityBadge(p.priority) : '';
-  const topRow = (topLeft || topRight) ? `<div class="gallery-card-meta-row">${topLeft || '<span></span>'}${topRight || '<span></span>'}</div>` : '';
+  const topRow = `<div class="gallery-card-meta-row">${topLeft}${topRight || '<span></span>'}</div>`;
 
   // Info row: requestor + budget
   const infoLeft = vf.has('requestor') ? `<span>${esc(p.requestor)}</span>` : '';
@@ -525,10 +525,10 @@ function renderKanbanView(container) {
       phaseItems.forEach(p => {
         const vf = state.visibleFields;
 
-        // Top row: jira key + priority
-        const topLeft = vf.has('jira_key') ? `<span class="project-jira">${p.jira_key || '—'}</span>` : '';
+        // Top row: project id + priority
+        const topLeft = `<span class="project-jira">#${p.id}</span>`;
         const topRight = vf.has('priority') ? priorityBadge(p.priority) : '';
-        const topRow = (topLeft || topRight) ? `<div class="kanban-card-meta">${topLeft || '<span></span>'}${topRight || '<span></span>'}</div>` : '';
+        const topRow = `<div class="kanban-card-meta">${topLeft}${topRight || '<span></span>'}</div>`;
 
         // Info: budget
         const budgetHtml = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
