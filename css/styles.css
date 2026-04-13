@@ -560,6 +560,12 @@ select:focus-visible {
   accent-color: var(--accent-600);
 }
 
+.dropdown-sep {
+  height: 1px;
+  background: var(--gray-200);
+  margin: var(--space-1) 0;
+}
+
 /* ── Checkbox ── */
 
 .checkbox-label {
@@ -1128,7 +1134,7 @@ select:focus-visible {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-4);
 }
 
@@ -1147,7 +1153,7 @@ select:focus-visible {
 }
 
 .gallery-card-image {
-  height: 120px;
+  height: 140px;
   position: relative;
   display: flex;
   align-items: center;

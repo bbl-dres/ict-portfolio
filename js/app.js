@@ -130,6 +130,7 @@ function renderView() {
   document.getElementById('sortDropdown').style.display = hideControls ? 'none' : '';
   document.getElementById('groupDropdown').style.display = hideControls ? 'none' : '';
   document.getElementById('filterToggleBtn').style.display = hideControls ? 'none' : '';
+  document.getElementById('assigneeDropdown').style.display = hideControls ? 'none' : '';
   document.getElementById('fieldsDropdown').style.display = hideControls ? 'none' : '';
   document.querySelector('.toolbar-sep').style.display = hideControls ? 'none' : '';
 
@@ -937,6 +938,7 @@ function setupToolbar() {
   });
 
   setupDropdown('fieldsDropdown', 'fieldsBtn', 'fieldsMenu', () => {}, true);
+  setupDropdown('assigneeDropdown', 'assigneeBtn', 'assigneeMenu', () => {}, true);
 
   // Create project
   document.getElementById('createProjectBtn').addEventListener('click', () => openModal());
@@ -1005,6 +1007,61 @@ function setupFilterToggle() {
     document.getElementById('filterToggleBtn').classList.toggle('active', state.filterPanelOpen);
     renderFilterPanel();
   });
+
+  // Assignee dropdown
+  setupAssigneeDropdown();
+}
+
+function setupAssigneeDropdown() {
+  const menu = document.getElementById('assigneeMenu');
+  const list = document.getElementById('assigneeList');
+
+  function populateList() {
+    const responsibles = new Set();
+    const currentUser = getUserById(state.currentUserId);
+    const meName = currentUser ? currentUser.display_name : null;
+    state.projects.forEach(p => {
+      if (p.responsible && p.responsible !== meName) responsibles.add(p.responsible);
+    });
+    list.innerHTML = [...responsibles].sort().map(r =>
+      `<label class="dropdown-checkbox"><input type="checkbox" data-assignee="${esc(r)}" ${state.filters.responsible.has(r) ? 'checked' : ''}> ${esc(r)}</label>`
+    ).join('');
+  }
+
+  function syncChecks() {
+    document.getElementById('assigneeMeCheck').checked = state.filters.responsible.has('__me__');
+    document.getElementById('assigneeNoneCheck').checked = state.filters.responsible.has('__none__');
+    list.querySelectorAll('input[data-assignee]').forEach(cb => {
+      cb.checked = state.filters.responsible.has(cb.dataset.assignee);
+    });
+    const count = state.filters.responsible.size;
+    document.getElementById('assigneeLabel').textContent = count > 0 ? `Zuweisung (${count})` : 'Zuweisung';
+    document.getElementById('assigneeBtn').classList.toggle('active', count > 0);
+  }
+
+  // Populate on each open
+  document.getElementById('assigneeBtn').addEventListener('click', () => {
+    populateList();
+    syncChecks();
+  });
+
+  // Handle checkbox changes
+  menu.addEventListener('change', (e) => {
+    const cb = e.target;
+    if (!cb.dataset || !cb.dataset.assignee) return;
+    if (cb.checked) {
+      state.filters.responsible.add(cb.dataset.assignee);
+    } else {
+      state.filters.responsible.delete(cb.dataset.assignee);
+    }
+    syncChecks();
+    renderFilterPills();
+    updateFilterCountBadge();
+    render();
+  });
+
+  // Stop click propagation so dropdown stays open on checkbox click
+  menu.addEventListener('click', (e) => { e.stopPropagation(); });
 }
 
 function renderFilterPanel() {
