@@ -45,10 +45,14 @@ const state = {
   /* ── Detail page ── */
   selectedProjectId: null,
   previousView: 'gallery',  // view to return to from detail
-  detailTab: 'overview',    // overview | comments | changelog
+  detailTab: 'overview',    // overview | changelog
+  detailEditing: false,     // inline edit mode
 
   /* ── Modal ── */
   editingProjectId: null,  // null = create, number = edit
+
+  /* ── Gantt ── */
+  ganttScale: 'quarter',  // year | quarter | month
 
   /* ── Current user (simulated login) ── */
   currentUserId: 1,  // Marc Brunner
@@ -98,3 +102,11 @@ const TYPE_LABELS = {
 };
 
 const TYPE_ORDER = ['incident', 'change', 'new', 'data', 'migration', 'study'];
+
+const HERMES_LABELS = {
+  initialisation: 'Initialisierung',
+  concept:        'Konzept',
+  realisation:    'Realisierung',
+  introduction:   'Einführung',
+  closure:        'Abschluss',
+};

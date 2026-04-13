@@ -212,6 +212,35 @@
   </main>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- IMAGE PREVIEW MODAL                                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="image-preview-overlay" id="imagePreviewOverlay">
+    <div class="image-preview-header">
+      <div class="image-preview-title" id="imagePreviewTitle"></div>
+      <div class="image-preview-actions">
+        <button class="image-preview-btn" id="imagePreviewUpload" title="Neues Bild hochladen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Hochladen</span>
+        </button>
+        <button class="image-preview-btn" id="imagePreviewDownload" title="Bild herunterladen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Herunterladen</span>
+        </button>
+        <button class="image-preview-btn image-preview-btn--danger" id="imagePreviewDelete" title="Bild entfernen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Entfernen</span>
+        </button>
+        <button class="image-preview-close" id="imagePreviewClose" title="Schliessen">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="image-preview-body" id="imagePreviewBody">
+      <img class="image-preview-img" id="imagePreviewImg" alt="">
+    </div>
+    <input type="file" id="imageUploadInput" accept="image/*" style="display:none">
+  </div>
+
   <!-- CREATE / EDIT MODAL                                         -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="modal-overlay" id="modalOverlay">
@@ -226,77 +255,40 @@
         <form id="projectForm">
           <div class="form-group">
             <label class="form-label" for="formTitle">Titel *</label>
-            <input class="form-input" type="text" id="formTitle" required>
+            <input class="form-input" type="text" id="formTitle" required placeholder="Name des Vorhabens">
           </div>
           <div class="form-group">
-            <label class="form-label" for="formRequestor">Auftraggeber *</label>
-            <input class="form-input" type="text" id="formRequestor" required>
+            <label class="form-label" for="formDescription">Beschreibung</label>
+            <textarea class="form-input form-textarea" id="formDescription" rows="3" placeholder="Worum geht es? Was ist das Ziel?"></textarea>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="formBudget">Budget (CHF) *</label>
-              <input class="form-input" type="number" id="formBudget" min="0" required>
+              <label class="form-label" for="formRequestor">Auftraggeber *</label>
+              <input class="form-input" type="text" id="formRequestor" required placeholder="z.B. DRES BBL">
             </div>
-            <div class="form-group">
-              <label class="form-label" for="formClass">Klasse</label>
-              <select class="form-input" id="formClass">
-                <option value="fast_track">Fast Track</option>
-                <option value="standard">Standard</option>
-                <option value="complex">Complex</option>
-              </select>
-              <span class="form-hint" id="classHint"></span>
-            </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="formType">Typ</label>
               <select class="form-input" id="formType">
-                <option value="new">Neuvorhaben</option>
+                <option value="new">Neues IKT-Vorhaben</option>
                 <option value="change">Änderungsantrag</option>
                 <option value="migration">Ablösung / Migration</option>
-                <option value="data">Datenbewirtschaftung</option>
+                <option value="data">Daten Initiative</option>
                 <option value="incident">Störung / Support</option>
                 <option value="study">Studie / Evaluation</option>
               </select>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="formPriority">Priorität</label>
-              <select class="form-input" id="formPriority">
-                <option value="low">Low</option>
-                <option value="medium" selected>Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="formResponsible">Verantwortlich</label>
-              <input class="form-input" type="text" id="formResponsible">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="formDti">DTI-pflichtig</label>
-              <div class="form-checkbox-row">
-                <input type="checkbox" id="formDti">
-                <label for="formDti">Ja, DTI-Meldung erforderlich</label>
-              </div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="formTargetDate">Zieldatum</label>
-              <input class="form-input" type="date" id="formTargetDate">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="formTags">Tags (kommagetrennt)</label>
-              <input class="form-input" type="text" id="formTags" placeholder="z.B. SAP, Migration, BFS">
-            </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="formNotes">Notizen</label>
-            <textarea class="form-input form-textarea" id="formNotes" rows="4"></textarea>
+            <label class="form-label" for="formTags">Tags (kommagetrennt)</label>
+            <input class="form-input" type="text" id="formTags" placeholder="z.B. SAP, Migration, BFS">
           </div>
+          <!-- Hidden fields for values set during later phases (kept for JS compatibility) -->
+          <input type="hidden" id="formBudget" value="0">
+          <input type="hidden" id="formClass" value="fast_track">
+          <input type="hidden" id="formPriority" value="medium">
+          <input type="hidden" id="formResponsible" value="">
+          <input type="hidden" id="formTargetDate" value="">
+          <input type="hidden" id="formDti" value="">
         </form>
       </div>
       <div class="modal-footer">

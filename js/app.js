@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupBadgeFilterClicks();
   setupDragAndDrop();
   setupModal();
+  setupImagePreview();
   renderFilterPills();
   updateFilterCountBadge();
   render();
@@ -301,9 +302,34 @@ function setupViewContainerEvents() {
       return;
     }
 
-    // Detail page: edit button
+    // Detail page: image preview
+    if (e.target.closest('.detail-hero-image')) {
+      openImagePreview();
+      return;
+    }
+
+    // Detail page: inline edit toggle
     if (e.target.closest('#detailEditBtn')) {
-      openModal(state.selectedProjectId);
+      state.detailEditing = true;
+      renderDetailPage(container);
+      return;
+    }
+    if (e.target.closest('#detailCancelBtn')) {
+      state.detailEditing = false;
+      renderDetailPage(container);
+      return;
+    }
+    if (e.target.closest('#detailSaveBtn')) {
+      saveInlineEdit();
+      return;
+    }
+
+    // Detail page: section collapse toggle
+    const sectionHeader = e.target.closest('.detail-section-header');
+    if (sectionHeader) {
+      sectionHeader.classList.toggle('collapsed');
+      const body = sectionHeader.nextElementSibling;
+      if (body) body.classList.toggle('collapsed');
       return;
     }
 
@@ -320,6 +346,16 @@ function setupViewContainerEvents() {
     if (e.target.closest('.badge-phase, .badge-class, .badge-type, .badge-priority, .badge-tag')) return;
     const item = e.target.closest('[data-id]');
     if (item) {
+      openDetailPanel(Number(item.dataset.id));
+    }
+  });
+
+  // Keyboard accessibility: Enter/Space on focusable [data-id] elements
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const item = e.target.closest('[data-id][role="button"]');
+    if (item) {
+      e.preventDefault();
       openDetailPanel(Number(item.dataset.id));
     }
   });
@@ -376,7 +412,7 @@ function renderProjectRow(p, cols, gridCols) {
       case 'tags':         cells += `<div class="tag-list">${(p.tags || []).map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`; break;
       case 'target_date':  cells += `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>`; break;
       case 'go_decision':  cells += `<span class="project-go">${p.go_decision === true ? 'Ja' : p.go_decision === false ? 'Nein' : '—'}</span>`; break;
-      case 'hermes_phase': cells += `<span class="project-hermes">${p.hermes_phase || '—'}</span>`; break;
+      case 'hermes_phase': cells += `<span class="project-hermes">${(HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—')}</span>`; break;
       case 'dti_required': cells += p.dti_required ? '<span class="badge badge-dti">DTI</span>' : '<span></span>'; break;
       case 'created_at':   cells += `<span class="project-date">${formatDate(p.created_at)}</span>`; break;
     }
@@ -430,7 +466,7 @@ function renderGalleryCard(p) {
   // Extras row: dti, hermes, go_decision, created_at
   const extras = [];
   if (vf.has('dti_required') && p.dti_required) extras.push('DTI');
-  if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
+  if (vf.has('hermes_phase')) extras.push((HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'));
   if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
   if (vf.has('created_at')) extras.push(formatDate(p.created_at));
   const extrasRow = extras.length ? `<div class="gallery-card-meta-row"><span class="project-date">${extras.join(' · ')}</span></div>` : '';
@@ -509,7 +545,7 @@ function renderKanbanView(container) {
         // Extras
         const extras = [];
         if (vf.has('dti_required') && p.dti_required) extras.push('DTI');
-        if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
+        if (vf.has('hermes_phase')) extras.push((HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'));
         if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
         const extrasRow = extras.length ? `<div class="kanban-card-responsible"><span class="project-date">${extras.join(' · ')}</span></div>` : '';
 
@@ -568,10 +604,9 @@ const GANTT_SCALES = {
   month:   { pxPerDay: 10, label: 'Monat' },
 };
 
-if (!state.ganttScale) state.ganttScale = 'quarter';
-
 function renderGanttChart(projects) {
   const today = new Date();
+  // Estimated bar length when target_date is missing, based on project class
   const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
   let minDate = new Date(today.getFullYear(), 0, 1);
   let maxDate = new Date(today.getFullYear(), 11, 31);
@@ -596,7 +631,8 @@ function renderGanttChart(projects) {
   minDate = new Date(minDate.getFullYear(), 0, 1);
   maxDate = new Date(maxDate.getFullYear(), 11, 31);
 
-  const pxPerDay = GANTT_SCALES[state.ganttScale].pxPerDay;
+  const scale = GANTT_SCALES[state.ganttScale] || GANTT_SCALES.quarter;
+  const pxPerDay = scale.pxPerDay;
   const totalDays = (maxDate - minDate) / (1000 * 60 * 60 * 24);
   const timelineWidth = Math.max(totalDays * pxPerDay, 800);
 
@@ -607,7 +643,7 @@ function renderGanttChart(projects) {
   // Sidebar
   let sidebarHTML = '<div class="gantt-sidebar-header">Projekt</div>';
   bars.forEach(b => {
-    sidebarHTML += `<div class="gantt-sidebar-row" data-id="${b.project.id}">${esc(b.project.title)}</div>`;
+    sidebarHTML += `<div class="gantt-sidebar-row" data-id="${b.project.id}" tabindex="0" role="button">${esc(b.project.title)}</div>`;
   });
 
   // Year headers (major axis)
@@ -646,7 +682,7 @@ function renderGanttChart(projects) {
     const left = dayOffset(b.start);
     const width = Math.max(dayOffset(b.end) - left, 4);
     barsHTML += `<div class="gantt-bar-row">
-      <div class="gantt-bar" data-class="${b.project.class}" data-id="${b.project.id}" style="left:${left}px;width:${width}px" title="${esc(b.project.title)}: ${formatDate(b.start.toISOString())} – ${formatDate(b.end.toISOString())}">
+      <div class="gantt-bar" data-class="${b.project.class}" data-id="${b.project.id}" tabindex="0" role="button" style="left:${left}px;width:${width}px" title="${esc(b.project.title)}: ${formatDate(b.start.toISOString())} – ${formatDate(b.end.toISOString())}">
         ${width > 60 ? esc(b.project.title) : ''}
       </div>
     </div>`;
@@ -678,7 +714,7 @@ function renderGanttChart(projects) {
           <div class="gantt-timeline-body" style="width:${timelineWidth}px">
             ${barsHTML}
             <div class="gantt-today-line" style="left:${todayX}px">
-              <div class="gantt-today-label">Heute, ${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}</div>
+              <div class="gantt-today-label">Heute, ${formatDate(today.toISOString())}</div>
             </div>
           </div>
         </div>
@@ -1333,6 +1369,7 @@ function openDetailPanel(projectId) {
 function closeDetailPage() {
   state.currentView = state.previousView || 'gallery';
   state.selectedProjectId = null;
+  state.detailEditing = false;
 
   // Restore tab UI
   document.querySelectorAll('.view-tab').forEach(t => {
@@ -1340,6 +1377,30 @@ function closeDetailPage() {
   });
 
   render();
+}
+
+// Field name translations for changelog display
+const FIELD_LABELS = {
+  phase: 'Phase', class: 'Klasse', type: 'Typ', priority: 'Priorität',
+  budget_chf: 'Budget', go_decision: 'Go-Entscheid', go_date: 'Go-Datum',
+  responsible: 'Verantwortlich', requestor: 'Auftraggeber', notes: 'Notizen',
+  description: 'Beschreibung', tags: 'Tags', target_date: 'Zieldatum',
+  dti_required: 'DTI-pflichtig', hermes_phase: 'HERMES Phase',
+  jira_key: 'Jira-Key', title: 'Titel',
+};
+
+// Translate raw changelog values to German labels
+function translateFieldValue(field, raw) {
+  if (raw == null || raw === 'null') return '—';
+  const val = String(raw).replace(/^"|"$/g, '');
+  if (field === 'phase') return PHASE_LABELS[val] || val;
+  if (field === 'class') return CLASS_LABELS[val] || val;
+  if (field === 'type') return TYPE_LABELS[val] || val;
+  if (field === 'priority') return PRIORITY_LABELS[val] || val;
+  if (field === 'hermes_phase') return HERMES_LABELS[val] || val;
+  if (field === 'go_decision') return val === 'true' ? 'Genehmigt' : val === 'false' ? 'Abgelehnt' : val;
+  if (field === 'dti_required') return val === 'true' ? 'Ja' : 'Nein';
+  return val;
 }
 
 function renderDetailPage(container) {
@@ -1361,9 +1422,30 @@ function renderDetailPage(container) {
   document.querySelector('.view-tabs').style.display = 'none';
   document.querySelector('.toolbar').style.display = 'none';
 
+  const editing = state.detailEditing;
   const imageStyle = p.thumbnail
     ? `background-image:url('${escCSSUrl(p.thumbnail)}')`
     : `background:var(--gray-100)`;
+
+  // Go-Entscheid with icon
+  const goIcon = p.go_decision === true
+    ? '<span class="go-badge go-badge--yes">✓ Genehmigt</span>'
+    : p.go_decision === false
+      ? '<span class="go-badge go-badge--no">✗ Abgelehnt</span>'
+      : '<span class="go-badge go-badge--pending">⏳ Ausstehend</span>';
+
+  // Tags in hero
+  const tagsHTML = (p.tags && p.tags.length)
+    ? `<div class="detail-hero-tags">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`
+    : '';
+
+  // Action buttons
+  const actionButtons = editing
+    ? `<div class="detail-hero-actions">
+        <button class="btn btn-outline btn-sm" id="detailCancelBtn">Abbrechen</button>
+        <button class="btn btn-primary btn-sm" id="detailSaveBtn">Speichern</button>
+      </div>`
+    : `<button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>`;
 
   let html = `
     <button class="detail-back" id="detailBackBtn">
@@ -1375,10 +1457,15 @@ function renderDetailPage(container) {
       <div class="detail-hero-image" style="${imageStyle}"></div>
       <div class="detail-hero-body">
         <div class="detail-hero-top">
-          <div class="detail-hero-title">${esc(p.title)}</div>
-          <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
+          ${editing
+            ? `<input class="form-input form-input--title" type="text" id="editTitle" value="${esc(p.title)}">`
+            : `<div class="detail-hero-title">${esc(p.title)}</div>`}
+          ${actionButtons}
         </div>
-        <div class="detail-hero-subtitle">${esc(p.requestor)}${p.responsible ? ' · ' + esc(p.responsible) : ''}${p.jira_key ? ' · ' + esc(p.jira_key) : ''}</div>
+        ${editing
+          ? `<textarea class="form-input form-input--desc" id="editDescription" rows="2" placeholder="Beschreibung...">${esc(p.description || '')}</textarea>`
+          : (p.description ? `<div class="detail-hero-description">${esc(p.description)}</div>` : '')}
+        ${editing ? '' : `
         <div class="detail-hero-badges">
           <span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>
           <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
@@ -1386,59 +1473,89 @@ function renderDetailPage(container) {
           ${priorityBadge(p.priority)}
           ${p.dti_required ? '<span class="badge badge-dti">DTI</span>' : ''}
         </div>
+        ${tagsHTML}`}
+        ${editing ? `<div class="detail-hero-edit-tags">
+          <label class="form-label--inline">Tags:</label>
+          <input class="form-input form-input--inline" type="text" id="editTags" value="${esc((p.tags || []).join(', '))}" placeholder="z.B. SAP, Migration">
+        </div>` : ''}
       </div>
     </div>
 
     <div class="detail-tabs">
       <button class="detail-tab${state.detailTab === 'overview' ? ' active' : ''}" data-tab="overview">Übersicht</button>
-      <button class="detail-tab${state.detailTab === 'comments' ? ' active' : ''}" data-tab="comments">Kommentare (${comments.length})</button>
       <button class="detail-tab${state.detailTab === 'changelog' ? ' active' : ''}" data-tab="changelog">Verlauf (${changelog.length})</button>
     </div>
   `;
 
+  const sectionChevron = '<svg class="detail-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+
   if (state.detailTab === 'overview') {
+    // Status & Planung section
     html += `
-      <div class="detail-card">
-        <div class="detail-card-header">Projektdetails</div>
-        <div class="detail-card-body">
+      <div class="detail-section">
+        <div class="detail-section-header" data-section="status">
+          ${sectionChevron}
+          <span class="detail-section-title">Status & Planung</span>
+        </div>
+        <div class="detail-section-body">
           <div class="detail-fields-grid">
-            ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
-            ${detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
-            ${detailFieldRow('Verantwortlich', p.responsible || '—')}
-            ${detailFieldRow('Auftraggeber', esc(p.requestor))}
-            ${detailFieldRow('Go-Entscheid', p.go_decision === true ? 'Genehmigt' : p.go_decision === false ? 'Abgelehnt' : 'Ausstehend')}
-            ${detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
-            ${detailFieldRow('HERMES Phase', p.hermes_phase || '—')}
-            ${detailFieldRow('Jira-Key', p.jira_key || '—')}
-            ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
-            ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
-            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
+            ${editing
+              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
+              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
+            ${detailFieldRow('Go-Entscheid', goIcon)}
+            ${editing
+              ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
+              : detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
+            ${detailFieldRow('HERMES Phase', (HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'))}
+            ${editing
+              ? detailEditRow('Priorität', detailSelect('editPriority', PRIORITY_LABELS, p.priority || 'medium'))
+              : detailFieldRow('Priorität', priorityBadge(p.priority))}
+            ${editing
+              ? detailEditRow('DTI-pflichtig', `<label class="form-checkbox-inline"><input type="checkbox" id="editDti" ${p.dti_required ? 'checked' : ''}> Ja</label>`)
+              : detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
+            ${editing
+              ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
+              : ''}
+            ${editing
+              ? detailEditRow('Klasse', detailSelect('editClass', CLASS_LABELS, p.class))
+              : ''}
           </div>
         </div>
       </div>
     `;
-    if (p.tags && p.tags.length) {
-      html += `
-        <div class="detail-card">
-          <div class="detail-card-header">Tags</div>
-          <div class="detail-card-body">
-            <div class="tag-list">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>
+
+    // Organisation section
+    html += `
+      <div class="detail-section">
+        <div class="detail-section-header" data-section="org">
+          ${sectionChevron}
+          <span class="detail-section-title">Organisation</span>
+        </div>
+        <div class="detail-section-body">
+          <div class="detail-fields-grid">
+            ${editing
+              ? detailEditRow('Verantwortlich', detailInput('editResponsible', p.responsible, 'text'))
+              : detailFieldRow('Verantwortlich', p.responsible || '—')}
+            ${editing
+              ? detailEditRow('Auftraggeber', detailInput('editRequestor', p.requestor, 'text'))
+              : detailFieldRow('Auftraggeber', esc(p.requestor))}
+            ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
+            ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
+            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
+            ${detailFieldRow('Jira-Key', p.jira_key || '—')}
           </div>
         </div>
-      `;
-    }
-    if (p.notes) {
-      html += `
-        <div class="detail-card">
-          <div class="detail-card-header">Notizen</div>
-          <div class="detail-card-body">
-            <div class="detail-notes">${esc(p.notes)}</div>
-          </div>
+      </div>
+    `;
+
+    // Comments section
+    html += `
+      <div class="detail-section">
+        <div class="detail-section-header" data-section="comments">
+          <svg class="detail-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          <span class="detail-section-title">Kommentare (${comments.length})</span>
         </div>
-      `;
-    }
-  } else if (state.detailTab === 'comments') {
-    html += '<div class="detail-card"><div class="detail-card-body">';
+        <div class="detail-section-body">`;
     if (comments.length === 0) {
       html += '<div class="empty-state">Keine Kommentare vorhanden.</div>';
     } else {
@@ -1450,15 +1567,20 @@ function renderDetailPage(container) {
         html += `<div class="comment-item">
           <div class="comment-avatar">${initials}</div>
           <div class="comment-body">
-            <div class="comment-author">${esc(name)}</div>
-            <div class="comment-date">${formatDateTime(c.created_at)}</div>
+            <div class="comment-author">${esc(name)} <span class="comment-date">${formatDateTime(c.created_at)}</span></div>
             <div class="comment-text">${esc(c.body)}</div>
           </div>
         </div>`;
       });
       html += '</div>';
     }
-    html += '</div></div>';
+    html += `
+        <div class="comment-input-placeholder">
+          <div class="comment-input-box">Kommentar hinzufügen...</div>
+        </div>
+      </div>
+    </div>`; // close detail-section-body + detail-section
+
   } else if (state.detailTab === 'changelog') {
     html += '<div class="detail-card"><div class="detail-card-body">';
     if (changelog.length === 0) {
@@ -1468,13 +1590,19 @@ function renderDetailPage(container) {
       changelog.forEach(e => {
         const user = getUserById(e.user_id);
         const name = user ? user.display_name : 'Unbekannt';
+        const fieldLabel = FIELD_LABELS[e.field] || e.field;
+        const oldVal = translateFieldValue(e.field, e.old_value);
+        const newVal = translateFieldValue(e.field, e.new_value);
         html += `<div class="changelog-item">
-          <div class="changelog-meta">${formatDateTime(e.changed_at)}</div>
-          <div class="changelog-field">${esc(name)} · ${esc(e.field)}</div>
-          <div class="changelog-values">
-            ${e.old_value != null ? `<span class="changelog-old">${esc(String(e.old_value))}</span>` : '—'}
-            <span class="changelog-arrow">→</span>
-            <span class="changelog-new">${esc(String(e.new_value))}</span>
+          <div class="changelog-dot"></div>
+          <div class="changelog-content">
+            <div class="changelog-meta">${formatDateTime(e.changed_at)}</div>
+            <div class="changelog-field">${esc(name)} änderte <strong>${esc(fieldLabel)}</strong></div>
+            <div class="changelog-values">
+              ${e.old_value != null ? `<span class="changelog-old">${esc(oldVal)}</span>` : '—'}
+              <span class="changelog-arrow">→</span>
+              <span class="changelog-new">${esc(newVal)}</span>
+            </div>
           </div>
         </div>`;
       });
@@ -1493,6 +1621,52 @@ function detailFieldRow(label, value) {
   </div>`;
 }
 
+function detailInput(id, value, type) {
+  if (type === 'text') return `<input class="form-input form-input--inline" type="text" id="${id}" value="${esc(value || '')}">`;
+  if (type === 'number') return `<input class="form-input form-input--inline" type="number" id="${id}" value="${value || 0}" min="0">`;
+  if (type === 'date') return `<input class="form-input form-input--inline" type="date" id="${id}" value="${value || ''}">`;
+  if (type === 'checkbox') return `<input type="checkbox" id="${id}" ${value ? 'checked' : ''}>`;
+  return '';
+}
+
+function detailSelect(id, options, selected) {
+  const opts = Object.entries(options).map(([k, v]) =>
+    `<option value="${k}" ${k === selected ? 'selected' : ''}>${esc(v)}</option>`
+  ).join('');
+  return `<select class="form-input form-input--inline" id="${id}">${opts}</select>`;
+}
+
+function detailEditRow(label, inputHTML) {
+  return `<div class="detail-field-row">
+    <span class="detail-field-label">${label}</span>
+    <span class="detail-field-value">${inputHTML}</span>
+  </div>`;
+}
+
+function saveInlineEdit() {
+  const p = state.projects.find(pr => pr.id === state.selectedProjectId);
+  if (!p) return;
+
+  p.title = document.getElementById('editTitle').value;
+  p.description = document.getElementById('editDescription').value || null;
+  p.requestor = document.getElementById('editRequestor').value;
+  p.budget_chf = Number(document.getElementById('editBudget').value) || 0;
+  p.type = document.getElementById('editType').value;
+  p.class = document.getElementById('editClass').value;
+  p.priority = document.getElementById('editPriority').value;
+  p.target_date = document.getElementById('editTargetDate').value || null;
+  p.responsible = document.getElementById('editResponsible').value || null;
+  p.dti_required = document.getElementById('editDti').checked;
+  p.tags = document.getElementById('editTags').value
+    ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean)
+    : [];
+  p.updated_at = new Date().toISOString();
+
+  state.detailEditing = false;
+  render();
+  renderDetailPage(document.getElementById('viewContainer'));
+}
+
 /* ═══════════════════════════════════════════════════════════
    CREATE / EDIT MODAL
    ═══════════════════════════════════════════════════════════ */
@@ -1503,30 +1677,6 @@ function setupModal() {
   document.getElementById('modalOverlay').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal();
   });
-
-  // Auto-suggest class
-  const budgetInput = document.getElementById('formBudget');
-  const dtiInput = document.getElementById('formDti');
-  const classSelect = document.getElementById('formClass');
-  const hint = document.getElementById('classHint');
-
-  function suggestClass() {
-    const budget = Number(budgetInput.value) || 0;
-    const dti = dtiInput.checked;
-    let suggested;
-    if (budget >= 50000 && dti) {
-      suggested = 'complex';
-    } else if (budget >= 50000) {
-      suggested = 'standard';
-    } else {
-      suggested = 'fast_track';
-    }
-    classSelect.value = suggested;
-    hint.textContent = `Vorschlag: ${CLASS_LABELS[suggested]} (Budget ${budget < 50000 ? '<' : '≥'} CHF 50k${dti ? ', DTI' : ''})`;
-  }
-
-  budgetInput.addEventListener('input', suggestClass);
-  dtiInput.addEventListener('change', suggestClass);
 
   // Save
   document.getElementById('modalSave').addEventListener('click', () => {
@@ -1539,32 +1689,12 @@ function setupModal() {
   });
 }
 
-function openModal(projectId) {
-  state.editingProjectId = projectId ?? null;
-  const isEdit = projectId != null;
-  document.getElementById('modalTitle').textContent = isEdit ? 'Projekt bearbeiten' : 'Neues Projekt erfassen';
+function openModal() {
+  state.editingProjectId = null;
+  document.getElementById('modalTitle').textContent = 'Neues Projekt erfassen';
   document.getElementById('modalOverlay').classList.add('open');
   document.body.classList.add('modal-open');
-
-  if (isEdit) {
-    const p = state.projects.find(pr => pr.id === projectId);
-    if (p) {
-      document.getElementById('formTitle').value = p.title;
-      document.getElementById('formRequestor').value = p.requestor;
-      document.getElementById('formBudget').value = p.budget_chf;
-      document.getElementById('formClass').value = p.class;
-      document.getElementById('formType').value = p.type || 'new';
-      document.getElementById('formResponsible').value = p.responsible || '';
-      document.getElementById('formPriority').value = p.priority || 'medium';
-      document.getElementById('formTargetDate').value = p.target_date || '';
-      document.getElementById('formTags').value = (p.tags || []).join(', ');
-      document.getElementById('formDti').checked = !!p.dti_required;
-      document.getElementById('formNotes').value = p.notes || '';
-    }
-  } else {
-    document.getElementById('projectForm').reset();
-    document.getElementById('classHint').textContent = '';
-  }
+  document.getElementById('projectForm').reset();
 }
 
 function closeModal() {
@@ -1574,49 +1704,116 @@ function closeModal() {
 }
 
 function saveProject() {
-  const data = {
-    title: document.getElementById('formTitle').value,
-    requestor: document.getElementById('formRequestor').value,
-    budget_chf: Number(document.getElementById('formBudget').value),
-    class: document.getElementById('formClass').value,
-    type: document.getElementById('formType').value,
-    responsible: document.getElementById('formResponsible').value || null,
-    priority: document.getElementById('formPriority').value,
-    target_date: document.getElementById('formTargetDate').value || null,
-    tags: document.getElementById('formTags').value ? document.getElementById('formTags').value.split(',').map(t => t.trim()).filter(Boolean) : [],
-    dti_required: document.getElementById('formDti').checked,
-    notes: document.getElementById('formNotes').value || null,
-  };
+  const tags = document.getElementById('formTags').value
+    ? document.getElementById('formTags').value.split(',').map(t => t.trim()).filter(Boolean)
+    : [];
 
-  if (state.editingProjectId !== null) {
-    // Edit
-    const p = state.projects.find(pr => pr.id === state.editingProjectId);
-    if (p) {
-      Object.assign(p, data);
-      p.updated_at = new Date().toISOString();
-    }
-  } else {
-    // Create
-    const maxId = Math.max(0, ...state.projects.map(p => p.id));
-    state.projects.push({
-      id: maxId + 1,
-      ...data,
-      phase: 'triage',
-      go_decision: null,
-      go_date: null,
-      hermes_phase: null,
-      jira_key: null,
-      created_by: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  }
+  const maxId = Math.max(0, ...state.projects.map(p => p.id));
+  const now = new Date().toISOString();
+  state.projects.push({
+    id: maxId + 1,
+    title: document.getElementById('formTitle').value,
+    description: document.getElementById('formDescription').value || null,
+    requestor: document.getElementById('formRequestor').value,
+    type: document.getElementById('formType').value,
+    tags,
+    budget_chf: 0,
+    class: 'fast_track',
+    phase: 'triage',
+    priority: 'medium',
+    go_decision: null,
+    go_date: null,
+    responsible: null,
+    target_date: null,
+    dti_required: false,
+    hermes_phase: null,
+    thumbnail: null,
+    jira_key: null,
+    notes: null,
+    created_by: state.currentUserId,
+    created_at: now,
+    updated_at: now,
+  });
 
   closeModal();
   render();
-  if (state.currentView === 'detail' && state.selectedProjectId) {
+}
+
+/* ═══════════════════════════════════════════════════════════
+   IMAGE PREVIEW
+   ═══════════════════════════════════════════════════════════ */
+
+function setupImagePreview() {
+  const overlay = document.getElementById('imagePreviewOverlay');
+  const img = document.getElementById('imagePreviewImg');
+  const title = document.getElementById('imagePreviewTitle');
+  const uploadInput = document.getElementById('imageUploadInput');
+
+  // Close
+  document.getElementById('imagePreviewClose').addEventListener('click', closeImagePreview);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.classList.contains('image-preview-body')) closeImagePreview();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeImagePreview();
+  });
+
+  // Download
+  document.getElementById('imagePreviewDownload').addEventListener('click', () => {
+    const p = state.projects.find(pr => pr.id === state.selectedProjectId);
+    if (!p || !p.thumbnail) return;
+    const a = document.createElement('a');
+    a.href = p.thumbnail;
+    a.download = p.title.replace(/[^a-zA-Z0-9äöüÄÖÜ\-_ ]/g, '') + '.jpg';
+    a.click();
+  });
+
+  // Upload
+  document.getElementById('imagePreviewUpload').addEventListener('click', () => {
+    uploadInput.click();
+  });
+
+  uploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const p = state.projects.find(pr => pr.id === state.selectedProjectId);
+    if (!p) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      p.thumbnail = ev.target.result;
+      p.updated_at = new Date().toISOString();
+      img.src = ev.target.result;
+      // Update the hero image in the background
+      const heroImg = document.querySelector('.detail-hero-image');
+      if (heroImg) heroImg.style.backgroundImage = `url('${ev.target.result}')`;
+    };
+    reader.readAsDataURL(file);
+    uploadInput.value = '';
+  });
+
+  // Delete
+  document.getElementById('imagePreviewDelete').addEventListener('click', () => {
+    const p = state.projects.find(pr => pr.id === state.selectedProjectId);
+    if (!p) return;
+    p.thumbnail = null;
+    p.updated_at = new Date().toISOString();
+    closeImagePreview();
     renderDetailPage(document.getElementById('viewContainer'));
-  }
+  });
+}
+
+function openImagePreview() {
+  const p = state.projects.find(pr => pr.id === state.selectedProjectId);
+  if (!p || !p.thumbnail) return;
+  document.getElementById('imagePreviewImg').src = p.thumbnail;
+  document.getElementById('imagePreviewTitle').textContent = p.title;
+  document.getElementById('imagePreviewOverlay').classList.add('open');
+  document.body.classList.add('modal-open');
+}
+
+function closeImagePreview() {
+  document.getElementById('imagePreviewOverlay').classList.remove('open');
+  document.body.classList.remove('modal-open');
 }
 
 /* ═══════════════════════════════════════════════════════════

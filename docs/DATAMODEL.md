@@ -32,6 +32,7 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `target_date` | date / null | no | Target completion date |
 | `dti_required` | boolean | no | DTI notification required (≥ CHF 1M or strategic) |
 | `hermes_phase` | enum / null | no | Current HERMES phase if applicable |
+| `thumbnail` | string (200) / null | no | Relative path to project thumbnail image |
 | `jira_key` | string (20) / null | no | Linked Jira issue key (e.g. `DRESPPM-42`) |
 | `created_by` | integer FK → `user.id` | yes | User who created the record |
 | `created_at` | datetime | yes | Set automatically on creation |
@@ -41,6 +42,7 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 
 | Value | Description |
 |---|---|
+| `incident` | Incident or support ticket (Störung / Support) |
 | `new` | New system, platform, or capability |
 | `change` | Enhancement or transformation of an existing system |
 | `migration` | Migration from one system or format to another |
@@ -208,12 +210,16 @@ All writes require a manual commit or a GitHub Action triggered by a form submis
     "type": "change",
     "class": "complex",
     "phase": "triage",
+    "priority": "high",
     "go_decision": null,
     "go_date": null,
     "responsible": "BA DRES",
     "notes": "EGID governance by design. BIT SUPERB involved. DTI notification required.",
+    "tags": ["SAP", "BFS", "EGID"],
+    "target_date": "2027-03-31",
     "dti_required": true,
     "hermes_phase": null,
+    "thumbnail": "assets/images/project-02.jpg",
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-04-13T08:00:00Z",
