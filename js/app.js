@@ -27,15 +27,14 @@ function restoreFromURL() {
   if (params.has('sort'))   state.sortField = params.get('sort');
   if (params.has('dir'))    state.sortDirection = params.get('dir');
   if (params.has('q'))      state.searchQuery = params.get('q');
-  if (params.has('assignee')) state.assigneeFilter = params.get('assignee');
   if (params.has('archived')) state.showArchived = params.get('archived') === '1';
-  if (params.has('mine'))     state.assignedToMe = params.get('mine') === '1';
 
   // Restore multi-dimensional filters
   if (params.has('f.phase'))    params.get('f.phase').split(',').forEach(v => state.filters.phase.add(v));
   if (params.has('f.class'))    params.get('f.class').split(',').forEach(v => state.filters.class.add(v));
   if (params.has('f.type'))     params.get('f.type').split(',').forEach(v => state.filters.type.add(v));
   if (params.has('f.priority')) params.get('f.priority').split(',').forEach(v => state.filters.priority.add(v));
+  if (params.has('f.responsible')) params.get('f.responsible').split(',').forEach(v => state.filters.responsible.add(v));
   if (params.has('f.tags'))     params.get('f.tags').split(',').forEach(v => state.filters.tags.add(v));
   if (params.has('f.dti'))      state.filters.dti = params.get('f.dti') === '1';
 
@@ -66,9 +65,6 @@ function restoreFromURL() {
   if (state.showArchived) {
     document.getElementById('showArchived').checked = true;
   }
-  if (state.assignedToMe) {
-    document.getElementById('assignedToMe').checked = true;
-  }
 }
 
 function updateURL() {
@@ -81,15 +77,14 @@ function updateURL() {
   if (state.sortField !== 'title')      params.set('sort', state.sortField);
   if (state.sortDirection !== 'asc')    params.set('dir', state.sortDirection);
   if (state.searchQuery)                params.set('q', state.searchQuery);
-  if (state.assigneeFilter)             params.set('assignee', state.assigneeFilter);
   if (state.showArchived)               params.set('archived', '1');
-  if (state.assignedToMe)               params.set('mine', '1');
 
   // Multi-dimensional filters
   if (state.filters.phase.size)    params.set('f.phase', [...state.filters.phase].join(','));
   if (state.filters.class.size)    params.set('f.class', [...state.filters.class].join(','));
   if (state.filters.type.size)     params.set('f.type', [...state.filters.type].join(','));
   if (state.filters.priority.size) params.set('f.priority', [...state.filters.priority].join(','));
+  if (state.filters.responsible.size) params.set('f.responsible', [...state.filters.responsible].join(','));
   if (state.filters.tags.size)     params.set('f.tags', [...state.filters.tags].join(','));
   if (state.filters.dti != null)   params.set('f.dti', state.filters.dti ? '1' : '0');
 
@@ -761,15 +756,6 @@ function setupToolbar() {
     render();
   });
 
-  // Assignee
-  setupAssigneeDropdown();
-
-  // Assigned to me
-  document.getElementById('assignedToMe').addEventListener('change', (e) => {
-    state.assignedToMe = e.target.checked;
-    render();
-  });
-
   // Show archived
   document.getElementById('showArchived').addEventListener('change', (e) => {
     state.showArchived = e.target.checked;
@@ -800,28 +786,6 @@ function setupToolbar() {
     const type = item.dataset.export;
     if (type === 'csv') exportCSV();
     if (type === 'pdf') exportPDF();
-  });
-}
-
-function setupAssigneeDropdown() {
-  const responsibles = getUniqueResponsibles();
-  const menu = document.getElementById('assigneeMenu');
-  let html = '<div class="dropdown-item active" data-assignee="">Alle</div>';
-  html += `<div class="dropdown-item" data-assignee="__none__">(nicht zugewiesen)</div>`;
-  responsibles.forEach(r => {
-    html += `<div class="dropdown-item" data-assignee="${esc(r)}">${esc(r)}</div>`;
-  });
-  menu.innerHTML = html;
-
-  setupDropdown('assigneeDropdown', 'assigneeBtn', 'assigneeMenu', (item) => {
-    const val = item.dataset.assignee;
-    state.assigneeFilter = val || null;
-    const label = val ? item.textContent.trim() : 'Verantwortlich';
-    document.getElementById('assigneeLabel').textContent = label;
-    document.querySelectorAll('#assigneeMenu .dropdown-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    document.getElementById('assigneeBtn').classList.toggle('active', !!val);
-    render();
   });
 }
 
@@ -903,6 +867,22 @@ function renderFilterPanel() {
     return `<label class="filter-option"><input type="checkbox" data-dim="priority" data-val="${k}" ${checked}>${PRIORITY_LABELS[k]}</label>`;
   }).join('');
 
+  const responsibles = getUniqueResponsibles();
+  const currentUser = getUserById(state.currentUserId);
+  const meName = currentUser ? currentUser.display_name : null;
+  let respOpts = '';
+  if (meName) {
+    const checked = f.responsible.has('__me__') ? 'checked' : '';
+    respOpts += `<label class="filter-option"><input type="checkbox" data-dim="responsible" data-val="__me__" ${checked}>Mir zugewiesen (${esc(meName)})</label>`;
+  }
+  const noneChecked = f.responsible.has('__none__') ? 'checked' : '';
+  respOpts += `<label class="filter-option"><input type="checkbox" data-dim="responsible" data-val="__none__" ${noneChecked}>Nicht zugewiesen</label>`;
+  responsibles.forEach(r => {
+    if (r === meName) return; // already shown as "Mir zugewiesen"
+    const checked = f.responsible.has(r) ? 'checked' : '';
+    respOpts += `<label class="filter-option"><input type="checkbox" data-dim="responsible" data-val="${esc(r)}" ${checked}>${esc(r)}</label>`;
+  });
+
   const dtiVal = f.dti;
   const dtiOpts = [
     `<label class="filter-option"><input type="radio" name="filter-dti" data-dim="dti" data-val="any" ${dtiVal == null ? 'checked' : ''}>Alle</label>`,
@@ -932,6 +912,10 @@ function renderFilterPanel() {
       <div>
         <div class="filter-section-title">Priorität</div>
         <div class="filter-section-options">${prioOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">Verantwortlich</div>
+        <div class="filter-section-options">${respOpts}</div>
       </div>
       <div>
         <div class="filter-section-title">DTI-pflichtig</div>
@@ -997,6 +981,10 @@ function renderFilterPills() {
   for (const k of f.priority) {
     html += filterPill('priority', k, PRIORITY_LABELS[k], prioColors[k]);
   }
+  for (const r of f.responsible) {
+    const label = r === '__me__' ? 'Mir zugewiesen' : r === '__none__' ? 'Nicht zugewiesen' : r;
+    html += filterPill('responsible', r, label, 'var(--accent-500)');
+  }
   for (const t of f.tags) {
     html += filterPill('tags', t, t, 'var(--gray-400)');
   }
@@ -1050,7 +1038,7 @@ function filterPill(dim, val, label, color) {
 
 function updateFilterCountBadge() {
   const f = state.filters;
-  const count = f.phase.size + f.class.size + f.type.size + f.priority.size + f.tags.size + (f.dti != null ? 1 : 0);
+  const count = f.phase.size + f.class.size + f.type.size + f.priority.size + f.responsible.size + f.tags.size + (f.dti != null ? 1 : 0);
   const badge = document.getElementById('filterCountBadge');
   badge.textContent = count;
   badge.classList.toggle('visible', count > 0);

@@ -19,18 +19,17 @@ const state = {
   groupBy: 'none',       // none | phase | class | type | responsible | dti_required
 
   /* ── Filters ── */
-  assigneeFilter: null,  // null = all, or user display_name
-  assignedToMe: false,   // checkbox: show only my projects
   showArchived: false,   // checkbox: include completed/rejected
 
   /* ── Multi-dimensional filters ── */
   filters: {
-    phase:    new Set(),   // e.g. Set(['triage', 'analysis'])
-    class:    new Set(),   // e.g. Set(['complex'])
-    priority: new Set(),   // e.g. Set(['high'])
-    type:     new Set(),   // e.g. Set(['new', 'change'])
-    tags:     new Set(),   // e.g. Set(['SAP', 'IoT'])
-    dti:      null,        // true | false | null (any)
+    phase:       new Set(),   // e.g. Set(['triage', 'analysis'])
+    class:       new Set(),   // e.g. Set(['complex'])
+    type:        new Set(),   // e.g. Set(['new', 'change'])
+    priority:    new Set(),   // e.g. Set(['high'])
+    responsible: new Set(),   // e.g. Set(['Sandra Keller', '__me__', '__none__'])
+    tags:        new Set(),   // e.g. Set(['SAP', 'IoT'])
+    dti:         null,        // true | false | null (any)
   },
   filterPanelOpen: false,
 

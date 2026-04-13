@@ -108,25 +108,20 @@ function getFilteredProjects() {
     );
   }
 
-  // Assigned to me
-  if (state.assignedToMe) {
-    const currentUser = getUserById(state.currentUserId);
-    if (currentUser) {
-      list = list.filter(p => p.responsible === currentUser.display_name);
-    }
-  }
-
-  // Assignee filter
-  if (state.assigneeFilter) {
-    if (state.assigneeFilter === '__none__') {
-      list = list.filter(p => !p.responsible);
-    } else {
-      list = list.filter(p => p.responsible === state.assigneeFilter);
-    }
-  }
-
   // Multi-dimensional filters (OR within dimension, AND across dimensions)
   const f = state.filters;
+
+  // Responsible filter (resolve __me__ and __none__ special values)
+  if (f.responsible.size > 0) {
+    const currentUser = getUserById(state.currentUserId);
+    const meName = currentUser ? currentUser.display_name : null;
+    list = list.filter(p => {
+      if (f.responsible.has('__none__') && !p.responsible) return true;
+      if (f.responsible.has('__me__') && meName && p.responsible === meName) return true;
+      if (p.responsible && f.responsible.has(p.responsible)) return true;
+      return false;
+    });
+  }
   if (f.phase.size > 0) {
     list = list.filter(p => f.phase.has(p.phase));
   }
@@ -292,7 +287,7 @@ function getAllTags() {
 
 function hasActiveFilters() {
   const f = state.filters;
-  return f.phase.size > 0 || f.class.size > 0 || f.type.size > 0 || f.priority.size > 0 || f.tags.size > 0 || f.dti != null;
+  return f.phase.size > 0 || f.class.size > 0 || f.type.size > 0 || f.priority.size > 0 || f.responsible.size > 0 || f.tags.size > 0 || f.dti != null;
 }
 
 function toggleFilter(dimension, value) {
@@ -309,6 +304,7 @@ function clearAllFilters() {
   state.filters.class.clear();
   state.filters.type.clear();
   state.filters.priority.clear();
+  state.filters.responsible.clear();
   state.filters.tags.clear();
   state.filters.dti = null;
 }
