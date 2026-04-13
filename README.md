@@ -1,8 +1,8 @@
+# IKT Projektportfolio DRES
+
 <p align="center">
   <img src="assets/Social1.jpg" alt="IKT Projektportfolio DRES" width="100%">
 </p>
-
-# IKT Projektportfolio DRES
 
 ![HTML](https://img.shields.io/badge/HTML-Static_SPA-E34F26?logo=html5&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS-Custom_Tokens-1572B6?logo=css3&logoColor=white)
