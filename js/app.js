@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   restoreFromURL();
   setupViewTabs();
   setupToolbar();
-  setupDetailPanel();
   setupModal();
   render();
 });
@@ -25,6 +24,8 @@ function restoreFromURL() {
   if (params.has('dir'))    state.sortDirection = params.get('dir');
   if (params.has('q'))      state.searchQuery = params.get('q');
   if (params.has('assignee')) state.assigneeFilter = params.get('assignee');
+  if (params.has('archived')) state.showArchived = params.get('archived') === '1';
+  if (params.has('mine'))     state.assignedToMe = params.get('mine') === '1';
 
   // Sync UI to restored state
   document.querySelectorAll('.view-tab').forEach(t => {
@@ -37,9 +38,24 @@ function restoreFromURL() {
       { phase: 'Phase', class: 'Klasse', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
+  // Sync sort field active state
+  document.querySelectorAll('#sortMenu .dropdown-item[data-sort]').forEach(i => {
+    i.classList.toggle('active', i.dataset.sort === state.sortField);
+  });
+  // Sync sort direction active state
+  document.querySelectorAll('#sortMenu .dropdown-item[data-direction]').forEach(i => {
+    i.classList.toggle('active', i.dataset.direction === state.sortDirection);
+  });
+
   if (state.searchQuery) {
     document.getElementById('searchInput').value = state.searchQuery;
     document.getElementById('toolbarSearch').classList.add('expanded');
+  }
+  if (state.showArchived) {
+    document.getElementById('showArchived').checked = true;
+  }
+  if (state.assignedToMe) {
+    document.getElementById('assignedToMe').checked = true;
   }
 }
 
@@ -54,6 +70,8 @@ function updateURL() {
   if (state.sortDirection !== 'asc')    params.set('dir', state.sortDirection);
   if (state.searchQuery)                params.set('q', state.searchQuery);
   if (state.assigneeFilter)             params.set('assignee', state.assigneeFilter);
+  if (state.showArchived)               params.set('archived', '1');
+  if (state.assignedToMe)               params.set('mine', '1');
 
   const qs = params.toString();
   const url = window.location.pathname + (qs ? '?' + qs : '');
@@ -66,7 +84,6 @@ function updateURL() {
 
 function render() {
   renderView();
-  updateURL();
 }
 
 
@@ -114,8 +131,9 @@ function renderView() {
     case 'gantt':     renderGanttView(container); break;
     case 'dashboard': container.classList.add('view-container--transparent'); renderDashboardView(container); break;
     case 'wiki':      container.classList.add('view-container--transparent'); renderWikiView(container); break;
-    case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); return;
+    case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); updateURL(); return;
   }
+  updateURL();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -290,7 +308,7 @@ function renderGalleryCard(p) {
   const vf = state.visibleFields;
   const hasImage = !!p.thumbnail;
   const imageStyle = hasImage
-    ? `background-image:url('${p.thumbnail}');background-size:cover;background-position:center`
+    ? `background-image:url('${escCSSUrl(p.thumbnail)}');background-size:cover;background-position:center`
     : `background:linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`;
 
   // Top row: jira key + priority
@@ -433,8 +451,8 @@ function renderGanttView(container) {
 function renderGanttChart(projects) {
   const today = new Date();
   const durations = { fast_track: 90, standard: 180, complex: 365 };
-  let minDate = new Date('2026-01-01');
-  let maxDate = new Date('2026-12-31');
+  let minDate = new Date(today.getFullYear(), 0, 1);
+  let maxDate = new Date(today.getFullYear(), 11, 31);
 
   const bars = projects.map(p => {
     const start = new Date(p.created_at);
@@ -796,21 +814,20 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
     }
     e.stopPropagation();
   });
-
-  // Close on outside click
-  document.addEventListener('click', () => {
-    menu.classList.remove('open');
-    btn.setAttribute('aria-expanded', 'false');
-  });
 }
+
+// Single global listener to close all dropdowns on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-menu.open').forEach(m => {
+    m.classList.remove('open');
+    const btn = m.parentElement.querySelector('[aria-expanded]');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+});
 
 /* ═══════════════════════════════════════════════════════════
    DETAIL PAGE
    ═══════════════════════════════════════════════════════════ */
-
-function setupDetailPanel() {
-  // No setup needed — detail page is rendered inline
-}
 
 function openDetailPanel(projectId) {
   state.previousView = state.currentView;
@@ -856,7 +873,7 @@ function renderDetailPage(container) {
   document.querySelector('.toolbar').style.display = 'none';
 
   const imageStyle = p.thumbnail
-    ? `background-image:url('${p.thumbnail}')`
+    ? `background-image:url('${escCSSUrl(p.thumbnail)}')`
     : `background:var(--gray-100)`;
 
   let html = `
@@ -1050,8 +1067,8 @@ function setupModal() {
 }
 
 function openModal(projectId) {
-  state.editingProjectId = projectId || null;
-  const isEdit = !!projectId;
+  state.editingProjectId = projectId ?? null;
+  const isEdit = projectId != null;
   document.getElementById('modalTitle').textContent = isEdit ? 'Projekt bearbeiten' : 'Neues Projekt erfassen';
   document.getElementById('modalOverlay').classList.add('open');
   document.body.classList.add('modal-open');
@@ -1128,10 +1145,6 @@ function saveProject() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   UTILITY
-   ═══════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════
    EXPORT
    ═══════════════════════════════════════════════════════════ */
 
@@ -1198,14 +1211,14 @@ function exportPDF() {
       </tr></thead>
       <tbody>
         ${projects.map(p => `<tr>
-          <td>${p.jira_key || '—'}</td>
+          <td>${esc(p.jira_key) || '—'}</td>
           <td><strong>${esc(p.title)}</strong><br><span style="color:#6B7280">${esc(p.requestor)}</span></td>
           <td><span class="badge phase-${p.phase}">${PHASE_LABELS[p.phase]}</span></td>
           <td>${CLASS_LABELS[p.class]}</td>
           <td>${PRIORITY_LABELS[p.priority || 'medium']}</td>
-          <td>${p.responsible || '—'}</td>
+          <td>${esc(p.responsible) || '—'}</td>
           <td>${p.target_date ? new Date(p.target_date).toLocaleDateString('de-CH') : '—'}</td>
-          <td class="tags">${(p.tags || []).join(', ') || '—'}</td>
+          <td class="tags">${(p.tags || []).map(t => esc(t)).join(', ') || '—'}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -1223,11 +1236,16 @@ function priorityBadge(priority) {
   return `<span class="badge badge-priority" data-priority="${p}">${PRIORITY_ICONS[p]} ${PRIORITY_LABELS[p]}</span>`;
 }
 
+const _escEl = document.createElement('div');
 function esc(str) {
   if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  _escEl.textContent = str;
+  return _escEl.innerHTML;
+}
+
+function escCSSUrl(url) {
+  if (!url) return '';
+  return url.replace(/['"\\()]/g, '\\$&');
 }
 
 /* ═══════════════════════════════════════════════════════════

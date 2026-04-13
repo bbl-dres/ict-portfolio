@@ -491,12 +491,17 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  width: 100%;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   color: var(--gray-700);
   cursor: pointer;
   transition: all var(--transition-fast);
   border-radius: var(--radius-md);
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
 }
 
 .dropdown-item:hover {

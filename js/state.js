@@ -39,6 +39,9 @@ const state = {
 
   /* ── Modal ── */
   editingProjectId: null,  // null = create, number = edit
+
+  /* ── Current user (simulated login) ── */
+  currentUserId: 1,  // Marc Brunner
 };
 
 /* ── Labels & look-ups ── */
