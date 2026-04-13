@@ -23,7 +23,11 @@
       "Bash(curl -sL -o project-08.jpg \"https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=640&h=400&fit=crop\")",
       "Bash(curl -sL -o project-09.jpg \"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=640&h=400&fit=crop\")",
       "Bash(curl -sL -o project-10.jpg \"https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=640&h=400&fit=crop\")",
-      "Bash(curl -sL -o project-04.jpg \"https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&h=400&fit=crop\")"
+      "Bash(curl -sL -o project-04.jpg \"https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&h=400&fit=crop\")",
+      "Bash(pdftotext \"D:/DRES IKT Projekte/Priorisierung Aufgaben Datenanal_4b92c6a28fb049988ce14218f9a9bf0e-130426-2038-32.pdf\" -)",
+      "Bash(curl -sL -o \"assets/images/project-01.jpg\" \"https://images.unsplash.com/photo-1524661135-423995f22d0b?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o \"assets/images/project-23.jpg\" \"https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=640&h=400&fit=crop\")",
+      "Bash(netstat -ano)"
     ]
   }
 }

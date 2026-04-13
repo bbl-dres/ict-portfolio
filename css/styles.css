@@ -833,24 +833,18 @@ select:focus-visible {
 
 .badge svg { flex-shrink: 0; }
 
-/* Phase variants */
-.badge-phase[data-phase="triage"]          { background: var(--phase-triage-bg);         color: var(--gray-700); }
-.badge-phase[data-phase="analysis"]        { background: var(--phase-analysis-bg);       color: var(--info-800); }
-.badge-phase[data-phase="implementation"]  { background: var(--phase-implementation-bg); color: var(--warning-800); }
-.badge-phase[data-phase="completed"]       { background: var(--phase-completed-bg);      color: var(--success-800); }
-.badge-phase[data-phase="rejected"]        { background: var(--phase-rejected-bg);       color: var(--error-800); }
+/* Phase variants — neutral */
+.badge-phase { background: var(--gray-100); color: var(--gray-700); }
 
-/* Priority variants */
+/* Priority variants — only badges with color */
 .badge-priority[data-priority="low"]    { background: var(--priority-low-bg);    color: var(--priority-low-text); }
 .badge-priority[data-priority="medium"] { background: var(--priority-medium-bg); color: var(--priority-medium-text); }
 .badge-priority[data-priority="high"]   { background: var(--priority-high-bg);   color: var(--priority-high-text); }
 
-/* Class variants */
-.badge-class[data-class="fast_track"] { background: var(--class-fast-bg); color: var(--class-fast-text); }
-.badge-class[data-class="standard"]   { background: var(--class-std-bg);  color: var(--class-std-text); }
-.badge-class[data-class="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
+/* Class variants — neutral */
+.badge-class { background: var(--gray-100); color: var(--gray-700); }
 
-/* Type variants — uniform grey */
+/* Type variants — neutral */
 .badge-type { background: var(--gray-100); color: var(--gray-700); }
 
 /* DTI badge — same base as .badge */
@@ -1349,7 +1343,6 @@ select:focus-visible {
    ═══════════════════════════════════════════════════════════ */
 
 .gantt-container {
-  overflow-x: auto;
   animation: fadeIn var(--transition-fast);
 }
 
@@ -1383,12 +1376,54 @@ select:focus-visible {
   border-color: var(--accent-600);
 }
 
+.gantt-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: auto;
+}
+
+.gantt-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.gantt-nav-btn:first-child {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.gantt-nav-btn:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.gantt-nav-btn:not(:first-child) {
+  border-left: none;
+}
+
+.gantt-nav-btn:hover {
+  background: var(--gray-50);
+}
+
+.gantt-nav-today {
+  padding: var(--space-1) var(--space-3);
+  color: var(--gray-700);
+}
+
 .gantt-chart {
   display: grid;
   grid-template-columns: 240px 1fr;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  overflow: hidden;
 }
 
 .gantt-sidebar {
@@ -1397,8 +1432,9 @@ select:focus-visible {
 }
 
 .gantt-sidebar-header,
-.gantt-timeline-header {
-  height: 40px;
+.gantt-timeline-header,
+.gantt-year-header {
+  height: 28px;
   display: flex;
   align-items: center;
   background: var(--gray-100);
@@ -1411,7 +1447,27 @@ select:focus-visible {
 }
 
 .gantt-sidebar-header {
+  height: 56px;
   padding: 0 var(--space-3);
+}
+
+.gantt-year-header {
+  position: relative;
+  background: var(--gray-50);
+}
+
+.gantt-year-label {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi);
+  color: var(--gray-700);
+  border-left: 1px solid var(--gray-200);
+  box-sizing: border-box;
 }
 
 .gantt-sidebar-row {
@@ -1436,7 +1492,9 @@ select:focus-visible {
 
 .gantt-timeline {
   overflow-x: auto;
+  scroll-behavior: smooth;
   position: relative;
+  min-width: 0;
 }
 
 .gantt-timeline-header {
@@ -1499,12 +1557,13 @@ select:focus-visible {
   width: 2px;
   background: var(--error-500);
   z-index: 5;
+  pointer-events: none;
 }
 
 .gantt-today-label {
   position: absolute;
-  top: -18px;
-  transform: translateX(-50%);
+  top: -20px;
+  left: 4px;
   font-size: var(--font-size-xs);
   color: var(--error-500);
   font-weight: var(--font-weight-medium);

@@ -154,7 +154,7 @@ function renderView() {
     case 'list':      renderListView(container); break;
     case 'gallery':   renderGalleryView(container); break;
     case 'kanban':    renderKanbanView(container); break;
-    case 'gantt':     renderGanttView(container); break;
+    case 'gantt':     renderGanttView(container); scrollGanttToToday(); break;
     case 'dashboard': container.classList.add('view-container--transparent'); renderDashboardView(container); break;
     case 'wiki':      container.classList.add('view-container--transparent'); renderWikiView(container); break;
     case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); updateURL(); return;
@@ -262,6 +262,30 @@ function setupViewContainerEvents() {
         state.collapsedGroups.add(key);
       }
       renderView();
+      return;
+    }
+
+    // Gantt zoom controls
+    const scaleBtn = e.target.closest('.gantt-scale-btn');
+    if (scaleBtn) {
+      state.ganttScale = scaleBtn.dataset.scale;
+      renderView();
+      return;
+    }
+
+    // Gantt navigation (today, left, right)
+    const navBtn = e.target.closest('.gantt-nav-btn');
+    if (navBtn) {
+      const action = navBtn.dataset.nav;
+      if (action === 'today') {
+        scrollGanttToToday(true);
+      } else {
+        const timeline = document.querySelector('.gantt-timeline');
+        if (timeline) {
+          const step = timeline.clientWidth * 0.6;
+          timeline.scrollLeft += action === 'right' ? step : -step;
+        }
+      }
       return;
     }
 
@@ -389,14 +413,14 @@ function renderGalleryCard(p) {
   const infoRight = vf.has('budget_chf') ? `<span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
   const infoRow = (infoLeft || infoRight) ? `<div class="gallery-card-meta-row">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
-  // Badge row: class + type in card body
+  // Badge row: class + phase in card body
   const badgeParts = [];
   if (vf.has('class')) badgeParts.push(`<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`);
-  if (vf.has('type')) badgeParts.push(typeBadge(p.type));
+  if (vf.has('phase')) badgeParts.push(`<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`);
   const badgeRow = badgeParts.length ? `<div class="gallery-card-badges">${badgeParts.join('')}</div>` : '';
 
-  // Phase badge on image overlay
-  const phaseBadgeOverlay = vf.has('phase') ? `<div class="card-badge"><span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span></div>` : '';
+  // Type badge on image overlay (top left)
+  const typeBadgeOverlay = vf.has('type') ? `<div class="card-badge">${typeBadge(p.type)}</div>` : '';
 
   // Tags
   const tags = vf.has('tags') ? (p.tags && p.tags.length
@@ -424,7 +448,7 @@ function renderGalleryCard(p) {
   return `<div class="gallery-card" data-id="${p.id}" role="article" aria-label="${esc(p.title)}">
     <div class="gallery-card-image" style="${imageStyle}">
       ${!hasImage ? '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M7 12h10M7 17h6"/></svg>' : ''}
-      ${phaseBadgeOverlay}
+      ${typeBadgeOverlay}
     </div>
     <div class="gallery-card-body">
       ${topRow}
@@ -524,9 +548,31 @@ function renderGanttView(container) {
   });
 }
 
+function scrollGanttToToday(smooth) {
+  // Double-rAF: first frame triggers layout, second frame scrolls reliably
+  requestAnimationFrame(() => { requestAnimationFrame(() => {
+    const timeline = document.querySelector('.gantt-timeline');
+    if (!timeline) return;
+    const todayLine = timeline.querySelector('.gantt-today-line');
+    if (!todayLine) return;
+    const todayLeft = parseFloat(todayLine.style.left);
+    if (!smooth) timeline.style.scrollBehavior = 'auto';
+    timeline.scrollLeft = Math.max(todayLeft - timeline.clientWidth / 2, 0);
+    if (!smooth) requestAnimationFrame(() => { timeline.style.scrollBehavior = ''; });
+  }); });
+}
+
+const GANTT_SCALES = {
+  year:    { pxPerDay: 1,  label: 'Jahr' },
+  quarter: { pxPerDay: 3,  label: 'Quartal' },
+  month:   { pxPerDay: 10, label: 'Monat' },
+};
+
+if (!state.ganttScale) state.ganttScale = 'quarter';
+
 function renderGanttChart(projects) {
   const today = new Date();
-  const durations = { fast_track: 90, standard: 180, complex: 365 };
+  const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
   let minDate = new Date(today.getFullYear(), 0, 1);
   let maxDate = new Date(today.getFullYear(), 11, 31);
 
@@ -535,42 +581,65 @@ function renderGanttChart(projects) {
     let end;
     if (p.phase === 'completed' || p.phase === 'rejected') {
       end = new Date(p.updated_at);
+    } else if (p.target_date) {
+      end = new Date(p.target_date);
     } else {
       end = new Date(start);
-      end.setDate(end.getDate() + (durations[p.class] || 180));
+      end.setDate(end.getDate() + (fallbackDurations[p.class] || 180));
     }
     if (start < minDate) minDate = new Date(start);
     if (end > maxDate) maxDate = new Date(end);
     return { project: p, start, end };
   });
 
-  const months = [];
-  const cursor = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-  while (cursor <= maxDate) {
-    months.push(new Date(cursor));
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
+  // Pad range to full years
+  minDate = new Date(minDate.getFullYear(), 0, 1);
+  maxDate = new Date(maxDate.getFullYear(), 11, 31);
 
+  const pxPerDay = GANTT_SCALES[state.ganttScale].pxPerDay;
   const totalDays = (maxDate - minDate) / (1000 * 60 * 60 * 24);
-  const pxPerDay = 4;
   const timelineWidth = Math.max(totalDays * pxPerDay, 800);
 
   function dayOffset(date) {
     return ((date - minDate) / (1000 * 60 * 60 * 24)) * pxPerDay;
   }
 
+  // Sidebar
   let sidebarHTML = '<div class="gantt-sidebar-header">Projekt</div>';
   bars.forEach(b => {
     sidebarHTML += `<div class="gantt-sidebar-row" data-id="${b.project.id}">${esc(b.project.title)}</div>`;
   });
 
-  let headerHTML = '';
-  const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-  months.forEach(m => {
-    const left = dayOffset(m);
-    headerHTML += `<div class="gantt-month-label" style="left:${left}px">${monthNames[m.getMonth()]} ${m.getFullYear()}</div>`;
-  });
+  // Year headers (major axis)
+  let yearHeaderHTML = '';
+  for (let y = minDate.getFullYear(); y <= maxDate.getFullYear(); y++) {
+    const yearStart = new Date(y, 0, 1);
+    const yearEnd = new Date(y, 11, 31);
+    const left = dayOffset(yearStart < minDate ? minDate : yearStart);
+    const right = dayOffset(yearEnd > maxDate ? maxDate : yearEnd);
+    const width = right - left;
+    yearHeaderHTML += `<div class="gantt-year-label" style="left:${left}px;width:${width}px">${y}</div>`;
+  }
 
+  // Month headers (minor axis)
+  let monthHeaderHTML = '';
+  const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const quarterNames = ['Q1', '', '', 'Q2', '', '', 'Q3', '', '', 'Q4', '', ''];
+  const cursor = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  while (cursor <= maxDate) {
+    const left = dayOffset(cursor);
+    const m = cursor.getMonth();
+    let label;
+    if (state.ganttScale === 'year') {
+      label = quarterNames[m];
+    } else {
+      label = monthNames[m];
+    }
+    monthHeaderHTML += `<div class="gantt-month-label" style="left:${left}px">${label}</div>`;
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  // Bars
   let barsHTML = '';
   const todayX = dayOffset(today);
   bars.forEach(b => {
@@ -583,16 +652,33 @@ function renderGanttChart(projects) {
     </div>`;
   });
 
+  // Zoom controls + navigation
+  const scaleButtons = Object.entries(GANTT_SCALES).map(([key, s]) =>
+    `<button class="gantt-scale-btn ${state.ganttScale === key ? 'active' : ''}" data-scale="${key}">${s.label}</button>`
+  ).join('');
+
+  const navWidget = `<div class="gantt-nav">
+    <button class="gantt-nav-btn" data-nav="left" title="Zurück">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <button class="gantt-nav-btn gantt-nav-today" data-nav="today">Heute</button>
+    <button class="gantt-nav-btn" data-nav="right" title="Vorwärts">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>`;
+
   return `
     <div class="gantt-container">
+      <div class="gantt-controls">${scaleButtons}${navWidget}</div>
       <div class="gantt-chart">
         <div class="gantt-sidebar">${sidebarHTML}</div>
-        <div class="gantt-timeline" style="width:${timelineWidth}px">
-          <div class="gantt-timeline-header" style="width:${timelineWidth}px">${headerHTML}</div>
+        <div class="gantt-timeline">
+          <div class="gantt-year-header" style="width:${timelineWidth}px">${yearHeaderHTML}</div>
+          <div class="gantt-timeline-header" style="width:${timelineWidth}px">${monthHeaderHTML}</div>
           <div class="gantt-timeline-body" style="width:${timelineWidth}px">
             ${barsHTML}
             <div class="gantt-today-line" style="left:${todayX}px">
-              <div class="gantt-today-label">Heute</div>
+              <div class="gantt-today-label">Heute, ${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}</div>
             </div>
           </div>
         </div>

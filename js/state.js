@@ -69,15 +69,15 @@ const PHASE_ORDER = ['triage', 'analysis', 'implementation', 'completed', 'rejec
 const CLASS_LABELS = {
   fast_track: 'Fast Track',
   standard:   'Standard',
-  complex:    'Complex',
+  complex:    'Komplex',
 };
 
 const CLASS_ORDER = ['fast_track', 'standard', 'complex'];
 
 const PRIORITY_LABELS = {
-  low:    'Low',
-  medium: 'Medium',
-  high:   'High',
+  low:    'Tief',
+  medium: 'Mittel',
+  high:   'Hoch',
 };
 
 const PRIORITY_ICONS = {
@@ -91,8 +91,8 @@ const PRIORITY_ORDER = ['high', 'medium', 'low'];
 const TYPE_LABELS = {
   incident:  'Störung / Support',
   change:    'Änderungsantrag',
-  new:       'Neuvorhaben',
-  data:      'Datenbewirtschaftung',
+  new:       'Neues IKT-Vorhaben',
+  data:      'Daten Initiative',
   migration: 'Ablösung / Migration',
   study:     'Studie / Evaluation',
 };

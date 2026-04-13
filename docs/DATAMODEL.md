@@ -17,8 +17,10 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 |---|---|---|---|
 | `id` | integer | yes | Auto-increment primary key |
 | `title` | string (200) | yes | Name of the initiative |
+| `description` | text | no | Short summary of what the initiative is about and why it exists |
 | `requestor` | string (200) | yes | Requesting unit or stakeholder |
 | `budget_chf` | integer | yes | Estimated budget in CHF |
+| `type` | enum | yes | See type enum below |
 | `class` | enum | yes | See class enum below |
 | `phase` | enum | yes | See phase enum below |
 | `priority` | enum | no | See priority enum below; default `medium` |
@@ -34,6 +36,16 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `created_by` | integer FK → `user.id` | yes | User who created the record |
 | `created_at` | datetime | yes | Set automatically on creation |
 | `updated_at` | datetime | yes | Updated automatically on every change |
+
+**Enum `type`**
+
+| Value | Description |
+|---|---|
+| `new` | New system, platform, or capability |
+| `change` | Enhancement or transformation of an existing system |
+| `migration` | Migration from one system or format to another |
+| `study` | Feasibility study, evaluation, or proof of concept |
+| `data` | Data quality, enrichment, capture, or cleansing initiative (Datenbewirtschaftung) |
 
 **Enum `class`**
 
@@ -190,8 +202,10 @@ All writes require a manual commit or a GitHub Action triggered by a form submis
   "project": {
     "id": 4,
     "title": "SAP RE-FX EGID Integration",
+    "description": "Integration der EGID-Gebäudeidentifikatoren aus dem BFS-Register in SAP RE-FX zur eindeutigen Zuordnung von Immobilienobjekten.",
     "requestor": "Informatik BBL",
     "budget_chf": 620000,
+    "type": "change",
     "class": "complex",
     "phase": "triage",
     "go_decision": null,
