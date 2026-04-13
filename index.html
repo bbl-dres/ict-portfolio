@@ -4,15 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DRES PPM — Projektportfolio</title>
+  <meta name="description" content="DRES PPM — Projektportfolio-Tool für digitale Initiativen des BBL">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- HEADER                                                      -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <header class="header">
+  <header class="header" role="banner">
     <div class="header-left">
       <button class="header-hamburger" id="hamburgerBtn" aria-label="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
@@ -39,24 +41,41 @@
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- BREADCRUMB                                                  -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="breadcrumb">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
     <div class="breadcrumb-inner">
       <span>Projekte</span>
       <span class="breadcrumb-sep">/</span>
       <span class="breadcrumb-current">Übersicht</span>
     </div>
-  </div>
+  </nav>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- PAGE CONTENT                                                -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <main class="main">
+  <main class="main" id="main-content" role="main">
     <!-- Page Header -->
     <div class="page-header">
       <div class="page-header-left">
         <h1 class="page-title">Projektportfolio DRES</h1>
         </div>
       <div class="page-header-right">
+        <div class="toolbar-dropdown" id="exportDropdown">
+          <button class="btn btn-outline" id="exportBtn" aria-expanded="false" aria-haspopup="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportieren
+            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu dropdown-menu--right" id="exportMenu">
+            <div class="dropdown-item" data-export="csv">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Excel / CSV
+            </div>
+            <div class="dropdown-item" data-export="pdf">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              PDF-Bericht
+            </div>
+          </div>
+        </div>
         <button class="btn btn-primary" id="createProjectBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           Neues Projekt
@@ -95,7 +114,7 @@
         </div>
 
         <div class="toolbar-dropdown" id="sortDropdown">
-          <button class="toolbar-btn" id="sortBtn">
+          <button class="toolbar-btn" id="sortBtn" aria-expanded="false" aria-haspopup="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
             <span id="sortLabel">Titel</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -105,6 +124,7 @@
             <div class="dropdown-item" data-sort="budget_chf">Budget</div>
             <div class="dropdown-item" data-sort="phase">Phase</div>
             <div class="dropdown-item" data-sort="class">Klasse</div>
+            <div class="dropdown-item" data-sort="priority">Priorität</div>
             <div class="dropdown-item" data-sort="created_at">Erstellt</div>
             <div class="dropdown-item" data-sort="updated_at">Geändert</div>
             <div class="dropdown-divider"></div>
@@ -120,7 +140,7 @@
         </div>
 
         <div class="toolbar-dropdown" id="groupDropdown">
-          <button class="toolbar-btn" id="groupBtn">
+          <button class="toolbar-btn" id="groupBtn" aria-expanded="false" aria-haspopup="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             <span id="groupLabel">Gruppieren</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -130,12 +150,13 @@
             <div class="dropdown-item" data-group="phase">Phase</div>
             <div class="dropdown-item" data-group="class">Klasse</div>
             <div class="dropdown-item" data-group="responsible">Verantwortlich</div>
+            <div class="dropdown-item" data-group="priority">Priorität</div>
             <div class="dropdown-item" data-group="dti_required">DTI-pflichtig</div>
           </div>
         </div>
 
         <div class="toolbar-dropdown" id="assigneeDropdown">
-          <button class="toolbar-btn" id="assigneeBtn">
+          <button class="toolbar-btn" id="assigneeBtn" aria-expanded="false" aria-haspopup="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span id="assigneeLabel">Verantwortlich</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -158,20 +179,24 @@
           <span class="checkbox-text">Archivierte anzeigen</span>
         </label>
         <div class="toolbar-dropdown" id="fieldsDropdown">
-          <button class="toolbar-btn" id="fieldsBtn">
+          <button class="toolbar-btn" id="fieldsBtn" aria-expanded="false" aria-haspopup="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Attribute
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="dropdown-menu" id="fieldsMenu">
             <label class="dropdown-checkbox"><input type="checkbox" data-field="jira_key" checked> Jira-Key</label>
-            <label class="dropdown-checkbox"><input type="checkbox" data-field="requestor" checked> Auftraggeber</label>
-            <label class="dropdown-checkbox"><input type="checkbox" data-field="budget_chf" checked> Budget</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="requestor"> Auftraggeber</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="budget_chf"> Budget</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="responsible" checked> Verantwortlich</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="phase" checked> Phase</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="class" checked> Klasse</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="priority" checked> Priorität</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="tags"> Tags</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="target_date" checked> Zieldatum</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="dti_required"> DTI</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="hermes_phase"> HERMES</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="go_decision"> Go-Entscheid</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="created_at"> Erstellt</label>
           </div>
         </div>
@@ -227,11 +252,31 @@
               <input class="form-input" type="text" id="formResponsible">
             </div>
             <div class="form-group">
+              <label class="form-label" for="formPriority">Priorität</label>
+              <select class="form-input" id="formPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label class="form-label" for="formDti">DTI-pflichtig</label>
               <div class="form-checkbox-row">
                 <input type="checkbox" id="formDti">
                 <label for="formDti">Ja, DTI-Meldung erforderlich</label>
               </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="formTargetDate">Zieldatum</label>
+              <input class="form-input" type="date" id="formTargetDate">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="formTags">Tags (kommagetrennt)</label>
+              <input class="form-input" type="text" id="formTags" placeholder="z.B. SAP, Migration, BFS">
             </div>
           </div>
           <div class="form-group">
@@ -246,6 +291,15 @@
       </div>
     </div>
   </div>
+
+  <footer class="footer" role="contentinfo">
+    <div>UX Prototype v0.1</div>
+    <div>
+      <a href="https://github.com/bbl-dres/ict-portfolio" class="footer-link" target="_blank" rel="noopener">Source Code</a>
+      <span class="footer-sep">|</span>
+      <a href="docs/REQUIREMENTS.md" class="footer-link">Dokumentation</a>
+    </div>
+  </footer>
 
   <script src="js/state.js"></script>
   <script src="js/data.js"></script>

@@ -21,10 +21,13 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `budget_chf` | integer | yes | Estimated budget in CHF |
 | `class` | enum | yes | See class enum below |
 | `phase` | enum | yes | See phase enum below |
+| `priority` | enum | no | See priority enum below; default `medium` |
 | `go_decision` | boolean / null | no | `null` = pending, `true` = approved |
 | `go_date` | date / null | no | Date the go-decision was made |
 | `responsible` | string (100) | no | Responsible person (BA or external PM) |
 | `notes` | text | no | Free text: description, dependencies, references |
+| `tags` | string[] | no | Free-text labels (e.g. `["SAP", "BFS"]`) |
+| `target_date` | date / null | no | Target completion date |
 | `dti_required` | boolean | no | DTI notification required (≥ CHF 1M or strategic) |
 | `hermes_phase` | enum / null | no | Current HERMES phase if applicable |
 | `jira_key` | string (20) / null | no | Linked Jira issue key (e.g. `DRESPPM-42`) |
@@ -49,6 +52,14 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `implementation` | Go granted, project running |
 | `completed` | Go-live done, operations handed over |
 | `rejected` | Initiative declined or withdrawn |
+
+**Enum `priority`**
+
+| Value | Description |
+|---|---|
+| `low` | Nice to have, no urgency |
+| `medium` | Normal priority, planned timeline |
+| `high` | Urgent, immediate attention required |
 
 **Enum `hermes_phase`**
 

@@ -69,6 +69,17 @@
   --phase-rejected:       #EF4444;
   --phase-rejected-bg:    #FEE2E2;
 
+  /* ── Priority colours ── */
+  --priority-low:       #22C55E;
+  --priority-low-bg:    #DCFCE7;
+  --priority-low-text:  #166534;
+  --priority-medium:    #F59E0B;
+  --priority-medium-bg: #FEF3C7;
+  --priority-medium-text:#92400E;
+  --priority-high:      #EF4444;
+  --priority-high-bg:   #FEE2E2;
+  --priority-high-text: #991B1B;
+
   /* ── Class colours ── */
   --class-fast-bg:    #DCFCE7;
   --class-fast-text:  #166534;
@@ -79,10 +90,11 @@
 
   /* ── Typography ── */
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-2xs: 0.625rem;  /* 10px */
   --font-size-xs:  0.75rem;   /* 12px */
-  --font-size-sm:  0.8125rem; /* 13px */
-  --font-size-md:  0.875rem;  /* 14px */
-  --font-size-lg:  1rem;      /* 16px */
+  --font-size-sm:  0.875rem;  /* 14px */
+  --font-size-md:  1rem;      /* 16px */
+  --font-size-lg:  1.125rem;  /* 18px */
   --font-size-xl:  1.25rem;   /* 20px */
   --font-size-2xl: 1.5rem;    /* 24px */
   --font-weight-normal:  400;
@@ -91,6 +103,8 @@
   --font-weight-bold:    700;
   --line-height-tight:   1.25;
   --line-height-normal:  1.5;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-wide:  0.025em;
 
   /* ── Spacing (4px base) ── */
   --space-1:  0.25rem;  /* 4px */
@@ -128,8 +142,17 @@
   --z-overlay:  400;
   --z-modal:    500;
 
+  /* ── Focus Ring ── */
+  --focus-ring-color: var(--accent-500);
+  --focus-ring-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--focus-ring-color);
+  --focus-ring-inset: 0 0 0 3px var(--accent-100);
+
   /* ── Layout ── */
-  --header-height: 52px;
-  --panel-width:   480px;
+  --header-height: 60px;
+  --panel-width:   560px;
   --content-max:   1400px;
+
+  /* ── App Background ── */
+  --bg-app: #f8fafd;
+  --bg-primary: #ffffff;
 }

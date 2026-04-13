@@ -115,6 +115,9 @@ function getFilteredProjects() {
     } else if (state.sortField === 'class') {
       va = CLASS_ORDER.indexOf(va);
       vb = CLASS_ORDER.indexOf(vb);
+    } else if (state.sortField === 'priority') {
+      va = PRIORITY_ORDER.indexOf(va);
+      vb = PRIORITY_ORDER.indexOf(vb);
     }
 
     if (va == null) va = '';
@@ -144,6 +147,8 @@ function getGroupedProjects(projects) {
       key = p.class;
     } else if (state.groupBy === 'responsible') {
       key = p.responsible || '(nicht zugewiesen)';
+    } else if (state.groupBy === 'priority') {
+      key = p.priority || 'medium';
     } else if (state.groupBy === 'dti_required') {
       key = p.dti_required ? 'DTI-pflichtig' : 'Nicht DTI-pflichtig';
     }
@@ -158,6 +163,9 @@ function getGroupedProjects(projects) {
   if (state.groupBy === 'class') {
     return new Map(CLASS_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
   }
+  if (state.groupBy === 'priority') {
+    return new Map(PRIORITY_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
+  }
 
   return groups;
 }
@@ -165,6 +173,7 @@ function getGroupedProjects(projects) {
 function getGroupLabel(key) {
   if (state.groupBy === 'phase') return PHASE_LABELS[key] || key;
   if (state.groupBy === 'class') return CLASS_LABELS[key] || key;
+  if (state.groupBy === 'priority') return PRIORITY_LABELS[key] || key;
   return key;
 }
 
@@ -184,6 +193,14 @@ function getGroupColor(key) {
       fast_track: 'var(--success-500)',
       standard: 'var(--accent-500)',
       complex: 'var(--warning-500)',
+    };
+    return colors[key] || 'var(--gray-400)';
+  }
+  if (state.groupBy === 'priority') {
+    const colors = {
+      high: 'var(--priority-high)',
+      medium: 'var(--priority-medium)',
+      low: 'var(--priority-low)',
     };
     return colors[key] || 'var(--gray-400)';
   }

@@ -25,8 +25,8 @@ const state = {
 
   /* ── Field visibility ── */
   visibleFields: new Set([
-    'jira_key', 'requestor', 'budget_chf',
-    'responsible', 'phase', 'class'
+    'jira_key',
+    'responsible', 'phase', 'class', 'priority', 'target_date'
   ]),
 
   /* ── Collapsed groups ── */
@@ -60,3 +60,17 @@ const CLASS_LABELS = {
 };
 
 const CLASS_ORDER = ['fast_track', 'standard', 'complex'];
+
+const PRIORITY_LABELS = {
+  low:    'Low',
+  medium: 'Medium',
+  high:   'High',
+};
+
+const PRIORITY_ICONS = {
+  low:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>',
+  medium: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m18 15-6-6-6 6"/></svg>',
+  high:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m18 11-6-6-6 6"/><path d="m18 18-6-6-6 6"/></svg>',
+};
+
+const PRIORITY_ORDER = ['high', 'medium', 'low'];

@@ -31,10 +31,10 @@ function restoreFromURL() {
     t.classList.toggle('active', t.dataset.view === state.currentView);
   });
   document.getElementById('sortLabel').textContent =
-    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', class: 'Klasse', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
+    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', class: 'Klasse', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
   if (state.groupBy !== 'none') {
     document.getElementById('groupLabel').textContent =
-      { phase: 'Phase', class: 'Klasse', responsible: 'Verantwortlich', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
+      { phase: 'Phase', class: 'Klasse', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
   if (state.searchQuery) {
@@ -223,25 +223,55 @@ function bindGroupEvents(container) {
 
 function renderListView(container) {
   renderGroupedView(container, (items) => {
+    const cols = getListColumns();
+    const gridCols = cols.map(c => c.width).join(' ');
     return '<div class="list-card">' +
-      items.map(p => renderProjectRow(p)).join('') +
+      items.map(p => renderProjectRow(p, cols, gridCols)).join('') +
     '</div>';
   });
 }
 
-function renderProjectRow(p) {
-  return `<div class="project-row" data-id="${p.id}">
-    <span class="project-jira">${p.jira_key || '—'}</span>
-    <div class="project-row-main">
-      <div class="project-title">${esc(p.title)}</div>
-      <div class="project-requestor">${esc(p.requestor)}</div>
-    </div>
-    <span class="project-budget">${formatBudgetShort(p.budget_chf)}</span>
-    <span class="project-responsible">${p.responsible || '—'}</span>
-    <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
-    <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
-    <span class="badge-dti" title="DTI-pflichtig">${p.dti_required ? '🚩' : ''}</span>
-  </div>`;
+function getListColumns() {
+  const vf = state.visibleFields;
+  const cols = [];
+  if (vf.has('jira_key'))      cols.push({ key: 'jira_key',     width: '100px' });
+  // Title is always shown
+  cols.push({ key: '_title', width: '1fr' });
+  if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '80px' });
+  if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '110px' });
+  if (vf.has('phase'))         cols.push({ key: 'phase',        width: '110px' });
+  if (vf.has('class'))         cols.push({ key: 'class',        width: '90px' });
+  if (vf.has('priority'))      cols.push({ key: 'priority',     width: '80px' });
+  if (vf.has('tags'))           cols.push({ key: 'tags',         width: '150px' });
+  if (vf.has('target_date'))   cols.push({ key: 'target_date',  width: '90px' });
+  if (vf.has('go_decision'))   cols.push({ key: 'go_decision',  width: '90px' });
+  if (vf.has('hermes_phase'))  cols.push({ key: 'hermes_phase', width: '100px' });
+  if (vf.has('dti_required'))  cols.push({ key: 'dti_required', width: '30px' });
+  if (vf.has('created_at'))    cols.push({ key: 'created_at',   width: '90px' });
+  return cols;
+}
+
+function renderProjectRow(p, cols, gridCols) {
+  const vf = state.visibleFields;
+  let cells = '';
+  for (const col of cols) {
+    switch (col.key) {
+      case 'jira_key':     cells += `<span class="project-jira">${p.jira_key || '—'}</span>`; break;
+      case '_title':       cells += `<div class="project-row-main"><div class="project-title">${esc(p.title)}</div>${vf.has('requestor') ? `<div class="project-requestor">${esc(p.requestor)}</div>` : ''}</div>`; break;
+      case 'budget_chf':   cells += `<span class="project-budget">${formatBudgetShort(p.budget_chf)}</span>`; break;
+      case 'responsible':  cells += `<span class="project-responsible">${p.responsible || '—'}</span>`; break;
+      case 'phase':        cells += `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`; break;
+      case 'class':        cells += `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`; break;
+      case 'priority':     cells += priorityBadge(p.priority); break;
+      case 'tags':         cells += `<div class="tag-list">${(p.tags || []).map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`; break;
+      case 'target_date':  cells += `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>`; break;
+      case 'go_decision':  cells += `<span class="project-go">${p.go_decision === true ? 'Ja' : p.go_decision === false ? 'Nein' : '—'}</span>`; break;
+      case 'hermes_phase': cells += `<span class="project-hermes">${p.hermes_phase || '—'}</span>`; break;
+      case 'dti_required': cells += `<span class="badge-dti" title="DTI-pflichtig">${p.dti_required ? '🚩' : ''}</span>`; break;
+      case 'created_at':   cells += `<span class="project-date">${formatDate(p.created_at)}</span>`; break;
+    }
+  }
+  return `<div class="project-row" data-id="${p.id}" style="grid-template-columns:${gridCols}">${cells}</div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -257,30 +287,61 @@ function renderGalleryView(container) {
 }
 
 function renderGalleryCard(p) {
+  const vf = state.visibleFields;
   const hasImage = !!p.thumbnail;
   const imageStyle = hasImage
     ? `background-image:url('${p.thumbnail}');background-size:cover;background-position:center`
     : `background:linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`;
-  return `<div class="gallery-card" data-id="${p.id}">
+
+  // Top row: jira key + priority
+  const topLeft = vf.has('jira_key') ? `<span class="project-jira">${p.jira_key || '—'}</span>` : '';
+  const topRight = vf.has('priority') ? priorityBadge(p.priority) : '';
+  const topRow = (topLeft || topRight) ? `<div class="gallery-card-meta-row">${topLeft || '<span></span>'}${topRight || '<span></span>'}</div>` : '';
+
+  // Info row: requestor + budget
+  const infoLeft = vf.has('requestor') ? `<span>${esc(p.requestor)}</span>` : '';
+  const infoRight = vf.has('budget_chf') ? `<span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
+  const infoRow = (infoLeft || infoRight) ? `<div class="gallery-card-meta-row">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
+
+  // Phase row
+  const phaseRow = vf.has('phase') ? `<div class="gallery-card-meta-row"><span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span></div>` : '';
+
+  // Tags
+  const tags = vf.has('tags') ? (p.tags && p.tags.length
+    ? `<div class="tag-list">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`
+    : `<div class="card-placeholder">Keine Tags</div>`) : '';
+
+  // Extras row: dti, hermes, go_decision, created_at
+  const extras = [];
+  if (vf.has('dti_required') && p.dti_required) extras.push('🚩 DTI');
+  if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
+  if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
+  if (vf.has('created_at')) extras.push(formatDate(p.created_at));
+  const extrasRow = extras.length ? `<div class="gallery-card-meta-row"><span class="project-date">${extras.join(' · ')}</span></div>` : '';
+
+  // Bottom row: target_date + assignee avatar (with separator)
+  const showDeadline = vf.has('target_date');
+  const showAssignee = vf.has('responsible');
+  const deadline = showDeadline ? `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>` : '';
+  const assigneeInitials = (showAssignee && p.responsible) ? getUserInitials(p.responsible) : '';
+  const assigneeHTML = showAssignee ? (assigneeInitials
+    ? `<div class="card-avatar" title="${esc(p.responsible)}">${assigneeInitials}</div>`
+    : `<div class="card-avatar card-avatar--empty" title="Nicht zugewiesen">—</div>`) : '';
+  const bottomRow = (showDeadline || showAssignee) ? `<div class="card-separator"></div><div class="gallery-card-meta-row">${deadline || '<span></span>'}${assigneeHTML}</div>` : '';
+
+  return `<div class="gallery-card" data-id="${p.id}" role="article" aria-label="${esc(p.title)}">
     <div class="gallery-card-image" style="${imageStyle}">
       ${!hasImage ? '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M7 12h10M7 17h6"/></svg>' : ''}
-      <div class="card-badge">
-        <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
-      </div>
+      ${vf.has('class') ? `<div class="card-badge"><span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span></div>` : ''}
     </div>
     <div class="gallery-card-body">
+      ${topRow}
       <div class="gallery-card-title">${esc(p.title)}</div>
-      <div class="gallery-card-sep"></div>
-      <div class="gallery-card-meta">
-        <div class="gallery-card-meta-row">
-          <span>${esc(p.requestor)}</span>
-          <span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>
-        </div>
-        <div class="gallery-card-meta-row">
-          <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
-          <span>${p.responsible || '—'}</span>
-        </div>
-      </div>
+      ${infoRow}
+      ${phaseRow}
+      ${tags}
+      ${extrasRow}
+      ${bottomRow}
     </div>
   </div>`;
 }
@@ -306,14 +367,50 @@ function renderKanbanView(container) {
           <span class="kanban-column-count">${phaseItems.length}</span>
         </div>
         <div class="kanban-column-body">`;
+      if (phaseItems.length === 0) {
+        html += '<div class="kanban-empty">Keine Projekte</div>';
+      }
       phaseItems.forEach(p => {
+        const vf = state.visibleFields;
+
+        // Top row: jira key + priority
+        const topLeft = vf.has('jira_key') ? `<span class="project-jira">${p.jira_key || '—'}</span>` : '';
+        const topRight = vf.has('priority') ? priorityBadge(p.priority) : '';
+        const topRow = (topLeft || topRight) ? `<div class="kanban-card-meta">${topLeft || '<span></span>'}${topRight || '<span></span>'}</div>` : '';
+
+        // Info: budget + class
+        const infoLeft = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
+        const infoRight = vf.has('class') ? `<span class="badge badge-class badge-sm" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
+        const infoRow = (infoLeft || infoRight) ? `<div class="kanban-card-meta">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
+
+        // Tags
+        const tags = vf.has('tags') ? (p.tags && p.tags.length
+          ? `<div class="tag-list">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`
+          : `<div class="card-placeholder">Keine Tags</div>`) : '';
+
+        // Extras
+        const extras = [];
+        if (vf.has('dti_required') && p.dti_required) extras.push('🚩 DTI');
+        if (vf.has('hermes_phase')) extras.push(p.hermes_phase || '—');
+        if (vf.has('go_decision')) extras.push(p.go_decision === true ? 'Go: Ja' : p.go_decision === false ? 'Go: Nein' : 'Go: —');
+        const extrasRow = extras.length ? `<div class="kanban-card-responsible"><span class="project-date">${extras.join(' · ')}</span></div>` : '';
+
+        // Bottom row: target_date + assignee avatar (with separator)
+        const showDeadline = vf.has('target_date');
+        const showAssignee = vf.has('responsible');
+        const deadline = showDeadline ? `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>` : '';
+        const assigneeHTML = showAssignee ? (p.responsible
+          ? `<div class="card-avatar" title="${esc(p.responsible)}">${getUserInitials(p.responsible)}</div>`
+          : `<div class="card-avatar card-avatar--empty" title="Nicht zugewiesen">—</div>`) : '';
+        const bottomRow = (showDeadline || showAssignee) ? `<div class="card-separator"></div><div class="kanban-card-meta">${deadline || '<span></span>'}${assigneeHTML}</div>` : '';
+
         html += `<div class="kanban-card" data-id="${p.id}">
+          ${topRow}
           <div class="kanban-card-title">${esc(p.title)}</div>
-          <div class="kanban-card-meta">
-            <span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>
-            <span class="badge badge-class badge-sm" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
-          </div>
-          ${p.responsible ? `<div class="kanban-card-responsible">${esc(p.responsible)}</div>` : ''}
+          ${infoRow}
+          ${tags}
+          ${extrasRow}
+          ${bottomRow}
         </div>`;
       });
       html += '</div></div>';
@@ -642,6 +739,13 @@ function setupToolbar() {
 
   // Create project
   document.getElementById('createProjectBtn').addEventListener('click', () => openModal());
+
+  // Export
+  setupDropdown('exportDropdown', 'exportBtn', 'exportMenu', (item) => {
+    const type = item.dataset.export;
+    if (type === 'csv') exportCSV();
+    if (type === 'pdf') exportPDF();
+  });
 }
 
 function setupAssigneeDropdown() {
@@ -674,9 +778,14 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
     e.stopPropagation();
     // Close all other dropdowns first
     document.querySelectorAll('.dropdown-menu.open').forEach(m => {
-      if (m.id !== menuId) m.classList.remove('open');
+      if (m.id !== menuId) {
+        m.classList.remove('open');
+        const otherBtn = m.previousElementSibling || m.parentElement.querySelector('.toolbar-btn');
+        if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+      }
     });
-    menu.classList.toggle('open');
+    const isOpen = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen);
   });
 
   menu.addEventListener('click', (e) => {
@@ -691,6 +800,7 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
   // Close on outside click
   document.addEventListener('click', () => {
     menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
   });
 }
 
@@ -786,7 +896,9 @@ function renderDetailPage(container) {
         <div class="detail-card-body">
           ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`)}
           ${detailFieldRow('Klasse', `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`)}
+          ${detailFieldRow('Priorität', priorityBadge(p.priority))}
           ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
+          ${detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
           ${detailFieldRow('Go-Entscheid', p.go_decision === true ? 'Genehmigt' : p.go_decision === false ? 'Abgelehnt' : 'Ausstehend')}
           ${detailFieldRow('Verantwortlich', p.responsible || '—')}
           ${detailFieldRow('Auftraggeber', esc(p.requestor))}
@@ -799,6 +911,16 @@ function renderDetailPage(container) {
         </div>
       </div>
     `;
+    if (p.tags && p.tags.length) {
+      html += `
+        <div class="detail-card">
+          <div class="detail-card-header">Tags</div>
+          <div class="detail-card-body">
+            <div class="tag-list">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>
+          </div>
+        </div>
+      `;
+    }
     if (p.notes) {
       html += `
         <div class="detail-card">
@@ -932,6 +1054,7 @@ function openModal(projectId) {
   const isEdit = !!projectId;
   document.getElementById('modalTitle').textContent = isEdit ? 'Projekt bearbeiten' : 'Neues Projekt erfassen';
   document.getElementById('modalOverlay').classList.add('open');
+  document.body.classList.add('modal-open');
 
   if (isEdit) {
     const p = state.projects.find(pr => pr.id === projectId);
@@ -941,6 +1064,9 @@ function openModal(projectId) {
       document.getElementById('formBudget').value = p.budget_chf;
       document.getElementById('formClass').value = p.class;
       document.getElementById('formResponsible').value = p.responsible || '';
+      document.getElementById('formPriority').value = p.priority || 'medium';
+      document.getElementById('formTargetDate').value = p.target_date || '';
+      document.getElementById('formTags').value = (p.tags || []).join(', ');
       document.getElementById('formDti').checked = !!p.dti_required;
       document.getElementById('formNotes').value = p.notes || '';
     }
@@ -952,6 +1078,7 @@ function openModal(projectId) {
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  document.body.classList.remove('modal-open');
   state.editingProjectId = null;
 }
 
@@ -962,6 +1089,9 @@ function saveProject() {
     budget_chf: Number(document.getElementById('formBudget').value),
     class: document.getElementById('formClass').value,
     responsible: document.getElementById('formResponsible').value || null,
+    priority: document.getElementById('formPriority').value,
+    target_date: document.getElementById('formTargetDate').value || null,
+    tags: document.getElementById('formTags').value ? document.getElementById('formTags').value.split(',').map(t => t.trim()).filter(Boolean) : [],
     dti_required: document.getElementById('formDti').checked,
     notes: document.getElementById('formNotes').value || null,
   };
@@ -992,12 +1122,106 @@ function saveProject() {
 
   closeModal();
   render();
-  if (state.selectedProjectId) renderDetailPanel();
+  if (state.currentView === 'detail' && state.selectedProjectId) {
+    renderDetailPage(document.getElementById('viewContainer'));
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    UTILITY
    ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT
+   ═══════════════════════════════════════════════════════════ */
+
+function exportCSV() {
+  const projects = getFilteredProjects();
+  const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Klasse', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
+  const rows = projects.map(p => [
+    p.id,
+    `"${(p.title || '').replace(/"/g, '""')}"`,
+    `"${(p.requestor || '').replace(/"/g, '""')}"`,
+    p.budget_chf,
+    CLASS_LABELS[p.class] || p.class,
+    PHASE_LABELS[p.phase] || p.phase,
+    PRIORITY_LABELS[p.priority] || p.priority || 'medium',
+    `"${(p.responsible || '').replace(/"/g, '""')}"`,
+    p.dti_required ? 'Ja' : 'Nein',
+    p.hermes_phase || '',
+    p.jira_key || '',
+    `"${(p.tags || []).join(', ')}"`,
+    p.target_date || '',
+    p.created_at ? p.created_at.split('T')[0] : '',
+    p.updated_at ? p.updated_at.split('T')[0] : '',
+  ]);
+
+  const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `DRES_PPM_Export_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPDF() {
+  const projects = getFilteredProjects();
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head>
+    <meta charset="UTF-8">
+    <title>DRES PPM — Projektportfolio Bericht</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; color: #111827; margin: 40px; }
+      h1 { font-size: 20px; margin-bottom: 4px; }
+      .subtitle { color: #6B7280; font-size: 12px; margin-bottom: 24px; }
+      table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      th { text-align: left; padding: 8px 6px; border-bottom: 2px solid #D1D5DB; font-weight: 600; color: #374151; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+      td { padding: 6px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
+      tr:hover { background: #F9FAFB; }
+      .badge { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 10px; font-weight: 500; }
+      .phase-triage { background: #F3F4F6; color: #374151; }
+      .phase-analysis { background: #DBEAFE; color: #1E40AF; }
+      .phase-implementation { background: #FEF3C7; color: #92400E; }
+      .phase-completed { background: #DCFCE7; color: #166534; }
+      .phase-rejected { background: #FEE2E2; color: #991B1B; }
+      .tags { color: #6B7280; }
+      @media print { body { margin: 20px; } }
+    </style>
+  </head><body>
+    <h1>Projektportfolio DRES</h1>
+    <div class="subtitle">${projects.length} Projekte · Erstellt am ${new Date().toLocaleDateString('de-CH')}</div>
+    <table>
+      <thead><tr>
+        <th>Key</th><th>Titel</th><th>Phase</th><th>Klasse</th><th>Priorität</th><th>Verantwortlich</th><th>Zieldatum</th><th>Tags</th>
+      </tr></thead>
+      <tbody>
+        ${projects.map(p => `<tr>
+          <td>${p.jira_key || '—'}</td>
+          <td><strong>${esc(p.title)}</strong><br><span style="color:#6B7280">${esc(p.requestor)}</span></td>
+          <td><span class="badge phase-${p.phase}">${PHASE_LABELS[p.phase]}</span></td>
+          <td>${CLASS_LABELS[p.class]}</td>
+          <td>${PRIORITY_LABELS[p.priority || 'medium']}</td>
+          <td>${p.responsible || '—'}</td>
+          <td>${p.target_date ? new Date(p.target_date).toLocaleDateString('de-CH') : '—'}</td>
+          <td class="tags">${(p.tags || []).join(', ') || '—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 300);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════════════════ */
+
+function priorityBadge(priority) {
+  const p = priority || 'medium';
+  return `<span class="badge badge-priority" data-priority="${p}">${PRIORITY_ICONS[p]} ${PRIORITY_LABELS[p]}</span>`;
+}
 
 function esc(str) {
   if (!str) return '';
