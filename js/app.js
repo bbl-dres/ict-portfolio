@@ -438,7 +438,7 @@ function renderGalleryCard(p) {
   const hasImage = !!p.thumbnail;
   const imageStyle = hasImage
     ? `background-image:url('${escCSSUrl(p.thumbnail)}');background-size:cover;background-position:center`
-    : `background:linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`;
+    : `background:linear-gradient(145deg, var(--gray-50) 0%, var(--gray-200) 60%, var(--accent-50) 100%)`;
 
   // Top row: project id + priority
   const topLeft = `<span class="project-jira">#${p.id}</span>`;
