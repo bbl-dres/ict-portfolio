@@ -274,7 +274,7 @@ function renderGalleryCard(p) {
       <div class="gallery-card-meta">
         <div class="gallery-card-meta-row">
           <span>${esc(p.requestor)}</span>
-          <span style="font-weight:var(--font-weight-semi)">${formatBudgetShort(p.budget_chf)}</span>
+          <span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>
         </div>
         <div class="gallery-card-meta-row">
           <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
@@ -311,9 +311,9 @@ function renderKanbanView(container) {
           <div class="kanban-card-title">${esc(p.title)}</div>
           <div class="kanban-card-meta">
             <span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>
-            <span class="badge badge-class" data-class="${p.class}" style="font-size:10px;padding:1px 6px">${CLASS_LABELS[p.class]}</span>
+            <span class="badge badge-class badge-sm" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
           </div>
-          ${p.responsible ? `<div style="font-size:var(--font-size-xs);color:var(--gray-500);margin-top:var(--space-2)">${esc(p.responsible)}</div>` : ''}
+          ${p.responsible ? `<div class="kanban-card-responsible">${esc(p.responsible)}</div>` : ''}
         </div>`;
       });
       html += '</div></div>';
@@ -531,7 +531,7 @@ function renderDashboardView(container) {
 function renderWikiView(container) {
   container.innerHTML = `
     <div class="placeholder-view">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--gray-300)">
+      <svg class="placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         <path d="M8 7h8M8 11h6"/>
@@ -764,7 +764,7 @@ function renderDetailPage(container) {
           <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
           <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
           ${p.dti_required ? '<span class="badge-dti" title="DTI-pflichtig">🚩 DTI</span>' : ''}
-          ${p.jira_key ? `<span style="font-size:var(--font-size-xs);color:var(--gray-500)">${esc(p.jira_key)}</span>` : ''}
+          ${p.jira_key ? `<span class="detail-hero-jira">${esc(p.jira_key)}</span>` : ''}
         </div>
         <div class="detail-hero-actions">
           <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
@@ -812,7 +812,7 @@ function renderDetailPage(container) {
   } else if (state.detailTab === 'comments') {
     html += '<div class="detail-card"><div class="detail-card-body">';
     if (comments.length === 0) {
-      html += '<div style="color:var(--gray-400);font-size:var(--font-size-sm)">Keine Kommentare vorhanden.</div>';
+      html += '<div class="empty-state">Keine Kommentare vorhanden.</div>';
     } else {
       html += '<div class="comment-list">';
       comments.forEach(c => {
@@ -834,7 +834,7 @@ function renderDetailPage(container) {
   } else if (state.detailTab === 'changelog') {
     html += '<div class="detail-card"><div class="detail-card-body">';
     if (changelog.length === 0) {
-      html += '<div style="color:var(--gray-400);font-size:var(--font-size-sm)">Kein Verlauf vorhanden.</div>';
+      html += '<div class="empty-state">Kein Verlauf vorhanden.</div>';
     } else {
       html += '<div class="changelog-list">';
       changelog.forEach(e => {

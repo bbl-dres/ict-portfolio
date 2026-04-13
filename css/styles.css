@@ -767,11 +767,21 @@ body {
 .badge-class[data-class="standard"]   { background: var(--class-std-bg);  color: var(--class-std-text); }
 .badge-class[data-class="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
 
+.badge-sm {
+  font-size: 10px;
+  padding: 1px 6px;
+}
+
 .badge-dti {
   color: var(--error-600);
   font-size: var(--font-size-sm);
   min-width: 20px;
   text-align: center;
+}
+
+.empty-state {
+  color: var(--gray-400);
+  font-size: var(--font-size-sm);
 }
 
 /* ── Add project row ── */
@@ -879,6 +889,10 @@ body {
   align-items: center;
 }
 
+.gallery-card-budget {
+  font-weight: var(--font-weight-semi);
+}
+
 
 /* ═══════════════════════════════════════════════════════════
    KANBAN VIEW
@@ -966,6 +980,12 @@ body {
 .kanban-card-budget {
   font-weight: var(--font-weight-medium);
   color: var(--gray-700);
+}
+
+.kanban-card-responsible {
+  font-size: var(--font-size-xs);
+  color: var(--gray-500);
+  margin-top: var(--space-2);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1325,6 +1345,10 @@ body {
   min-height: 300px;
 }
 
+.placeholder-icon {
+  color: var(--gray-300);
+}
+
 .placeholder-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semi);
@@ -1413,6 +1437,11 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+}
+
+.detail-hero-jira {
+  font-size: var(--font-size-xs);
+  color: var(--gray-500);
 }
 
 /* ── Detail tabs ── */
