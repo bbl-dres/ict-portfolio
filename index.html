@@ -124,6 +124,7 @@
             <div class="dropdown-item" data-sort="budget_chf">Budget</div>
             <div class="dropdown-item" data-sort="phase">Phase</div>
             <div class="dropdown-item" data-sort="class">Klasse</div>
+            <div class="dropdown-item" data-sort="type">Typ</div>
             <div class="dropdown-item" data-sort="priority">Priorität</div>
             <div class="dropdown-item" data-sort="created_at">Erstellt</div>
             <div class="dropdown-item" data-sort="updated_at">Geändert</div>
@@ -149,6 +150,7 @@
             <div class="dropdown-item active" data-group="none">Keine</div>
             <div class="dropdown-item" data-group="phase">Phase</div>
             <div class="dropdown-item" data-group="class">Klasse</div>
+            <div class="dropdown-item" data-group="type">Typ</div>
             <div class="dropdown-item" data-group="responsible">Verantwortlich</div>
             <div class="dropdown-item" data-group="priority">Priorität</div>
             <div class="dropdown-item" data-group="dti_required">DTI-pflichtig</div>
@@ -191,6 +193,7 @@
             <label class="dropdown-checkbox"><input type="checkbox" data-field="responsible" checked> Verantwortlich</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="phase" checked> Phase</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="class" checked> Klasse</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="type"> Typ</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="priority" checked> Priorität</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="tags"> Tags</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="target_date" checked> Zieldatum</label>
@@ -263,8 +266,15 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="formResponsible">Verantwortlich</label>
-              <input class="form-input" type="text" id="formResponsible">
+              <label class="form-label" for="formType">Typ</label>
+              <select class="form-input" id="formType">
+                <option value="new">Neuvorhaben</option>
+                <option value="change">Änderungsantrag</option>
+                <option value="migration">Ablösung / Migration</option>
+                <option value="data">Datenbewirtschaftung</option>
+                <option value="incident">Störung / Support</option>
+                <option value="study">Studie / Evaluation</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label" for="formPriority">Priorität</label>
@@ -273,6 +283,12 @@
                 <option value="medium" selected>Medium</option>
                 <option value="high">High</option>
               </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="formResponsible">Verantwortlich</label>
+              <input class="form-input" type="text" id="formResponsible">
             </div>
           </div>
           <div class="form-row">

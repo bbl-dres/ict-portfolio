@@ -841,6 +841,15 @@ select:focus-visible {
 .badge-class[data-class="standard"]   { background: var(--class-std-bg);  color: var(--class-std-text); }
 .badge-class[data-class="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
 
+.badge-type { gap: 3px; }
+.badge-type svg { flex-shrink: 0; }
+.badge-type[data-type="incident"]  { background: var(--type-incident-bg);  color: var(--type-incident-text); }
+.badge-type[data-type="change"]    { background: var(--type-change-bg);    color: var(--type-change-text); }
+.badge-type[data-type="new"]       { background: var(--type-new-bg);       color: var(--type-new-text); }
+.badge-type[data-type="data"]      { background: var(--type-data-bg);      color: var(--type-data-text); }
+.badge-type[data-type="migration"] { background: var(--type-migration-bg); color: var(--type-migration-text); }
+.badge-type[data-type="study"]     { background: var(--type-study-bg);     color: var(--type-study-text); }
+
 .badge-sm {
   font-size: 10px;
   padding: 1px 6px;
@@ -878,6 +887,7 @@ select:focus-visible {
 /* Clickable badges */
 .view-container .badge-phase,
 .view-container .badge-class,
+.view-container .badge-type,
 .view-container .badge-priority,
 .view-container .badge-tag,
 .dashboard .dashboard-bar-row,
@@ -887,6 +897,7 @@ select:focus-visible {
 
 .view-container .badge-phase:hover,
 .view-container .badge-class:hover,
+.view-container .badge-type:hover,
 .view-container .badge-priority:hover,
 .view-container .badge-tag:hover {
   opacity: 0.8;

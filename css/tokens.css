@@ -88,6 +88,26 @@
   --class-complex-bg: #FEF3C7;
   --class-complex-text:#92400E;
 
+  /* ── Type colours ── */
+  --type-incident:      #EF4444;
+  --type-incident-bg:   #FEE2E2;
+  --type-incident-text: #991B1B;
+  --type-change:        #8B5CF6;
+  --type-change-bg:     #EDE9FE;
+  --type-change-text:   #5B21B6;
+  --type-new:           #10B981;
+  --type-new-bg:        #D1FAE5;
+  --type-new-text:      #065F46;
+  --type-data:          #F59E0B;
+  --type-data-bg:       #FEF3C7;
+  --type-data-text:     #92400E;
+  --type-migration:     #3B82F6;
+  --type-migration-bg:  #DBEAFE;
+  --type-migration-text:#1E40AF;
+  --type-study:         #6B7280;
+  --type-study-bg:      #F3F4F6;
+  --type-study-text:    #374151;
+
   /* ── Typography ── */
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-size-2xs: 0.625rem;  /* 10px */

@@ -34,6 +34,7 @@ function restoreFromURL() {
   // Restore multi-dimensional filters
   if (params.has('f.phase'))    params.get('f.phase').split(',').forEach(v => state.filters.phase.add(v));
   if (params.has('f.class'))    params.get('f.class').split(',').forEach(v => state.filters.class.add(v));
+  if (params.has('f.type'))     params.get('f.type').split(',').forEach(v => state.filters.type.add(v));
   if (params.has('f.priority')) params.get('f.priority').split(',').forEach(v => state.filters.priority.add(v));
   if (params.has('f.tags'))     params.get('f.tags').split(',').forEach(v => state.filters.tags.add(v));
   if (params.has('f.dti'))      state.filters.dti = params.get('f.dti') === '1';
@@ -43,10 +44,10 @@ function restoreFromURL() {
     t.classList.toggle('active', t.dataset.view === state.currentView);
   });
   document.getElementById('sortLabel').textContent =
-    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', class: 'Klasse', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
+    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', class: 'Klasse', type: 'Typ', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
   if (state.groupBy !== 'none') {
     document.getElementById('groupLabel').textContent =
-      { phase: 'Phase', class: 'Klasse', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
+      { phase: 'Phase', class: 'Klasse', type: 'Typ', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
   // Sync sort field active state
@@ -87,6 +88,7 @@ function updateURL() {
   // Multi-dimensional filters
   if (state.filters.phase.size)    params.set('f.phase', [...state.filters.phase].join(','));
   if (state.filters.class.size)    params.set('f.class', [...state.filters.class].join(','));
+  if (state.filters.type.size)     params.set('f.type', [...state.filters.type].join(','));
   if (state.filters.priority.size) params.set('f.priority', [...state.filters.priority].join(','));
   if (state.filters.tags.size)     params.set('f.tags', [...state.filters.tags].join(','));
   if (state.filters.dti != null)   params.set('f.dti', state.filters.dti ? '1' : '0');
@@ -285,6 +287,7 @@ function getListColumns() {
   if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '80px' });
   if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '110px' });
   if (vf.has('phase'))         cols.push({ key: 'phase',        width: '110px' });
+  if (vf.has('type'))          cols.push({ key: 'type',         width: '140px' });
   if (vf.has('class'))         cols.push({ key: 'class',        width: '90px' });
   if (vf.has('priority'))      cols.push({ key: 'priority',     width: '80px' });
   if (vf.has('tags'))           cols.push({ key: 'tags',         width: '150px' });
@@ -306,6 +309,7 @@ function renderProjectRow(p, cols, gridCols) {
       case 'budget_chf':   cells += `<span class="project-budget">${formatBudgetShort(p.budget_chf)}</span>`; break;
       case 'responsible':  cells += `<span class="project-responsible">${p.responsible || '—'}</span>`; break;
       case 'phase':        cells += `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`; break;
+      case 'type':         cells += typeBadge(p.type); break;
       case 'class':        cells += `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`; break;
       case 'priority':     cells += priorityBadge(p.priority); break;
       case 'tags':         cells += `<div class="tag-list">${(p.tags || []).map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`; break;
@@ -348,8 +352,10 @@ function renderGalleryCard(p) {
   const infoRight = vf.has('budget_chf') ? `<span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
   const infoRow = (infoLeft || infoRight) ? `<div class="gallery-card-meta-row">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
-  // Phase row
-  const phaseRow = vf.has('phase') ? `<div class="gallery-card-meta-row"><span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span></div>` : '';
+  // Phase + type row
+  const phaseBadgeHtml = vf.has('phase') ? `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>` : '';
+  const typeBadgeHtml = vf.has('type') ? typeBadge(p.type) : '';
+  const phaseRow = (phaseBadgeHtml || typeBadgeHtml) ? `<div class="gallery-card-meta-row">${phaseBadgeHtml}${typeBadgeHtml}</div>` : '';
 
   // Tags
   const tags = vf.has('tags') ? (p.tags && p.tags.length
@@ -428,6 +434,9 @@ function renderKanbanView(container) {
         const infoRight = vf.has('class') ? `<span class="badge badge-class badge-sm" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
         const infoRow = (infoLeft || infoRight) ? `<div class="kanban-card-meta">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
+        // Type
+        const typeRow = vf.has('type') ? `<div class="kanban-card-meta">${typeBadge(p.type)}</div>` : '';
+
         // Tags
         const tags = vf.has('tags') ? (p.tags && p.tags.length
           ? `<div class="tag-list">${p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`
@@ -453,6 +462,7 @@ function renderKanbanView(container) {
           ${topRow}
           <div class="kanban-card-title">${esc(p.title)}</div>
           ${infoRow}
+          ${typeRow}
           ${tags}
           ${extrasRow}
           ${bottomRow}
@@ -885,6 +895,11 @@ function renderFilterPanel() {
     return `<label class="filter-option"><input type="checkbox" data-dim="class" data-val="${k}" ${checked}><span class="filter-dot" style="background:${colors[k]}"></span>${CLASS_LABELS[k]}</label>`;
   }).join('');
 
+  const typeOpts = TYPE_ORDER.map(k => {
+    const checked = f.type.has(k) ? 'checked' : '';
+    return `<label class="filter-option"><input type="checkbox" data-dim="type" data-val="${k}" ${checked}><span class="filter-dot" style="background:var(--type-${k})"></span>${TYPE_LABELS[k]}</label>`;
+  }).join('');
+
   const prioOpts = PRIORITY_ORDER.map(k => {
     const checked = f.priority.has(k) ? 'checked' : '';
     const colors = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
@@ -912,6 +927,10 @@ function renderFilterPanel() {
       <div>
         <div class="filter-section-title">Klasse</div>
         <div class="filter-section-options">${classOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">Typ</div>
+        <div class="filter-section-options">${typeOpts}</div>
       </div>
       <div>
         <div class="filter-section-title">Priorität</div>
@@ -975,6 +994,9 @@ function renderFilterPills() {
   for (const k of f.class) {
     html += filterPill('class', k, CLASS_LABELS[k], classColors[k]);
   }
+  for (const k of f.type) {
+    html += filterPill('type', k, TYPE_LABELS[k], `var(--type-${k})`);
+  }
   for (const k of f.priority) {
     html += filterPill('priority', k, PRIORITY_LABELS[k], prioColors[k]);
   }
@@ -1031,7 +1053,7 @@ function filterPill(dim, val, label, color) {
 
 function updateFilterCountBadge() {
   const f = state.filters;
-  const count = f.phase.size + f.class.size + f.priority.size + f.tags.size + (f.dti != null ? 1 : 0);
+  const count = f.phase.size + f.class.size + f.type.size + f.priority.size + f.tags.size + (f.dti != null ? 1 : 0);
   const badge = document.getElementById('filterCountBadge');
   badge.textContent = count;
   badge.classList.toggle('visible', count > 0);
@@ -1057,6 +1079,13 @@ function setupBadgeFilterClicks() {
       e.stopPropagation();
       const val = classBadge.dataset.class;
       if (val) { toggleFilter('class', val); afterBadgeClick(); return; }
+    }
+
+    const typeBadgeEl = e.target.closest('.badge-type');
+    if (typeBadgeEl) {
+      e.stopPropagation();
+      const val = typeBadgeEl.dataset.type;
+      if (val) { toggleFilter('type', val); afterBadgeClick(); return; }
     }
 
     const prioBadge = e.target.closest('.badge-priority');
@@ -1202,6 +1231,7 @@ function renderDetailPage(container) {
         <div class="detail-hero-badges">
           <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
           <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
+          ${typeBadge(p.type)}
           ${p.dti_required ? '<span class="badge-dti" title="DTI-pflichtig">🚩 DTI</span>' : ''}
           ${p.jira_key ? `<span class="detail-hero-jira">${esc(p.jira_key)}</span>` : ''}
         </div>
@@ -1225,6 +1255,7 @@ function renderDetailPage(container) {
         <div class="detail-card-body">
           ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`)}
           ${detailFieldRow('Klasse', `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`)}
+          ${detailFieldRow('Typ', typeBadge(p.type))}
           ${detailFieldRow('Priorität', priorityBadge(p.priority))}
           ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
           ${detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
@@ -1392,6 +1423,7 @@ function openModal(projectId) {
       document.getElementById('formRequestor').value = p.requestor;
       document.getElementById('formBudget').value = p.budget_chf;
       document.getElementById('formClass').value = p.class;
+      document.getElementById('formType').value = p.type || 'new';
       document.getElementById('formResponsible').value = p.responsible || '';
       document.getElementById('formPriority').value = p.priority || 'medium';
       document.getElementById('formTargetDate').value = p.target_date || '';
@@ -1417,6 +1449,7 @@ function saveProject() {
     requestor: document.getElementById('formRequestor').value,
     budget_chf: Number(document.getElementById('formBudget').value),
     class: document.getElementById('formClass').value,
+    type: document.getElementById('formType').value,
     responsible: document.getElementById('formResponsible').value || null,
     priority: document.getElementById('formPriority').value,
     target_date: document.getElementById('formTargetDate').value || null,
@@ -1462,13 +1495,14 @@ function saveProject() {
 
 function exportCSV() {
   const projects = getFilteredProjects();
-  const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Klasse', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
+  const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Klasse', 'Typ', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
   const rows = projects.map(p => [
     p.id,
     `"${(p.title || '').replace(/"/g, '""')}"`,
     `"${(p.requestor || '').replace(/"/g, '""')}"`,
     p.budget_chf,
     CLASS_LABELS[p.class] || p.class,
+    TYPE_LABELS[p.type] || p.type || '',
     PHASE_LABELS[p.phase] || p.phase,
     PRIORITY_LABELS[p.priority] || p.priority || 'medium',
     `"${(p.responsible || '').replace(/"/g, '""')}"`,
@@ -1519,12 +1553,13 @@ function exportPDF() {
     <div class="subtitle">${projects.length} Projekte · Erstellt am ${new Date().toLocaleDateString('de-CH')}</div>
     <table>
       <thead><tr>
-        <th>Key</th><th>Titel</th><th>Phase</th><th>Klasse</th><th>Priorität</th><th>Verantwortlich</th><th>Zieldatum</th><th>Tags</th>
+        <th>Key</th><th>Titel</th><th>Typ</th><th>Phase</th><th>Klasse</th><th>Priorität</th><th>Verantwortlich</th><th>Zieldatum</th><th>Tags</th>
       </tr></thead>
       <tbody>
         ${projects.map(p => `<tr>
           <td>${esc(p.jira_key) || '—'}</td>
           <td><strong>${esc(p.title)}</strong><br><span style="color:#6B7280">${esc(p.requestor)}</span></td>
+          <td>${TYPE_LABELS[p.type] || '—'}</td>
           <td><span class="badge phase-${p.phase}">${PHASE_LABELS[p.phase]}</span></td>
           <td>${CLASS_LABELS[p.class]}</td>
           <td>${PRIORITY_LABELS[p.priority || 'medium']}</td>
@@ -1546,6 +1581,11 @@ function exportPDF() {
 function priorityBadge(priority) {
   const p = priority || 'medium';
   return `<span class="badge badge-priority" data-priority="${p}">${PRIORITY_ICONS[p]} ${PRIORITY_LABELS[p]}</span>`;
+}
+
+function typeBadge(type) {
+  const t = type || 'new';
+  return `<span class="badge badge-type" data-type="${t}">${TYPE_ICONS[t]} ${TYPE_LABELS[t]}</span>`;
 }
 
 const _escEl = document.createElement('div');
