@@ -108,30 +108,28 @@ function getFilteredProjects() {
     );
   }
 
-  // Assigned to me
-  if (state.assignedToMe) {
-    const currentUser = getUserById(state.currentUserId);
-    if (currentUser) {
-      list = list.filter(p => p.responsible === currentUser.display_name);
-    }
-  }
-
-  // Assignee filter
-  if (state.assigneeFilter) {
-    if (state.assigneeFilter === '__none__') {
-      list = list.filter(p => !p.responsible);
-    } else {
-      list = list.filter(p => p.responsible === state.assigneeFilter);
-    }
-  }
-
   // Multi-dimensional filters (OR within dimension, AND across dimensions)
   const f = state.filters;
+
+  // Responsible filter (resolve __me__ and __none__ special values)
+  if (f.responsible.size > 0) {
+    const currentUser = getUserById(state.currentUserId);
+    const meName = currentUser ? currentUser.display_name : null;
+    list = list.filter(p => {
+      if (f.responsible.has('__none__') && !p.responsible) return true;
+      if (f.responsible.has('__me__') && meName && p.responsible === meName) return true;
+      if (p.responsible && f.responsible.has(p.responsible)) return true;
+      return false;
+    });
+  }
   if (f.phase.size > 0) {
     list = list.filter(p => f.phase.has(p.phase));
   }
   if (f.class.size > 0) {
     list = list.filter(p => f.class.has(p.class));
+  }
+  if (f.type.size > 0) {
+    list = list.filter(p => f.type.has(p.type));
   }
   if (f.priority.size > 0) {
     list = list.filter(p => f.priority.has(p.priority || 'medium'));
@@ -157,6 +155,9 @@ function getFilteredProjects() {
     } else if (state.sortField === 'class') {
       va = CLASS_ORDER.indexOf(va);
       vb = CLASS_ORDER.indexOf(vb);
+    } else if (state.sortField === 'type') {
+      va = TYPE_ORDER.indexOf(va);
+      vb = TYPE_ORDER.indexOf(vb);
     } else if (state.sortField === 'priority') {
       va = PRIORITY_ORDER.indexOf(va);
       vb = PRIORITY_ORDER.indexOf(vb);
@@ -187,6 +188,8 @@ function getGroupedProjects(projects) {
       key = p.phase;
     } else if (state.groupBy === 'class') {
       key = p.class;
+    } else if (state.groupBy === 'type') {
+      key = p.type || 'new';
     } else if (state.groupBy === 'responsible') {
       key = p.responsible || '(nicht zugewiesen)';
     } else if (state.groupBy === 'priority') {
@@ -205,6 +208,9 @@ function getGroupedProjects(projects) {
   if (state.groupBy === 'class') {
     return new Map(CLASS_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
   }
+  if (state.groupBy === 'type') {
+    return new Map(TYPE_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
+  }
   if (state.groupBy === 'priority') {
     return new Map(PRIORITY_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
   }
@@ -215,6 +221,7 @@ function getGroupedProjects(projects) {
 function getGroupLabel(key) {
   if (state.groupBy === 'phase') return PHASE_LABELS[key] || key;
   if (state.groupBy === 'class') return CLASS_LABELS[key] || key;
+  if (state.groupBy === 'type') return TYPE_LABELS[key] || key;
   if (state.groupBy === 'priority') return PRIORITY_LABELS[key] || key;
   return key;
 }
@@ -235,6 +242,17 @@ function getGroupColor(key) {
       fast_track: 'var(--success-500)',
       standard: 'var(--accent-500)',
       complex: 'var(--warning-500)',
+    };
+    return colors[key] || 'var(--gray-400)';
+  }
+  if (state.groupBy === 'type') {
+    const colors = {
+      incident: 'var(--type-incident)',
+      change: 'var(--type-change)',
+      new: 'var(--type-new)',
+      data: 'var(--type-data)',
+      migration: 'var(--type-migration)',
+      study: 'var(--type-study)',
     };
     return colors[key] || 'var(--gray-400)';
   }
@@ -269,7 +287,7 @@ function getAllTags() {
 
 function hasActiveFilters() {
   const f = state.filters;
-  return f.phase.size > 0 || f.class.size > 0 || f.priority.size > 0 || f.tags.size > 0 || f.dti != null;
+  return f.phase.size > 0 || f.class.size > 0 || f.type.size > 0 || f.priority.size > 0 || f.responsible.size > 0 || f.tags.size > 0 || f.dti != null;
 }
 
 function toggleFilter(dimension, value) {
@@ -284,7 +302,9 @@ function toggleFilter(dimension, value) {
 function clearAllFilters() {
   state.filters.phase.clear();
   state.filters.class.clear();
+  state.filters.type.clear();
   state.filters.priority.clear();
+  state.filters.responsible.clear();
   state.filters.tags.clear();
   state.filters.dti = null;
 }

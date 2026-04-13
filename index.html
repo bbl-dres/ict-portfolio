@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DRES PPM — Projektportfolio</title>
-  <meta name="description" content="DRES PPM — Projektportfolio-Tool für digitale Initiativen des BBL">
+  <title>IKT Projektportfolio DRES — BBL</title>
+  <meta name="description" content="IKT Projektportfolio DRES — Projektportfolio-Tool für digitale Initiativen des BBL">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -21,7 +21,7 @@
       </button>
       <div class="header-brand">
         <svg class="header-logo" width="28" height="28" viewBox="0 0 32 32"><rect width="32" height="32" rx="3" fill="#E53935"/><rect x="13" y="6" width="6" height="20" rx="1" fill="#fff"/><rect x="6" y="13" width="20" height="6" rx="1" fill="#fff"/></svg>
-        <span class="header-title">DRES PPM</span>
+        <span class="header-title">Bundesamt für Bauten und Logistik BBL<br>IKT Projektportfolio DRES</span>
       </div>
     </div>
     <div class="header-right">
@@ -56,7 +56,7 @@
     <!-- Page Header -->
     <div class="page-header">
       <div class="page-header-left">
-        <h1 class="page-title">Projektportfolio DRES</h1>
+        <h1 class="page-title">IKT Projektportfolio DRES</h1>
         </div>
       <div class="page-header-right">
         <div class="toolbar-dropdown" id="exportDropdown">
@@ -124,6 +124,7 @@
             <div class="dropdown-item" data-sort="budget_chf">Budget</div>
             <div class="dropdown-item" data-sort="phase">Phase</div>
             <div class="dropdown-item" data-sort="class">Klasse</div>
+            <div class="dropdown-item" data-sort="type">Typ</div>
             <div class="dropdown-item" data-sort="priority">Priorität</div>
             <div class="dropdown-item" data-sort="created_at">Erstellt</div>
             <div class="dropdown-item" data-sort="updated_at">Geändert</div>
@@ -149,27 +150,13 @@
             <div class="dropdown-item active" data-group="none">Keine</div>
             <div class="dropdown-item" data-group="phase">Phase</div>
             <div class="dropdown-item" data-group="class">Klasse</div>
+            <div class="dropdown-item" data-group="type">Typ</div>
             <div class="dropdown-item" data-group="responsible">Verantwortlich</div>
             <div class="dropdown-item" data-group="priority">Priorität</div>
             <div class="dropdown-item" data-group="dti_required">DTI-pflichtig</div>
           </div>
         </div>
 
-        <div class="toolbar-dropdown" id="assigneeDropdown">
-          <button class="toolbar-btn" id="assigneeBtn" aria-expanded="false" aria-haspopup="true" aria-controls="assigneeMenu">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span id="assigneeLabel">Verantwortlich</span>
-            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="dropdown-menu" id="assigneeMenu">
-            <!-- filled by JS -->
-          </div>
-        </div>
-        <label class="checkbox-label">
-          <input type="checkbox" class="checkbox-input" id="assignedToMe">
-          <span class="checkbox-custom"></span>
-          <span class="checkbox-text">Mir zugewiesen</span>
-        </label>
       </div>
 
       <div class="toolbar-right">
@@ -191,6 +178,7 @@
             <label class="dropdown-checkbox"><input type="checkbox" data-field="responsible" checked> Verantwortlich</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="phase" checked> Phase</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="class" checked> Klasse</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="type"> Typ</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="priority" checked> Priorität</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="tags"> Tags</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="target_date" checked> Zieldatum</label>
@@ -263,8 +251,15 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="formResponsible">Verantwortlich</label>
-              <input class="form-input" type="text" id="formResponsible">
+              <label class="form-label" for="formType">Typ</label>
+              <select class="form-input" id="formType">
+                <option value="new">Neuvorhaben</option>
+                <option value="change">Änderungsantrag</option>
+                <option value="migration">Ablösung / Migration</option>
+                <option value="data">Datenbewirtschaftung</option>
+                <option value="incident">Störung / Support</option>
+                <option value="study">Studie / Evaluation</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label" for="formPriority">Priorität</label>
@@ -273,6 +268,12 @@
                 <option value="medium" selected>Medium</option>
                 <option value="high">High</option>
               </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="formResponsible">Verantwortlich</label>
+              <input class="form-input" type="text" id="formResponsible">
             </div>
           </div>
           <div class="form-row">
