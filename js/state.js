@@ -32,9 +32,10 @@ const state = {
   /* ── Collapsed groups ── */
   collapsedGroups: new Set(),
 
-  /* ── Detail panel ── */
+  /* ── Detail page ── */
   selectedProjectId: null,
-  detailTab: 'overview',  // overview | comments | changelog
+  previousView: 'gallery',  // view to return to from detail
+  detailTab: 'overview',    // overview | comments | changelog
 
   /* ── Modal ── */
   editingProjectId: null,  // null = create, number = edit

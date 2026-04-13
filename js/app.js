@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function restoreFromURL() {
   const params = new URLSearchParams(window.location.search);
   if (params.has('view'))   state.currentView = params.get('view');
+  if (params.has('id'))     state.selectedProjectId = Number(params.get('id'));
   if (params.has('group'))  state.groupBy = params.get('group');
   if (params.has('sort'))   state.sortField = params.get('sort');
   if (params.has('dir'))    state.sortDirection = params.get('dir');
@@ -45,6 +46,9 @@ function restoreFromURL() {
 function updateURL() {
   const params = new URLSearchParams();
   params.set('view', state.currentView);
+  if (state.currentView === 'detail' && state.selectedProjectId) {
+    params.set('id', state.selectedProjectId);
+  }
   if (state.groupBy !== 'none')         params.set('group', state.groupBy);
   if (state.sortField !== 'title')      params.set('sort', state.sortField);
   if (state.sortDirection !== 'asc')    params.set('dir', state.sortDirection);
@@ -84,17 +88,33 @@ function setupViewTabs() {
 function renderView() {
   const container = document.getElementById('viewContainer');
   container.classList.remove('view-container--transparent');
-  const hideForViews = ['dashboard', 'wiki'].includes(state.currentView);
-  document.getElementById('sortDropdown').style.display = hideForViews ? 'none' : '';
-  document.getElementById('groupDropdown').style.display = hideForViews ? 'none' : '';
-  document.getElementById('fieldsDropdown').style.display = hideForViews ? 'none' : '';
+  const isDetail = state.currentView === 'detail';
+  const hideControls = ['dashboard', 'wiki', 'detail'].includes(state.currentView);
+
+  // Show/hide view tabs and toolbar
+  document.querySelector('.view-tabs').style.display = isDetail ? 'none' : '';
+  document.querySelector('.toolbar').style.display = isDetail ? 'none' : '';
+  document.getElementById('sortDropdown').style.display = hideControls ? 'none' : '';
+  document.getElementById('groupDropdown').style.display = hideControls ? 'none' : '';
+  document.getElementById('fieldsDropdown').style.display = hideControls ? 'none' : '';
+
+  // Restore breadcrumb when not in detail
+  if (!isDetail) {
+    document.querySelector('.breadcrumb-inner').innerHTML = `
+      <span>Projekte</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Übersicht</span>
+    `;
+  }
+
   switch (state.currentView) {
-    case 'list':      renderListView(container); break;      // uses renderGroupedView
-    case 'gallery':   renderGalleryView(container); break;   // uses renderGroupedView
-    case 'kanban':    renderKanbanView(container); break;    // uses renderGroupedView
-    case 'gantt':     renderGanttView(container); break;     // uses renderGroupedView
+    case 'list':      renderListView(container); break;
+    case 'gallery':   renderGalleryView(container); break;
+    case 'kanban':    renderKanbanView(container); break;
+    case 'gantt':     renderGanttView(container); break;
     case 'dashboard': container.classList.add('view-container--transparent'); renderDashboardView(container); break;
     case 'wiki':      container.classList.add('view-container--transparent'); renderWikiView(container); break;
+    case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); return;
   }
 }
 
@@ -183,7 +203,6 @@ function bindGroupEvents(container) {
   // Project clicks
   container.querySelectorAll('[data-id]').forEach(el => {
     el.addEventListener('click', (e) => {
-      // Don't trigger if clicking inside add-project-btn
       if (e.target.closest('.add-project-btn')) return;
       openDetailPanel(Number(el.dataset.id));
     });
@@ -193,6 +212,9 @@ function bindGroupEvents(container) {
   container.querySelectorAll('.add-project-btn').forEach(btn => {
     btn.addEventListener('click', () => openModal());
   });
+
+  // Drag & drop
+  setupDragAndDrop(container);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -277,7 +299,7 @@ function renderKanbanView(container) {
     let html = '<div class="kanban-board">';
     for (const phase of PHASE_ORDER) {
       const phaseItems = columns[phase];
-      html += `<div class="kanban-column">
+      html += `<div class="kanban-column" data-phase="${phase}">
         <div class="kanban-column-header">
           <span class="group-dot" style="background:var(--phase-${phase})"></span>
           ${PHASE_LABELS[phase]}
@@ -673,157 +695,190 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DETAIL PANEL
+   DETAIL PAGE
    ═══════════════════════════════════════════════════════════ */
 
 function setupDetailPanel() {
-  document.getElementById('detailBackBtn').addEventListener('click', closeDetailPanel);
-  document.getElementById('panelOverlay').addEventListener('click', closeDetailPanel);
-  document.getElementById('detailEditBtn').addEventListener('click', () => {
-    if (state.selectedProjectId) openModal(state.selectedProjectId);
-  });
+  // No setup needed — detail page is rendered inline
 }
 
 function openDetailPanel(projectId) {
+  state.previousView = state.currentView;
+  state.currentView = 'detail';
   state.selectedProjectId = projectId;
   state.detailTab = 'overview';
-  document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('panelOverlay').classList.add('open');
-  renderDetailPanel();
+
+  // Update tab UI
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+
+  render();
 }
 
-function closeDetailPanel() {
+function closeDetailPage() {
+  state.currentView = state.previousView || 'gallery';
   state.selectedProjectId = null;
-  document.getElementById('detailPanel').classList.remove('open');
-  document.getElementById('panelOverlay').classList.remove('open');
+
+  // Restore tab UI
+  document.querySelectorAll('.view-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === state.currentView);
+  });
+
+  render();
 }
 
-function renderDetailPanel() {
+function renderDetailPage(container) {
   const p = state.projects.find(pr => pr.id === state.selectedProjectId);
   if (!p) return;
 
   const creator = getUserById(p.created_by);
-  const body = document.getElementById('detailPanelBody');
+  const comments = getCommentsForProject(p.id);
+  const changelog = getChangelogForProject(p.id);
+
+  // Update breadcrumb
+  document.querySelector('.breadcrumb-inner').innerHTML = `
+    <a href="#" class="breadcrumb-link" id="breadcrumbBack">Projekte</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">${esc(p.title)}</span>
+  `;
+
+  // Hide view tabs and toolbar
+  document.querySelector('.view-tabs').style.display = 'none';
+  document.querySelector('.toolbar').style.display = 'none';
+
+  const imageStyle = p.thumbnail
+    ? `background-image:url('${p.thumbnail}')`
+    : `background:var(--gray-100)`;
 
   let html = `
+    <button class="detail-back" id="detailBackBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      Zurück
+    </button>
+
+    <div class="detail-hero">
+      <div class="detail-hero-image" style="${imageStyle}"></div>
+      <div class="detail-hero-body">
+        <div class="detail-hero-title">${esc(p.title)}</div>
+        <div class="detail-hero-subtitle">${esc(p.requestor)}${p.responsible ? ' · ' + esc(p.responsible) : ''}</div>
+        <div class="detail-hero-badges">
+          <span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>
+          <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
+          ${p.dti_required ? '<span class="badge-dti" title="DTI-pflichtig">🚩 DTI</span>' : ''}
+          ${p.jira_key ? `<span style="font-size:var(--font-size-xs);color:var(--gray-500)">${esc(p.jira_key)}</span>` : ''}
+        </div>
+        <div class="detail-hero-actions">
+          <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
+        </div>
+      </div>
+    </div>
+
     <div class="detail-tabs">
       <button class="detail-tab${state.detailTab === 'overview' ? ' active' : ''}" data-tab="overview">Übersicht</button>
-      <button class="detail-tab${state.detailTab === 'comments' ? ' active' : ''}" data-tab="comments">Kommentare</button>
-      <button class="detail-tab${state.detailTab === 'changelog' ? ' active' : ''}" data-tab="changelog">Verlauf</button>
-    </div>`;
+      <button class="detail-tab${state.detailTab === 'comments' ? ' active' : ''}" data-tab="comments">Kommentare (${comments.length})</button>
+      <button class="detail-tab${state.detailTab === 'changelog' ? ' active' : ''}" data-tab="changelog">Verlauf (${changelog.length})</button>
+    </div>
+  `;
 
   if (state.detailTab === 'overview') {
     html += `
-      <div class="detail-title">${esc(p.title)}</div>
-      <div class="detail-fields">
-        <div class="detail-field">
-          <span class="detail-field-label">Phase</span>
-          <span class="detail-field-value"><span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span></span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Klasse</span>
-          <span class="detail-field-value"><span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span></span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Budget</span>
-          <span class="detail-field-value">${formatBudget(p.budget_chf)}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Go-Entscheid</span>
-          <span class="detail-field-value">${p.go_decision === true ? '✅ Genehmigt' : p.go_decision === false ? '❌ Abgelehnt' : 'Ausstehend'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Verantwortlich</span>
-          <span class="detail-field-value">${p.responsible || '—'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Auftraggeber</span>
-          <span class="detail-field-value">${esc(p.requestor)}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">DTI-pflichtig</span>
-          <span class="detail-field-value">${p.dti_required ? 'Ja' : 'Nein'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">HERMES Phase</span>
-          <span class="detail-field-value">${p.hermes_phase || '—'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Jira-Key</span>
-          <span class="detail-field-value">${p.jira_key || '—'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Erstellt von</span>
-          <span class="detail-field-value">${creator ? esc(creator.display_name) : '—'}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Erstellt am</span>
-          <span class="detail-field-value">${formatDate(p.created_at)}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">Letzte Änderung</span>
-          <span class="detail-field-value">${formatDate(p.updated_at)}</span>
+      <div class="detail-card">
+        <div class="detail-card-header">Projektdetails</div>
+        <div class="detail-card-body">
+          ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}"><span class="phase-dot"></span>${PHASE_LABELS[p.phase]}</span>`)}
+          ${detailFieldRow('Klasse', `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`)}
+          ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
+          ${detailFieldRow('Go-Entscheid', p.go_decision === true ? 'Genehmigt' : p.go_decision === false ? 'Abgelehnt' : 'Ausstehend')}
+          ${detailFieldRow('Verantwortlich', p.responsible || '—')}
+          ${detailFieldRow('Auftraggeber', esc(p.requestor))}
+          ${detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
+          ${detailFieldRow('HERMES Phase', p.hermes_phase || '—')}
+          ${detailFieldRow('Jira-Key', p.jira_key || '—')}
+          ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
+          ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
+          ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
         </div>
       </div>
-      ${p.notes ? `
-        <div class="detail-section">
-          <div class="detail-section-title">Notizen</div>
-          <div class="detail-notes">${esc(p.notes)}</div>
-        </div>` : ''}
     `;
+    if (p.notes) {
+      html += `
+        <div class="detail-card">
+          <div class="detail-card-header">Notizen</div>
+          <div class="detail-card-body">
+            <div class="detail-notes">${esc(p.notes)}</div>
+          </div>
+        </div>
+      `;
+    }
   } else if (state.detailTab === 'comments') {
-    const comments = getCommentsForProject(p.id);
-    html += '<div class="comment-list">';
+    html += '<div class="detail-card"><div class="detail-card-body">';
     if (comments.length === 0) {
       html += '<div style="color:var(--gray-400);font-size:var(--font-size-sm)">Keine Kommentare vorhanden.</div>';
-    }
-    comments.forEach(c => {
-      const user = getUserById(c.user_id);
-      const name = user ? user.display_name : 'Unbekannt';
-      const initials = getUserInitials(name);
-      html += `<div class="comment-item">
-        <div class="comment-avatar">${initials}</div>
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="comment-author">${esc(name)}</span>
-            <span class="comment-date">${formatDateTime(c.created_at)}</span>
+    } else {
+      html += '<div class="comment-list">';
+      comments.forEach(c => {
+        const user = getUserById(c.user_id);
+        const name = user ? user.display_name : 'Unbekannt';
+        const initials = getUserInitials(name);
+        html += `<div class="comment-item">
+          <div class="comment-avatar">${initials}</div>
+          <div class="comment-body">
+            <div class="comment-author">${esc(name)}</div>
+            <div class="comment-date">${formatDateTime(c.created_at)}</div>
+            <div class="comment-text">${esc(c.body)}</div>
           </div>
-          <div class="comment-text">${esc(c.body)}</div>
-        </div>
-      </div>`;
-    });
-    html += '</div>';
-  } else if (state.detailTab === 'changelog') {
-    const entries = getChangelogForProject(p.id);
-    html += '<div class="changelog-list">';
-    if (entries.length === 0) {
-      html += '<div style="color:var(--gray-400);font-size:var(--font-size-sm)">Kein Verlauf vorhanden.</div>';
+        </div>`;
+      });
+      html += '</div>';
     }
-    entries.forEach(e => {
-      const user = getUserById(e.user_id);
-      const name = user ? user.display_name : 'Unbekannt';
-      html += `<div class="changelog-item">
-        <span class="changelog-date">${formatDateTime(e.changed_at)}</span>
-        <div class="changelog-detail">
-          <span class="changelog-field">${esc(e.field)}</span>
-          ${e.old_value != null ? `<span class="changelog-old">${esc(String(e.old_value))}</span> →` : '→'}
-          <span class="changelog-new">${esc(String(e.new_value))}</span>
-          <div style="font-size:var(--font-size-xs);color:var(--gray-400);margin-top:2px">${esc(name)}</div>
-        </div>
-      </div>`;
-    });
-    html += '</div>';
+    html += '</div></div>';
+  } else if (state.detailTab === 'changelog') {
+    html += '<div class="detail-card"><div class="detail-card-body">';
+    if (changelog.length === 0) {
+      html += '<div style="color:var(--gray-400);font-size:var(--font-size-sm)">Kein Verlauf vorhanden.</div>';
+    } else {
+      html += '<div class="changelog-list">';
+      changelog.forEach(e => {
+        const user = getUserById(e.user_id);
+        const name = user ? user.display_name : 'Unbekannt';
+        html += `<div class="changelog-item">
+          <div class="changelog-meta">${formatDateTime(e.changed_at)}</div>
+          <div class="changelog-field">${esc(name)} · ${esc(e.field)}</div>
+          <div class="changelog-values">
+            ${e.old_value != null ? `<span class="changelog-old">${esc(String(e.old_value))}</span>` : '—'}
+            <span class="changelog-arrow">→</span>
+            <span class="changelog-new">${esc(String(e.new_value))}</span>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div></div>';
   }
 
-  body.innerHTML = html;
+  container.innerHTML = html;
 
-  // Bind tabs
-  body.querySelectorAll('.detail-tab').forEach(tab => {
+  // Bind events
+  document.getElementById('detailBackBtn').addEventListener('click', closeDetailPage);
+  document.getElementById('breadcrumbBack').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeDetailPage();
+  });
+  document.getElementById('detailEditBtn').addEventListener('click', () => {
+    openModal(state.selectedProjectId);
+  });
+  container.querySelectorAll('.detail-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       state.detailTab = tab.dataset.tab;
-      renderDetailPanel();
+      renderDetailPage(container);
     });
   });
+}
+
+function detailFieldRow(label, value) {
+  return `<div class="detail-field-row">
+    <span class="detail-field-label">${label}</span>
+    <span class="detail-field-value">${value}</span>
+  </div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -949,4 +1004,151 @@ function esc(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAG & DROP
+   ═══════════════════════════════════════════════════════════ */
+
+function setupDragAndDrop(container) {
+  const view = state.currentView;
+
+  if (view === 'kanban') {
+    setupKanbanDrag(container);
+  } else if (['list', 'gallery', 'gantt'].includes(view) && state.groupBy !== 'none') {
+    setupGroupDrag(container);
+  }
+}
+
+/* ── Kanban: drag between phase columns ── */
+
+function setupKanbanDrag(container) {
+  // Make cards draggable
+  container.querySelectorAll('.kanban-card').forEach(card => {
+    card.setAttribute('draggable', 'true');
+
+    card.addEventListener('dragstart', (e) => {
+      card.classList.add('drag-item');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', card.dataset.id);
+      // Store the source phase column
+      const sourceColumn = card.closest('.kanban-column');
+      e.dataTransfer.setData('application/x-source', sourceColumn.dataset.phase);
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('drag-item');
+      container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+  });
+
+  // Make columns drop zones
+  container.querySelectorAll('.kanban-column').forEach(column => {
+    column.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      column.classList.add('drag-over');
+    });
+
+    column.addEventListener('dragleave', (e) => {
+      // Only remove if actually leaving the column (not entering a child)
+      if (!column.contains(e.relatedTarget)) {
+        column.classList.remove('drag-over');
+      }
+    });
+
+    column.addEventListener('drop', (e) => {
+      e.preventDefault();
+      column.classList.remove('drag-over');
+      const projectId = Number(e.dataTransfer.getData('text/plain'));
+      const targetPhase = column.dataset.phase;
+      const project = state.projects.find(p => p.id === projectId);
+      if (project && project.phase !== targetPhase) {
+        project.phase = targetPhase;
+        project.updated_at = new Date().toISOString();
+        render();
+      }
+    });
+  });
+}
+
+/* ── List/Gallery/Gantt: drag between group cards ── */
+
+function setupGroupDrag(container) {
+  const draggableSelector = getDraggableSelector();
+  if (!draggableSelector) return;
+
+  // Make items draggable
+  container.querySelectorAll(draggableSelector).forEach(item => {
+    item.setAttribute('draggable', 'true');
+
+    item.addEventListener('dragstart', (e) => {
+      item.classList.add('drag-item');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item.dataset.id);
+      // Prevent click event from firing after drag
+      e.stopPropagation();
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('drag-item');
+      container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+  });
+
+  // Make group cards drop zones
+  container.querySelectorAll('.group-card').forEach(groupCard => {
+    const header = groupCard.querySelector('.group-header');
+    if (!header) return;
+    const groupKey = header.dataset.group;
+
+    groupCard.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      groupCard.classList.add('drag-over');
+    });
+
+    groupCard.addEventListener('dragleave', (e) => {
+      if (!groupCard.contains(e.relatedTarget)) {
+        groupCard.classList.remove('drag-over');
+      }
+    });
+
+    groupCard.addEventListener('drop', (e) => {
+      e.preventDefault();
+      groupCard.classList.remove('drag-over');
+      const projectId = Number(e.dataTransfer.getData('text/plain'));
+      const project = state.projects.find(p => p.id === projectId);
+      if (!project) return;
+
+      // Update the field that matches the current groupBy
+      const field = state.groupBy;
+      const newValue = convertGroupKeyToValue(field, groupKey);
+      if (project[field] !== newValue) {
+        project[field] = newValue;
+        project.updated_at = new Date().toISOString();
+        render();
+      }
+    });
+  });
+}
+
+function getDraggableSelector() {
+  switch (state.currentView) {
+    case 'list':    return '.project-row';
+    case 'gallery': return '.gallery-card';
+    case 'gantt':   return '.gantt-sidebar-row';
+    default:        return null;
+  }
+}
+
+function convertGroupKeyToValue(field, groupKey) {
+  if (field === 'dti_required') {
+    return groupKey === 'DTI-pflichtig';
+  }
+  if (field === 'responsible') {
+    return groupKey === '(nicht zugewiesen)' ? null : groupKey;
+  }
+  // phase, class — key is the enum value directly
+  return groupKey;
 }
