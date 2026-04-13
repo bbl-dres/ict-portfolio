@@ -23,6 +23,16 @@ const state = {
   assignedToMe: false,   // checkbox: show only my projects
   showArchived: false,   // checkbox: include completed/rejected
 
+  /* ── Multi-dimensional filters ── */
+  filters: {
+    phase:    new Set(),   // e.g. Set(['triage', 'analysis'])
+    class:    new Set(),   // e.g. Set(['complex'])
+    priority: new Set(),   // e.g. Set(['high'])
+    tags:     new Set(),   // e.g. Set(['SAP', 'IoT'])
+    dti:      null,        // true | false | null (any)
+  },
+  filterPanelOpen: false,
+
   /* ── Field visibility ── */
   visibleFields: new Set([
     'jira_key',
