@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DRES PPM — Projektportfolio</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- HEADER                                                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-hamburger" id="hamburgerBtn" aria-label="Menü">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <div class="header-brand">
+        <svg class="header-logo" width="28" height="28" viewBox="0 0 32 32"><rect width="32" height="32" rx="3" fill="#E53935"/><rect x="13" y="6" width="6" height="20" rx="1" fill="#fff"/><rect x="6" y="13" width="20" height="6" rx="1" fill="#fff"/></svg>
+        <span class="header-title">DRES PPM</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-icon-btn" id="globalSearchBtn" aria-label="Suche">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="header-icon-btn" id="notificationsBtn" aria-label="Benachrichtigungen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <button class="header-icon-btn" aria-label="Einstellungen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="header-avatar" id="userAvatar" title="Marc Brunner (Admin)">MB</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- BREADCRUMB                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="breadcrumb">
+    <div class="breadcrumb-inner">
+      <span>Projekte</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Übersicht</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- PAGE CONTENT                                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <main class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1 class="page-title">Projektportfolio DRES</h1>
+        </div>
+      <div class="page-header-right">
+        <button class="btn btn-primary" id="createProjectBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Neues Projekt
+        </button>
+      </div>
+    </div>
+
+    <!-- View Tabs -->
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="gallery">Galerie</button>
+      <button class="view-tab" data-view="list">Liste</button>
+      <button class="view-tab" data-view="kanban">Kanban</button>
+      <button class="view-tab" data-view="gantt">Gantt</button>
+      <button class="view-tab" data-view="dashboard">Dashboard</button>
+      <button class="view-tab" data-view="wiki">Wiki</button>
+    </div>
+
+    <!-- Toolbar + View Content -->
+    <div class="view-content-area">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="toolbar-search" id="toolbarSearch">
+          <button class="toolbar-btn toolbar-search-toggle" id="searchToggleBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span class="toolbar-search-label">Suche</span>
+          </button>
+          <div class="toolbar-search-input-wrapper">
+            <span class="toolbar-search-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </span>
+            <input type="text" class="toolbar-search-input" id="searchInput" placeholder="Suche nach Titel, Auftraggeber…">
+            <button class="toolbar-search-clear" id="searchClearBtn" aria-label="Suche leeren">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-dropdown" id="sortDropdown">
+          <button class="toolbar-btn" id="sortBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
+            <span id="sortLabel">Titel</span>
+            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="sortMenu">
+            <div class="dropdown-item active" data-sort="title">Titel</div>
+            <div class="dropdown-item" data-sort="budget_chf">Budget</div>
+            <div class="dropdown-item" data-sort="phase">Phase</div>
+            <div class="dropdown-item" data-sort="class">Klasse</div>
+            <div class="dropdown-item" data-sort="created_at">Erstellt</div>
+            <div class="dropdown-item" data-sort="updated_at">Geändert</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-direction="asc">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+              Aufsteigend
+            </div>
+            <div class="dropdown-item" data-direction="desc">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              Absteigend
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-dropdown" id="groupDropdown">
+          <button class="toolbar-btn" id="groupBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span id="groupLabel">Gruppieren</span>
+            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="groupMenu">
+            <div class="dropdown-item active" data-group="none">Keine</div>
+            <div class="dropdown-item" data-group="phase">Phase</div>
+            <div class="dropdown-item" data-group="class">Klasse</div>
+            <div class="dropdown-item" data-group="responsible">Verantwortlich</div>
+            <div class="dropdown-item" data-group="dti_required">DTI-pflichtig</div>
+          </div>
+        </div>
+
+        <div class="toolbar-dropdown" id="assigneeDropdown">
+          <button class="toolbar-btn" id="assigneeBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span id="assigneeLabel">Verantwortlich</span>
+            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="assigneeMenu">
+            <!-- filled by JS -->
+          </div>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" class="checkbox-input" id="assignedToMe">
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-text">Mir zugewiesen</span>
+        </label>
+      </div>
+
+      <div class="toolbar-right">
+        <label class="checkbox-label">
+          <input type="checkbox" class="checkbox-input" id="showArchived">
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-text">Archivierte anzeigen</span>
+        </label>
+        <div class="toolbar-dropdown" id="fieldsDropdown">
+          <button class="toolbar-btn" id="fieldsBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Attribute
+            <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="dropdown-menu" id="fieldsMenu">
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="jira_key" checked> Jira-Key</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="requestor" checked> Auftraggeber</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="budget_chf" checked> Budget</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="responsible" checked> Verantwortlich</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="phase" checked> Phase</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="class" checked> Klasse</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="dti_required"> DTI</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="hermes_phase"> HERMES</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="created_at"> Erstellt</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Container -->
+    <div class="view-container" id="viewContainer">
+      <!-- filled by JS -->
+    </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DETAIL PANEL (slide-in)                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="panel-overlay" id="panelOverlay"></div>
+  <aside class="detail-panel" id="detailPanel">
+    <div class="detail-panel-header">
+      <button class="detail-back-btn" id="detailBackBtn" aria-label="Schliessen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="detail-panel-actions">
+        <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
+      </div>
+    </div>
+    <div class="detail-panel-body" id="detailPanelBody">
+      <!-- filled by JS -->
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CREATE / EDIT MODAL                                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="projectModal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Neues Projekt erfassen</h2>
+        <button class="modal-close" id="modalClose" aria-label="Schliessen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="projectForm">
+          <div class="form-group">
+            <label class="form-label" for="formTitle">Titel *</label>
+            <input class="form-input" type="text" id="formTitle" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formRequestor">Auftraggeber *</label>
+            <input class="form-input" type="text" id="formRequestor" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="formBudget">Budget (CHF) *</label>
+              <input class="form-input" type="number" id="formBudget" min="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="formClass">Klasse</label>
+              <select class="form-input" id="formClass">
+                <option value="fast_track">Fast Track</option>
+                <option value="standard">Standard</option>
+                <option value="complex">Complex</option>
+              </select>
+              <span class="form-hint" id="classHint"></span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="formResponsible">Verantwortlich</label>
+              <input class="form-input" type="text" id="formResponsible">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="formDti">DTI-pflichtig</label>
+              <div class="form-checkbox-row">
+                <input type="checkbox" id="formDti">
+                <label for="formDti">Ja, DTI-Meldung erforderlich</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formNotes">Notizen</label>
+            <textarea class="form-input form-textarea" id="formNotes" rows="4"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modalCancel">Abbrechen</button>
+        <button class="btn btn-primary" id="modalSave">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

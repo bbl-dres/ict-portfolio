@@ -1,7 +1,29 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find . -type f -not -path \"./.git/*\" -exec wc -l {} +)"
+      "Bash(find . -type f -not -path \"./.git/*\" -exec wc -l {} +)",
+      "Bash(npx -y http-server -p 8080 -c-1 --silent)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/index.html)",
+      "Bash(npx -y http-server -p 8080 -c-1)",
+      "Bash(curl -s http://localhost:8080/data/projects.json)",
+      "Bash(disown)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/)",
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(curl -s http://localhost:8080/data/users.json)",
+      "Bash(curl -s http://localhost:8080/js/app.js)",
+      "Bash(taskkill //F //IM python.exe)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -sL -o project-01.jpg \"https://images.unsplash.com/photo-1497366216548-37526070297c?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-02.jpg \"https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-03.jpg \"https://images.unsplash.com/photo-1544396821-4dd40b938ad3?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-04.jpg \"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-05.jpg \"https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-06.jpg \"https://images.unsplash.com/photo-1555421689-d68471e189f2?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-07.jpg \"https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-08.jpg \"https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-09.jpg \"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-10.jpg \"https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=640&h=400&fit=crop\")",
+      "Bash(curl -sL -o project-04.jpg \"https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&h=400&fit=crop\")"
     ]
   }
 }
