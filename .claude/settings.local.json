@@ -31,7 +31,10 @@
       "Bash(ls -la /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/assets/images/project-*.jpg)",
       "Bash(node -e \"const p = require\\('./data/projects.json'\\); console.log\\('Total:', p.length\\); const ids = p.map\\(x=>x.id\\); console.log\\('Unique IDs:', new Set\\(ids\\).size\\); console.log\\('Missing required fields:'\\); p.forEach\\(x => { const missing = []; if \\(!x.id\\) missing.push\\('id'\\); if \\(!x.title\\) missing.push\\('title'\\); if \\(!x.requestor\\) missing.push\\('requestor'\\); if \\(!\\('budget_chf' in x\\)\\) missing.push\\('budget_chf'\\); if \\(!x.type\\) missing.push\\('type'\\); if \\(!x.class\\) missing.push\\('class'\\); if \\(!x.phase\\) missing.push\\('phase'\\); if \\(!x.created_by\\) missing.push\\('created_by'\\); if \\(!x.created_at\\) missing.push\\('created_at'\\); if \\(!x.updated_at\\) missing.push\\('updated_at'\\); if \\(missing.length\\) console.log\\('ID', x.id, ':', missing.join\\(', '\\)\\); }\\);\")",
       "Bash(node -e \"const p = require\\('./data/projects.json'\\); p.forEach\\(x => { if \\(!x.priority\\) console.log\\('Missing priority:', x.id, x.title\\); }\\);\")",
-      "Bash(grep -n \"const PHASE_LABELS\\\\|const CLASS_LABELS\\\\|const TYPE_LABELS\\\\|const PRIORITY_LABELS\\\\|const PRIORITY_ICONS\\\\|const PHASE_ORDER\\\\|const CLASS_ORDER\\\\|const TYPE_ORDER\\\\|const PRIORITY_ORDER\\\\|const HERMES_LABELS\" /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/js/*.js)"
+      "Bash(grep -n \"const PHASE_LABELS\\\\|const CLASS_LABELS\\\\|const TYPE_LABELS\\\\|const PRIORITY_LABELS\\\\|const PRIORITY_ICONS\\\\|const PHASE_ORDER\\\\|const CLASS_ORDER\\\\|const TYPE_ORDER\\\\|const PRIORITY_ORDER\\\\|const HERMES_LABELS\" /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/js/*.js)",
+      "Bash(grep -n \"#[0-9A-Fa-f]\\\\{3,6\\\\}\" /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/css/styles.css)",
+      "Bash(xxd)",
+      "Bash(grep -nB 5 -A 5 \"height: 36px\" \"/c/Users/DavidRasner/Documents/GitHub/ict-portfolio/css/styles.css\")"
     ]
   }
 }

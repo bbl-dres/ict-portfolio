@@ -13,7 +13,11 @@
     "go_date": "2025-06-15",
     "responsible": "Rasner David",
     "notes": "Zentral für diverse Themen: MIS, Netto Null, EMBAG, Tagesgeschäft. Abhängigkeit zu Adresskorrekturen EGIDs.",
-    "tags": ["GIS", "IMMO", "Geodaten"],
+    "tags": [
+      "GIS",
+      "IMMO",
+      "Geodaten"
+    ],
     "target_date": "2027-12-31",
     "dti_required": false,
     "hermes_phase": "realisation",
@@ -21,7 +25,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-01-15T08:00:00Z",
-    "updated_at": "2026-04-10T10:00:00Z"
+    "updated_at": "2026-04-10T10:00:00Z",
+    "gever_url": null
   },
   {
     "id": 2,
@@ -37,7 +42,11 @@
     "go_date": "2023-01-01",
     "responsible": "Seidt Franka",
     "notes": "Grossprojekt mit mehreren LBCs. Multi-Milliarden IT-Programm des Bundes. Fast abgeschlossen. Alle LBCs (#5-#9) gehören hierzu.",
-    "tags": ["SAP", "SUPERB", "S/4HANA"],
+    "tags": [
+      "SAP",
+      "SUPERB",
+      "S/4HANA"
+    ],
     "target_date": "2027-06-30",
     "dti_required": true,
     "hermes_phase": "realisation",
@@ -45,7 +54,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2023-01-10T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": "https://actanova.admin.ch/dossier/SUPERB-IMMO-2023"
   },
   {
     "id": 3,
@@ -61,7 +71,13 @@
     "go_date": "2024-09-01",
     "responsible": "Strathaus Thorsten",
     "notes": "Drei Bauherren: armasuisse, BBL, ASTRA. BIT stellt Betriebsinfrastruktur bereit. RHOS Container-Umgebung. Klonner Maria swisstopo koordiniert Zugriffe.",
-    "tags": ["CDE", "BIM", "OpenBIM", "ASTRA", "armasuisse"],
+    "tags": [
+      "CDE",
+      "BIM",
+      "OpenBIM",
+      "ASTRA",
+      "armasuisse"
+    ],
     "target_date": "2028-12-31",
     "dti_required": true,
     "hermes_phase": "realisation",
@@ -69,7 +85,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-03-01T08:00:00Z",
-    "updated_at": "2026-04-13T10:00:00Z"
+    "updated_at": "2026-04-13T10:00:00Z",
+    "gever_url": "https://actanova.admin.ch/dossier/CDE-BUND-2024"
   },
   {
     "id": 4,
@@ -85,7 +102,13 @@
     "go_date": "2024-06-01",
     "responsible": null,
     "notes": "SAP WSM (Korasoft APP) integriert in RE-FX und PM. Rückbau von ESTAT/KOMI/Mietermodelle. Vereinfachung interne Verrechnung Mietflächen.",
-    "tags": ["SAP", "WSM", "FM", "RE-FX", "SUPERB"],
+    "tags": [
+      "SAP",
+      "WSM",
+      "FM",
+      "RE-FX",
+      "SUPERB"
+    ],
     "target_date": "2027-06-30",
     "dti_required": true,
     "hermes_phase": "realisation",
@@ -93,7 +116,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-02-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 5,
@@ -109,7 +133,12 @@
     "go_date": null,
     "responsible": null,
     "notes": "Once-only-Prinzip. Überwindung technischer Fragmentierung. Hybridansatz für schnelle Anbindung. Backlog: Anbindung externer Register.",
-    "tags": ["Integration", "Datenkatalog", "API", "SUPERB"],
+    "tags": [
+      "Integration",
+      "Datenkatalog",
+      "API",
+      "SUPERB"
+    ],
     "target_date": "2028-12-31",
     "dti_required": true,
     "hermes_phase": "concept",
@@ -117,7 +146,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-06-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 6,
@@ -133,7 +163,13 @@
     "go_date": null,
     "responsible": null,
     "notes": "SAP Analytics Cloud. Keine Freigabe für vertrauliche Daten. Backlog: Ablösung Kennzahlen-Checker (Excel), Ausbau Nachhaltigkeits-KPIs. Prüfung BW-Reporte auf Verwendbarkeit.",
-    "tags": ["MIS", "SAC", "Dashboard", "KPI", "SUPERB"],
+    "tags": [
+      "MIS",
+      "SAC",
+      "Dashboard",
+      "KPI",
+      "SUPERB"
+    ],
     "target_date": "2028-06-30",
     "dti_required": true,
     "hermes_phase": "concept",
@@ -141,7 +177,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-06-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 7,
@@ -157,7 +194,12 @@
     "go_date": null,
     "responsible": null,
     "notes": "Ablösung heutiges Kundenportal Intranet BBL. Lösung in Arbeit. Backlog: Anbindung an Marktplatz.",
-    "tags": ["Portal", "Mieter", "Self-Service", "SUPERB"],
+    "tags": [
+      "Portal",
+      "Mieter",
+      "Self-Service",
+      "SUPERB"
+    ],
     "target_date": "2028-06-30",
     "dti_required": true,
     "hermes_phase": "concept",
@@ -165,7 +207,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-06-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 8,
@@ -181,7 +224,12 @@
     "go_date": "2024-09-01",
     "responsible": null,
     "notes": "SAP ePPM Cockpit PMC. Backlog: Anbindung an CDE BUND/BBL. Effizienzvorteile verteilt auf ganzen Mitarbeiterstamm.",
-    "tags": ["SAP", "ePPM", "PMC", "SUPERB"],
+    "tags": [
+      "SAP",
+      "ePPM",
+      "PMC",
+      "SUPERB"
+    ],
     "target_date": "2027-12-31",
     "dti_required": true,
     "hermes_phase": "realisation",
@@ -189,7 +237,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-03-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 9,
@@ -205,7 +254,12 @@
     "go_date": "2024-04-01",
     "responsible": "Weber Janec Noah",
     "notes": "Projektdauer mind. bis 2029. Budget 200k bei zeitnaher Ausschreibung. Experte Hanak für architekturhistorische Bewertung. 2025 Q4: Ausschreibung Restaurierung/Digitalisierung. Pläne zerfallen zusehends.",
-    "tags": ["Archiv", "Digitalisierung", "Pläne", "DALA"],
+    "tags": [
+      "Archiv",
+      "Digitalisierung",
+      "Pläne",
+      "DALA"
+    ],
     "target_date": "2030-12-31",
     "dti_required": true,
     "hermes_phase": "realisation",
@@ -213,7 +267,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2024-04-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": "https://actanova.admin.ch/dossier/HIST-PLAENE-2024"
   },
   {
     "id": 10,
@@ -229,7 +284,12 @@
     "go_date": "2025-01-01",
     "responsible": "Hischier Maria",
     "notes": "Zentral für diverse Themen: EDM, MIS, Netto Null, Mietermodell, Workspace Management. Adresskorrekturen EGIDs noch nicht fertig. Kreis DS liefert GIS-Geschossflächen.",
-    "tags": ["Flächen", "Volumen", "GIS", "WTO"],
+    "tags": [
+      "Flächen",
+      "Volumen",
+      "GIS",
+      "WTO"
+    ],
     "target_date": "2027-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -237,7 +297,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-01-10T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 11,
@@ -253,7 +314,11 @@
     "go_date": null,
     "responsible": "Rasner David",
     "notes": "Vertrag mit SeilerSeiler Ende 2025 abgelaufen (13k bis Kostendach). Projekt pausiert wegen Adresskorrekturen. Plausibilisierung mit bekannten Flächen ausstehend.",
-    "tags": ["GIS", "Geschossflächen", "Schätzung"],
+    "tags": [
+      "GIS",
+      "Geschossflächen",
+      "Schätzung"
+    ],
     "target_date": "2026-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -261,7 +326,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-06-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 12,
@@ -277,7 +343,13 @@
     "go_date": "2025-09-01",
     "responsible": "Rasner David",
     "notes": "Priorität 1: 331 ESTAT-Fälle. 735 EDM-Gebäude bereinigt. Prüfcodes E/K/EK/A-K. Knowledge Transfer ab 20. April an trpa. CR für SAP-Koordinaten und EGIDs vorbereiten. 140 unklare Fälle mit OVs/PFM besprechen.",
-    "tags": ["EGID", "Adressen", "SAP", "GWR", "AV"],
+    "tags": [
+      "EGID",
+      "Adressen",
+      "SAP",
+      "GWR",
+      "AV"
+    ],
     "target_date": "2026-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -285,7 +357,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-09-01T08:00:00Z",
-    "updated_at": "2026-04-13T09:00:00Z"
+    "updated_at": "2026-04-13T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 13,
@@ -301,7 +374,13 @@
     "go_date": "2025-09-01",
     "responsible": "Rasner David",
     "notes": "JavaScript-App verfügbar für AV-Daten. Paradebeispiel: Wald-Grundstück AV 1.3 Mio m² vs SAP 427 m². Auswirkung auf Mn5 BAFU Biodiversität. Massenmutation SAP geplant.",
-    "tags": ["EGRID", "Grundstücke", "SAP", "Terravis", "AV"],
+    "tags": [
+      "EGRID",
+      "Grundstücke",
+      "SAP",
+      "Terravis",
+      "AV"
+    ],
     "target_date": "2026-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -309,7 +388,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-09-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 14,
@@ -325,7 +405,12 @@
     "go_date": "2025-06-01",
     "responsible": "Rasner David",
     "notes": "Vom Bundesrat priorisiert. Erste Auswertung mit alten EGRIDs liegt vor — muss mit korrigierten EGRIDs aktualisiert werden. Koordination mit OE Nachhaltigkeit und AG BAFU/BLOs. Grundlage Strategie Nachhaltigkeit BBL.",
-    "tags": ["BAFU", "Biodiversität", "Nachhaltigkeit", "Mn5"],
+    "tags": [
+      "BAFU",
+      "Biodiversität",
+      "Nachhaltigkeit",
+      "Mn5"
+    ],
     "target_date": "2030-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -333,7 +418,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-06-01T08:00:00Z",
-    "updated_at": "2026-04-13T09:00:00Z"
+    "updated_at": "2026-04-13T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 15,
@@ -349,7 +435,11 @@
     "go_date": "2025-03-01",
     "responsible": "Rasner David",
     "notes": "Gesamthafte Modellierung aller Geschäftsobjekte. Grundlage für Integration und Orchestrierung. Teil von SUPERB IMMO LBC Integration.",
-    "tags": ["Datenkatalog", "Metadaten", "Architektur"],
+    "tags": [
+      "Datenkatalog",
+      "Metadaten",
+      "Architektur"
+    ],
     "target_date": "2027-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -357,7 +447,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-03-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": "https://actanova.admin.ch/dossier/NETTO-NULL-2025"
   },
   {
     "id": 16,
@@ -373,7 +464,14 @@
     "go_date": "2025-03-01",
     "responsible": "Rasner David",
     "notes": "Co-PL mit lami. TP1: Schuban/IT-Grundschutz klären. Stammdaten inkl. Flächen, Mappung Nutzkategorien, Energiedaten bereinigen. REIDA-Methode. TP4: Verhandlungen WüestPartner, PowerBI als Alternative testen.",
-    "tags": ["NettoNull", "CO2", "REIDA", "DWH", "KLIG", "THG"],
+    "tags": [
+      "NettoNull",
+      "CO2",
+      "REIDA",
+      "DWH",
+      "KLIG",
+      "THG"
+    ],
     "target_date": "2028-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -381,7 +479,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-03-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 17,
@@ -397,7 +496,11 @@
     "go_date": "2025-06-01",
     "responsible": null,
     "notes": "Extern durch Ennovatisch unterstützt. Wichtig für NettoNull und Model ecCo (BFE). Kontinuierlich laufend.",
-    "tags": ["EDM", "Energie", "Datenqualität"],
+    "tags": [
+      "EDM",
+      "Energie",
+      "Datenqualität"
+    ],
     "target_date": "2027-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -405,7 +508,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-06-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 18,
@@ -421,7 +525,11 @@
     "go_date": null,
     "responsible": null,
     "notes": "On-Hold. Wichtig für NettoNull und Absenkungspfad. Kein konkreter Auftrag vorhanden.",
-    "tags": ["EHP", "Energie", "Datenqualität"],
+    "tags": [
+      "EHP",
+      "Energie",
+      "Datenqualität"
+    ],
     "target_date": null,
     "dti_required": false,
     "hermes_phase": null,
@@ -429,7 +537,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-01-15T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 19,
@@ -445,7 +554,11 @@
     "go_date": null,
     "responsible": null,
     "notes": "On-Hold. Fehlende Plannings/Sanierungen für Ampelsystem. Wichtig für NettoNull und Absenkungspfad.",
-    "tags": ["ePPM", "SAP", "Datenqualität"],
+    "tags": [
+      "ePPM",
+      "SAP",
+      "Datenqualität"
+    ],
     "target_date": null,
     "dti_required": false,
     "hermes_phase": null,
@@ -453,7 +566,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-01-15T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 20,
@@ -469,7 +583,10 @@
     "go_date": null,
     "responsible": null,
     "notes": "On-Hold. Dokumentation nicht vollständig. Kein konkreter Auftrag. Neuer Auftrag von muda/zuda möglich.",
-    "tags": ["Dokumentation", "Bauwerke"],
+    "tags": [
+      "Dokumentation",
+      "Bauwerke"
+    ],
     "target_date": null,
     "dti_required": false,
     "hermes_phase": null,
@@ -477,7 +594,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-01-15T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 21,
@@ -493,7 +611,10 @@
     "go_date": null,
     "responsible": null,
     "notes": "On-Hold. Leitsystem nicht klar, benötigt Änderungen an Architektur BBL. Kein Auftrag.",
-    "tags": ["Stammdaten", "Technische Anlagen"],
+    "tags": [
+      "Stammdaten",
+      "Technische Anlagen"
+    ],
     "target_date": null,
     "dti_required": false,
     "hermes_phase": null,
@@ -501,7 +622,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-01-15T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 22,
@@ -517,7 +639,10 @@
     "go_date": "2025-10-01",
     "responsible": null,
     "notes": "Extern beauftragt. Einmaliges Thema.",
-    "tags": ["Aussenflächen", "Nacherfassung"],
+    "tags": [
+      "Aussenflächen",
+      "Nacherfassung"
+    ],
     "target_date": "2026-09-30",
     "dti_required": false,
     "hermes_phase": null,
@@ -525,7 +650,8 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2025-10-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   },
   {
     "id": 23,
@@ -541,7 +667,11 @@
     "go_date": null,
     "responsible": "Rasner David",
     "notes": "Lösungsvarianten formulieren. Bestehende BIT-Lösungen bewerten. Als Standard für Profil Datenanalyst definieren.",
-    "tags": ["Tooling", "Datenanalyse", "BIT"],
+    "tags": [
+      "Tooling",
+      "Datenanalyse",
+      "BIT"
+    ],
     "target_date": "2026-12-31",
     "dti_required": false,
     "hermes_phase": null,
@@ -549,6 +679,7 @@
     "jira_key": null,
     "created_by": 1,
     "created_at": "2026-03-01T08:00:00Z",
-    "updated_at": "2026-04-01T09:00:00Z"
+    "updated_at": "2026-04-01T09:00:00Z",
+    "gever_url": null
   }
 ]

@@ -34,6 +34,7 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `hermes_phase` | enum / null | no | Current HERMES phase if applicable |
 | `thumbnail` | string (200) / null | no | Relative path to project thumbnail image |
 | `jira_key` | string (20) / null | no | Linked Jira issue key (e.g. `DRESPPM-42`) |
+| `gever_url` | string (500) / null | no | URL to ActaNova GEVER dossier with project documentation |
 | `created_by` | integer FK → `user.id` | yes | User who created the record |
 | `created_at` | datetime | yes | Set automatically on creation |
 | `updated_at` | datetime | yes | Updated automatically on every change |

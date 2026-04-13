@@ -9,6 +9,14 @@
   },
   {
     "id": 2,
+    "project_id": 1,
+    "user_id": 3,
+    "body": "Neue Datenschicht für Arealgrenzen erfolgreich integriert. Performance-Tests zeigen < 2s Ladezeit für ganzes Portfolio.",
+    "created_at": "2026-03-22T14:30:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 3,
     "project_id": 2,
     "user_id": 2,
     "body": "SUPERB IMMO nähert sich dem Abschluss. Verbleibende LBCs (MIS, MiPo, Integration) noch in Konzeptphase.",
@@ -16,7 +24,23 @@
     "updated_at": null
   },
   {
-    "id": 3,
+    "id": 4,
+    "project_id": 2,
+    "user_id": 1,
+    "body": "Koordination mit BIT SUPERB für Abschluss-Review geplant. Übergabe Betrieb muss noch formell dokumentiert werden.",
+    "created_at": "2026-04-02T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 5,
+    "project_id": 2,
+    "user_id": 4,
+    "body": "Offene Punkte aus letztem Steering Committee: Datenmigration RE-FX Altdaten, Schulungskonzept für Endanwender.",
+    "created_at": "2026-04-10T11:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 6,
     "project_id": 3,
     "user_id": 1,
     "body": "CDE Bund: Container-Umgebung auf RHOS aufgesetzt. Demaj Egzon hat ADGroup und Application Environment konfiguriert.",
@@ -24,7 +48,7 @@
     "updated_at": null
   },
   {
-    "id": 4,
+    "id": 7,
     "project_id": 3,
     "user_id": 2,
     "body": "Fehlende Zugriffsrechte können bei Klonner Maria swisstopo beantragt werden. Onboarding-Dokumentation aktualisiert.",
@@ -32,95 +56,15 @@
     "updated_at": null
   },
   {
-    "id": 5,
-    "project_id": 5,
-    "user_id": 1,
-    "body": "Systemlandschaft stark fragmentiert: 13+ Fachanwendungen mit eigenen Datenmodellen. Zentrale Orchestrierungsschicht als Drehscheibe geplant.",
-    "created_at": "2026-03-15T09:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 6,
-    "project_id": 9,
-    "user_id": 3,
-    "body": "Experte Hanak: Bewertung architekturhistorischer Pläne abgeschlossen Q4 2025. Viele Pläne in sehr schlechtem Zustand — Restaurierung dringend.",
-    "created_at": "2026-01-20T11:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 7,
-    "project_id": 9,
-    "user_id": 4,
-    "body": "Ausschreibung für Restaurierung, Digitalisierung und Transport wird vorbereitet. POC-Prüfung läuft.",
-    "created_at": "2026-02-10T14:00:00Z",
-    "updated_at": null
-  },
-  {
     "id": 8,
-    "project_id": 12,
-    "user_id": 1,
-    "body": "735 EDM-Gebäude bereinigt und in spezieller Karte gespeichert. Prüfcodes: E=EGID, K=Koordinaten, EK, A-K. Priorität 1 (331 ESTAT) fast erledigt.",
-    "created_at": "2026-03-20T10:00:00Z",
+    "project_id": 3,
+    "user_id": 5,
+    "body": "ASTRA meldet Verzögerung bei der IFC-Modell-Validierung. Betrifft den gemeinsamen Datenstandard. Fritz Ofer koordiniert.",
+    "created_at": "2026-04-14T08:15:00Z",
     "updated_at": null
   },
   {
     "id": 9,
-    "project_id": 12,
-    "user_id": 1,
-    "body": "Knowledge Transfer an trpa ab 20. April geplant. 140 unklare Fälle müssen einzeln mit OVs/PFM besprochen werden.",
-    "created_at": "2026-04-10T09:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 10,
-    "project_id": 13,
-    "user_id": 1,
-    "body": "JavaScript-App für AV-Daten verfügbar. Paradebeispiel gefunden: Wald-Grundstück AV 1.3 Mio m² vs SAP 427 m² — Bezeichnung und EGRID inkorrekt.",
-    "created_at": "2026-02-15T10:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 11,
-    "project_id": 14,
-    "user_id": 1,
-    "body": "Erste Auswertung mit alten EGRIDs liegt vor: Grundstücke kategorisiert in no-green, green-soil, green-wooded. Grosse Abweichungen AV vs SAP.",
-    "created_at": "2026-03-10T09:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 12,
-    "project_id": 14,
-    "user_id": 2,
-    "body": "Auswertung muss mit korrigierten EGRIDs neu berechnet werden. Koordination mit OE Nachhaltigkeit und Teilnahme AG BAFU.",
-    "created_at": "2026-04-05T14:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 13,
-    "project_id": 16,
-    "user_id": 1,
-    "body": "TP1 WebApp: Schuban und IT-Grundschutz müssen geklärt und unterschrieben werden. Stammdaten-Extraktion an externen Partner geplant.",
-    "created_at": "2026-03-15T10:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 14,
-    "project_id": 16,
-    "user_id": 1,
-    "body": "TP4 DWH: Verhandlungen mit WüestPartner laufen. PowerBI als Alternative wird getestet. REIDA-Methode muss korrekt implementiert werden.",
-    "created_at": "2026-04-08T11:00:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 15,
-    "project_id": 6,
-    "user_id": 2,
-    "body": "SAP Analytics Cloud als Lösung evaluiert. Keine Freigabe für Daten mit Klassifizierung vertraulich oder höher — Einschränkung beachten.",
-    "created_at": "2026-03-20T09:30:00Z",
-    "updated_at": null
-  },
-  {
-    "id": 16,
     "project_id": 4,
     "user_id": 3,
     "body": "SAP WSM (Korasoft APP) Integration in RE-FX und PM läuft. Rückbau ESTAT/KOMI in Vorbereitung.",
@@ -128,7 +72,103 @@
     "updated_at": null
   },
   {
+    "id": 10,
+    "project_id": 4,
+    "user_id": 2,
+    "body": "Mietermodell-Harmonisierung: Alle drei bestehenden Modelle analysiert. Zielmodell für neue Arbeitswelten Bund definiert.",
+    "created_at": "2026-04-08T15:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 11,
+    "project_id": 5,
+    "user_id": 1,
+    "body": "Systemlandschaft stark fragmentiert: 13+ Fachanwendungen mit eigenen Datenmodellen. Zentrale Orchestrierungsschicht als Drehscheibe geplant.",
+    "created_at": "2026-03-15T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 12,
+    "project_id": 5,
+    "user_id": 4,
+    "body": "Erste Schnittstellenanalyse abgeschlossen. 47 aktive Datenflüsse identifiziert, davon 12 manuell (Excel/E-Mail).",
+    "created_at": "2026-04-05T16:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 13,
+    "project_id": 6,
+    "user_id": 2,
+    "body": "SAP Analytics Cloud als Lösung evaluiert. Keine Freigabe für Daten mit Klassifizierung vertraulich oder höher — Einschränkung beachten.",
+    "created_at": "2026-03-20T09:30:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 14,
+    "project_id": 6,
+    "user_id": 1,
+    "body": "BLO-Vergleichskennzahlen mit armasuisse und ASTRA abgestimmt. Erste Dashboard-Mockups in Arbeit.",
+    "created_at": "2026-04-12T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 15,
+    "project_id": 7,
+    "user_id": 3,
+    "body": "Anforderungsworkshop mit Facility Management durchgeführt. Wichtigste Anforderung: Störmeldungen mobil erfassen.",
+    "created_at": "2026-03-28T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 16,
+    "project_id": 7,
+    "user_id": 6,
+    "body": "Aus Nutzersicht: Bitte auch Verbrauchskennzahlen pro Gebäude anzeigen. Aktuell muss man dafür in EDM nachschauen.",
+    "created_at": "2026-04-09T11:30:00Z",
+    "updated_at": null
+  },
+  {
     "id": 17,
+    "project_id": 8,
+    "user_id": 2,
+    "body": "SAP ePPM Cockpit PMC in Betrieb. Erste Bauprojekte werden aktiv geführt. Schulung für Projektleiter läuft.",
+    "created_at": "2026-03-10T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 18,
+    "project_id": 8,
+    "user_id": 4,
+    "body": "Anbindung an CDE Bund als nächster Meilenstein. Abstimmung mit Strathaus Thorsten geplant.",
+    "created_at": "2026-04-11T16:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 19,
+    "project_id": 9,
+    "user_id": 3,
+    "body": "Experte Hanak: Bewertung architekturhistorischer Pläne abgeschlossen Q4 2025. Viele Pläne in sehr schlechtem Zustand — Restaurierung dringend.",
+    "created_at": "2026-01-20T11:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 20,
+    "project_id": 9,
+    "user_id": 4,
+    "body": "Ausschreibung für Restaurierung, Digitalisierung und Transport wird vorbereitet. POC-Prüfung läuft.",
+    "created_at": "2026-02-10T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 21,
+    "project_id": 9,
+    "user_id": 1,
+    "body": "Abgleich DALA mit Planbestand zu 80% abgeschlossen. Verbleibende 20% betreffen historische Bauten vor 1900.",
+    "created_at": "2026-04-05T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 22,
     "project_id": 10,
     "user_id": 1,
     "body": "Kreis DS liefert GIS-geschätzte Geschossflächen an hima für WTO-Ausschreibungsunterlagen. Adresskorrekturen EGIDs sind Voraussetzung.",
@@ -136,11 +176,211 @@
     "updated_at": null
   },
   {
-    "id": 18,
+    "id": 23,
+    "project_id": 10,
+    "user_id": 2,
+    "body": "WTO-Ausschreibung publiziert. Eingabefrist bis 30.06.2026. Drei Anbieter haben bereits Interesse bekundet.",
+    "created_at": "2026-04-12T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 24,
+    "project_id": 11,
+    "user_id": 1,
+    "body": "Vertrag mit SeilerSeiler abgelaufen. Methodik dokumentiert, kann intern weitergeführt werden. Plausibilisierung mit bekannten Flächen steht noch aus.",
+    "created_at": "2026-01-15T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 25,
+    "project_id": 11,
+    "user_id": 3,
+    "body": "Projekt pausiert bis Adresskorrekturen (Projekt #12) abgeschlossen sind. GIS-Schätzungen basieren auf korrekten EGIDs.",
+    "created_at": "2026-03-10T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 26,
+    "project_id": 12,
+    "user_id": 1,
+    "body": "735 EDM-Gebäude bereinigt und in spezieller Karte gespeichert. Prüfcodes: E=EGID, K=Koordinaten, EK, A-K. Priorität 1 (331 ESTAT) fast erledigt.",
+    "created_at": "2026-03-20T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 27,
+    "project_id": 12,
+    "user_id": 1,
+    "body": "Knowledge Transfer an trpa ab 20. April geplant. 140 unklare Fälle müssen einzeln mit OVs/PFM besprechen werden.",
+    "created_at": "2026-04-10T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 28,
+    "project_id": 12,
+    "user_id": 4,
+    "body": "CR für SAP-Koordinaten und EGIDs vorbereitet. Abstimmung mit LIG für Adressänderungen läuft.",
+    "created_at": "2026-04-14T11:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 29,
+    "project_id": 13,
+    "user_id": 1,
+    "body": "JavaScript-App für AV-Daten verfügbar. Paradebeispiel gefunden: Wald-Grundstück AV 1.3 Mio m² vs SAP 427 m² — Bezeichnung und EGRID inkorrekt.",
+    "created_at": "2026-02-15T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 30,
+    "project_id": 13,
+    "user_id": 3,
+    "body": "Grundbuchauszüge via Terravis für 50 Pilotobjekte bestellt. Validierung der EGRIDs gegen amtliche Vermessung beginnt nächste Woche.",
+    "created_at": "2026-04-07T09:30:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 31,
+    "project_id": 14,
+    "user_id": 1,
+    "body": "Erste Auswertung mit alten EGRIDs liegt vor: Grundstücke kategorisiert in no-green, green-soil, green-wooded. Grosse Abweichungen AV vs SAP.",
+    "created_at": "2026-03-10T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 32,
+    "project_id": 14,
+    "user_id": 2,
+    "body": "Auswertung muss mit korrigierten EGRIDs neu berechnet werden. Koordination mit OE Nachhaltigkeit und Teilnahme AG BAFU.",
+    "created_at": "2026-04-05T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 33,
+    "project_id": 14,
+    "user_id": 5,
+    "body": "Bundesrat hat Massnahme 5 als prioritär eingestuft. Deadline 2030 steht. Zwischenbericht bis Ende 2026 erwartet.",
+    "created_at": "2026-04-13T08:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 34,
+    "project_id": 15,
+    "user_id": 1,
+    "body": "Erster Entwurf des Datenkatalogs liegt vor. 23 Geschäftsobjekte modelliert, 47 Datenflüsse dokumentiert.",
+    "created_at": "2026-03-20T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 35,
+    "project_id": 15,
+    "user_id": 4,
+    "body": "Review mit LBC Integration Team geplant. Datenkatalog soll als Grundlage für die Orchestrierungsschicht dienen.",
+    "created_at": "2026-04-08T15:30:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 36,
+    "project_id": 16,
+    "user_id": 1,
+    "body": "TP1 WebApp: Schuban und IT-Grundschutz müssen geklärt und unterschrieben werden. Stammdaten-Extraktion an externen Partner geplant.",
+    "created_at": "2026-03-15T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 37,
+    "project_id": 16,
+    "user_id": 1,
+    "body": "TP4 DWH: Verhandlungen mit WüestPartner laufen. PowerBI als Alternative wird getestet. REIDA-Methode muss korrekt implementiert werden.",
+    "created_at": "2026-04-08T11:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 38,
+    "project_id": 16,
+    "user_id": 2,
+    "body": "Scope-Klärung mit OE Nachhaltigkeit abgeschlossen. System-Grenzen (Eigentum Bund, Anmiete, externe Mieter) definiert.",
+    "created_at": "2026-04-12T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 39,
     "project_id": 17,
     "user_id": 4,
     "body": "Ennovatisch unterstützt extern bei EDM-Datenqualität. Kontinuierliche Bereinigung der Energieverbrauchsdaten läuft.",
     "created_at": "2026-04-02T14:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 40,
+    "project_id": 17,
+    "user_id": 1,
+    "body": "Datenlieferung Q1 2026 bereinigt. 12% der Verbrauchswerte mussten korrigiert werden. Hauptproblem: fehlende Zählerzuordnungen.",
+    "created_at": "2026-04-10T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 41,
+    "project_id": 18,
+    "user_id": 2,
+    "body": "Projekt on-hold. Abhängigkeit zu NettoNull und Absenkungspfad. Kein konkreter Auftrag vorhanden — muda prüft Priorisierung.",
+    "created_at": "2026-03-01T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 42,
+    "project_id": 19,
+    "user_id": 2,
+    "body": "Projekt on-hold. Fehlende Planungs-/Sanierungsdaten verhindern Ampelsystem in ePPM. Abstimmung mit BBL PM nötig.",
+    "created_at": "2026-03-05T11:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 43,
+    "project_id": 20,
+    "user_id": 3,
+    "body": "Bestandsaufnahme: ca. 40% der Baudokumente digital verfügbar, Rest nur physisch oder in lokalen Laufwerken. Kein konkreter Auftrag.",
+    "created_at": "2026-02-20T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 44,
+    "project_id": 21,
+    "user_id": 2,
+    "body": "Leitsystem-Architektur unklar. Benötigt grundlegende Änderungen an der BBL-IT-Architektur. Vorerst kein Auftrag.",
+    "created_at": "2026-03-15T09:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 45,
+    "project_id": 22,
+    "user_id": 4,
+    "body": "Externe Firma beauftragt für Vermessung der Aussenflächen. Erste Lieferung für 200 Objekte erwartet bis Ende Mai.",
+    "created_at": "2026-04-03T10:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 46,
+    "project_id": 22,
+    "user_id": 1,
+    "body": "Datenformat mit GIS-Team abgestimmt. Import-Skript für SAP vorbereitet. Testlauf mit 10 Objekten erfolgreich.",
+    "created_at": "2026-04-11T14:30:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 47,
+    "project_id": 23,
+    "user_id": 1,
+    "body": "BIT-Angebot für Datenanalyse-Arbeitsplatz evaluiert: JupyterHub, RStudio Server, Power BI. Kosten und Einschränkungen dokumentiert.",
+    "created_at": "2026-03-20T15:00:00Z",
+    "updated_at": null
+  },
+  {
+    "id": 48,
+    "project_id": 23,
+    "user_id": 3,
+    "body": "Python/Pandas lokal möglich, aber kein Zugriff auf SAP-Daten ohne VPN. Cloud-Lösung (Azure ML) als Alternative prüfen.",
+    "created_at": "2026-04-09T09:00:00Z",
     "updated_at": null
   }
 ]

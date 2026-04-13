@@ -1386,7 +1386,7 @@ const FIELD_LABELS = {
   responsible: 'Verantwortlich', requestor: 'Auftraggeber', notes: 'Notizen',
   description: 'Beschreibung', tags: 'Tags', target_date: 'Zieldatum',
   dti_required: 'DTI-pflichtig', hermes_phase: 'HERMES Phase',
-  jira_key: 'Jira-Key', title: 'Titel',
+  jira_key: 'Jira-Key', gever_url: 'GEVER Dossier', title: 'Titel',
 };
 
 // Translate raw changelog values to German labels
@@ -1465,15 +1465,7 @@ function renderDetailPage(container) {
         ${editing
           ? `<textarea class="form-input form-input--desc" id="editDescription" rows="2" placeholder="Beschreibung...">${esc(p.description || '')}</textarea>`
           : (p.description ? `<div class="detail-hero-description">${esc(p.description)}</div>` : '')}
-        ${editing ? '' : `
-        <div class="detail-hero-badges">
-          <span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>
-          <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
-          ${typeBadge(p.type)}
-          ${priorityBadge(p.priority)}
-          ${p.dti_required ? '<span class="badge badge-dti">DTI</span>' : ''}
-        </div>
-        ${tagsHTML}`}
+        ${editing ? '' : tagsHTML}
         ${editing ? `<div class="detail-hero-edit-tags">
           <label class="form-label--inline">Tags:</label>
           <input class="form-input form-input--inline" type="text" id="editTags" value="${esc((p.tags || []).join(', '))}" placeholder="z.B. SAP, Migration">
@@ -1539,10 +1531,18 @@ function renderDetailPage(container) {
             ${editing
               ? detailEditRow('Auftraggeber', detailInput('editRequestor', p.requestor, 'text'))
               : detailFieldRow('Auftraggeber', esc(p.requestor))}
+            ${detailFieldRow('Projekt-ID', '#' + p.id)}
             ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
             ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
             ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
-            ${detailFieldRow('Jira-Key', p.jira_key || '—')}
+            ${editing
+              ? detailEditRow('Jira-Key', detailInput('editJiraKey', p.jira_key, 'text'))
+              : detailFieldRow('Jira-Key', p.jira_key || '—')}
+            ${editing
+              ? detailEditRow('GEVER Dossier', detailInput('editGeverUrl', p.gever_url, 'text'))
+              : detailFieldRow('GEVER Dossier', p.gever_url
+                ? `<a href="${esc(p.gever_url)}" target="_blank" rel="noopener" class="detail-link">${esc(p.gever_url)}</a>`
+                : '—')}
           </div>
         </div>
       </div>
@@ -1657,6 +1657,8 @@ function saveInlineEdit() {
   p.target_date = document.getElementById('editTargetDate').value || null;
   p.responsible = document.getElementById('editResponsible').value || null;
   p.dti_required = document.getElementById('editDti').checked;
+  p.jira_key = document.getElementById('editJiraKey').value || null;
+  p.gever_url = document.getElementById('editGeverUrl').value || null;
   p.tags = document.getElementById('editTags').value
     ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(Boolean)
     : [];
@@ -1746,16 +1748,119 @@ function saveProject() {
 function setupImagePreview() {
   const overlay = document.getElementById('imagePreviewOverlay');
   const img = document.getElementById('imagePreviewImg');
-  const title = document.getElementById('imagePreviewTitle');
+  const body = document.getElementById('imagePreviewBody');
   const uploadInput = document.getElementById('imageUploadInput');
+  let zoomLevel = 1;
+  let panX = 0, panY = 0, isPanning = false, panStartX, panStartY;
+  // Pinch state
+  let lastPinchDist = 0;
+
+  function setZoom(level, centerX, centerY) {
+    zoomLevel = Math.min(Math.max(level, 0.5), 5);
+    img.style.transform = `scale(${zoomLevel}) translate(${panX / zoomLevel}px, ${panY / zoomLevel}px)`;
+    const label = document.getElementById('imagePreviewZoomLabel');
+    if (label) label.textContent = Math.round(zoomLevel * 100) + '%';
+  }
+
+  function resetZoom() {
+    zoomLevel = 1; panX = 0; panY = 0;
+    img.style.transform = '';
+    const label = document.getElementById('imagePreviewZoomLabel');
+    if (label) label.textContent = '100%';
+  }
 
   // Close
   document.getElementById('imagePreviewClose').addEventListener('click', closeImagePreview);
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.classList.contains('image-preview-body')) closeImagePreview();
+    if (e.target === overlay || (e.target === body && !isPanning)) closeImagePreview();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay.classList.contains('open')) closeImagePreview();
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') closeImagePreview();
+    if (e.key === '+' || e.key === '=') { setZoom(zoomLevel * 1.2); e.preventDefault(); }
+    if (e.key === '-') { setZoom(zoomLevel / 1.2); e.preventDefault(); }
+    if (e.key === '0') { resetZoom(); e.preventDefault(); }
+  });
+
+  // Scroll wheel zoom (desktop)
+  body.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom(zoomLevel * delta);
+  }, { passive: false });
+
+  // Zoom buttons
+  document.getElementById('imagePreviewZoomIn').addEventListener('click', () => setZoom(zoomLevel * 1.3));
+  document.getElementById('imagePreviewZoomOut').addEventListener('click', () => setZoom(zoomLevel / 1.3));
+  document.getElementById('imagePreviewZoomReset').addEventListener('click', resetZoom);
+
+  // Pan with mouse drag (when zoomed)
+  body.addEventListener('mousedown', (e) => {
+    if (zoomLevel <= 1) return;
+    isPanning = true;
+    panStartX = e.clientX - panX;
+    panStartY = e.clientY - panY;
+    body.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    panX = e.clientX - panStartX;
+    panY = e.clientY - panStartY;
+    img.style.transform = `scale(${zoomLevel}) translate(${panX / zoomLevel}px, ${panY / zoomLevel}px)`;
+  });
+  document.addEventListener('mouseup', () => {
+    if (isPanning) {
+      isPanning = false;
+      body.style.cursor = '';
+    }
+  });
+
+  // Pinch-to-zoom (mobile)
+  body.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      lastPinchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    } else if (e.touches.length === 1 && zoomLevel > 1) {
+      isPanning = true;
+      panStartX = e.touches[0].clientX - panX;
+      panStartY = e.touches[0].clientY - panY;
+    }
+  }, { passive: true });
+
+  body.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (lastPinchDist > 0) {
+        setZoom(zoomLevel * (dist / lastPinchDist));
+      }
+      lastPinchDist = dist;
+    } else if (e.touches.length === 1 && isPanning) {
+      panX = e.touches[0].clientX - panStartX;
+      panY = e.touches[0].clientY - panStartY;
+      img.style.transform = `scale(${zoomLevel}) translate(${panX / zoomLevel}px, ${panY / zoomLevel}px)`;
+    }
+  }, { passive: false });
+
+  body.addEventListener('touchend', () => {
+    lastPinchDist = 0;
+    isPanning = false;
+  });
+
+  // Double-tap to toggle zoom (mobile)
+  let lastTap = 0;
+  body.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300 && e.changedTouches.length === 1) {
+      zoomLevel > 1 ? resetZoom() : setZoom(2.5);
+    }
+    lastTap = now;
   });
 
   // Download
@@ -1769,10 +1874,7 @@ function setupImagePreview() {
   });
 
   // Upload
-  document.getElementById('imagePreviewUpload').addEventListener('click', () => {
-    uploadInput.click();
-  });
-
+  document.getElementById('imagePreviewUpload').addEventListener('click', () => uploadInput.click());
   uploadInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1783,7 +1885,7 @@ function setupImagePreview() {
       p.thumbnail = ev.target.result;
       p.updated_at = new Date().toISOString();
       img.src = ev.target.result;
-      // Update the hero image in the background
+      resetZoom();
       const heroImg = document.querySelector('.detail-hero-image');
       if (heroImg) heroImg.style.backgroundImage = `url('${ev.target.result}')`;
     };
@@ -1805,8 +1907,11 @@ function setupImagePreview() {
 function openImagePreview() {
   const p = state.projects.find(pr => pr.id === state.selectedProjectId);
   if (!p || !p.thumbnail) return;
-  document.getElementById('imagePreviewImg').src = p.thumbnail;
+  const img = document.getElementById('imagePreviewImg');
+  img.src = p.thumbnail;
+  img.style.transform = '';
   document.getElementById('imagePreviewTitle').textContent = p.title;
+  document.getElementById('imagePreviewZoomLabel').textContent = '100%';
   document.getElementById('imagePreviewOverlay').classList.add('open');
   document.body.classList.add('modal-open');
 }
