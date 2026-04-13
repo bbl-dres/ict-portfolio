@@ -44,7 +44,7 @@
   --warning-100: #FEF3C7;
   --warning-500: #F59E0B;
   --warning-600: #D97706;
-  --warning-800: #92400E;
+  --warning-800: #78350F;
 
   --error-50:  #FEF2F2;
   --error-100: #FEE2E2;
@@ -75,7 +75,7 @@
   --priority-low-text:  #166534;
   --priority-medium:    #F59E0B;
   --priority-medium-bg: #FEF3C7;
-  --priority-medium-text:#92400E;
+  --priority-medium-text:#78350F;
   --priority-high:      #EF4444;
   --priority-high-bg:   #FEE2E2;
   --priority-high-text: #991B1B;
@@ -86,7 +86,7 @@
   --class-std-bg:     #DBEAFE;
   --class-std-text:   #1E40AF;
   --class-complex-bg: #FEF3C7;
-  --class-complex-text:#92400E;
+  --class-complex-text:#78350F;
 
   /* ── Type colours ── */
   --type-incident:      #EF4444;
@@ -100,7 +100,7 @@
   --type-new-text:      #065F46;
   --type-data:          #F59E0B;
   --type-data-bg:       #FEF3C7;
-  --type-data-text:     #92400E;
+  --type-data-text:     #78350F;
   --type-migration:     #3B82F6;
   --type-migration-bg:  #DBEAFE;
   --type-migration-text:#1E40AF;
@@ -170,7 +170,7 @@
   /* ── Layout ── */
   --header-height: 60px;
   --panel-width:   560px;
-  --content-max:   1400px;
+  --content-max:   1600px;
 
   /* ── App Background ── */
   --bg-app: #f8fafd;

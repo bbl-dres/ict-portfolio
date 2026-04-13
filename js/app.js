@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupViewTabs();
   setupToolbar();
   setupFilterToggle();
+  setupViewContainerEvents();
+  setupFilterPanelEvents();
   setupBadgeFilterClicks();
+  setupDragAndDrop();
   setupModal();
   renderFilterPills();
   updateFilterCountBadge();
@@ -61,9 +64,6 @@ function restoreFromURL() {
   if (state.searchQuery) {
     document.getElementById('searchInput').value = state.searchQuery;
     document.getElementById('toolbarSearch').classList.add('expanded');
-  }
-  if (state.showArchived) {
-    document.getElementById('showArchived').checked = true;
   }
 }
 
@@ -128,7 +128,9 @@ function renderView() {
   document.querySelector('.toolbar').style.display = isDetail ? 'none' : '';
   document.getElementById('sortDropdown').style.display = hideControls ? 'none' : '';
   document.getElementById('groupDropdown').style.display = hideControls ? 'none' : '';
+  document.getElementById('filterToggleBtn').style.display = hideControls ? 'none' : '';
   document.getElementById('fieldsDropdown').style.display = hideControls ? 'none' : '';
+  document.querySelector('.toolbar-sep').style.display = hideControls ? 'none' : '';
 
   // Show/hide filter panel and pills in detail view
   if (isDetail) {
@@ -175,6 +177,15 @@ function renderGroupedView(container, contentRenderer) {
   // Always use card-group layout (transparent container)
   container.classList.add('view-container--transparent');
 
+  if (projects.length === 0) {
+    container.innerHTML = `<div class="placeholder-view">
+      <svg class="placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+      <div class="placeholder-title">Keine Projekte gefunden</div>
+      <div class="placeholder-text">Die aktiven Filter ergeben keine Treffer. Passen Sie die Filterkriterien an oder setzen Sie alle Filter zurück.</div>
+    </div>`;
+    return;
+  }
+
   let html = '<div class="groups-container">';
 
   if (groups) {
@@ -191,7 +202,8 @@ function renderGroupedView(container, contentRenderer) {
   html += '</div>';
   container.innerHTML = html;
 
-  bindGroupEvents(container);
+  // Set draggable attributes (events are delegated via setupViewContainerEvents)
+  setupDragAttributes(container);
 }
 
 function renderGroupCard(key, items, collapsed, contentRenderer, isFlat) {
@@ -228,10 +240,21 @@ function renderAddRow() {
   </div>`;
 }
 
-function bindGroupEvents(container) {
-  // Group toggles
-  container.querySelectorAll('.group-header').forEach(header => {
-    header.addEventListener('click', () => {
+/* ── Delegated event handler for viewContainer (set up once) ── */
+
+function setupViewContainerEvents() {
+  const container = document.getElementById('viewContainer');
+
+  // Breadcrumb back link (outside viewContainer, delegate on document)
+  document.querySelector('.breadcrumb-inner').addEventListener('click', (e) => {
+    const back = e.target.closest('#breadcrumbBack');
+    if (back) { e.preventDefault(); closeDetailPage(); }
+  });
+
+  container.addEventListener('click', (e) => {
+    // Group header toggles
+    const header = e.target.closest('.group-header');
+    if (header) {
       const key = header.dataset.group;
       if (state.collapsedGroups.has(key)) {
         state.collapsedGroups.delete(key);
@@ -239,24 +262,43 @@ function bindGroupEvents(container) {
         state.collapsedGroups.add(key);
       }
       renderView();
-    });
-  });
+      return;
+    }
 
-  // Project clicks
-  container.querySelectorAll('[data-id]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('.add-project-btn')) return;
-      openDetailPanel(Number(el.dataset.id));
-    });
-  });
+    // Add project buttons
+    if (e.target.closest('.add-project-btn')) {
+      openModal();
+      return;
+    }
 
-  // Add project buttons
-  container.querySelectorAll('.add-project-btn').forEach(btn => {
-    btn.addEventListener('click', () => openModal());
-  });
+    // Detail page: back button
+    if (e.target.closest('#detailBackBtn')) {
+      closeDetailPage();
+      return;
+    }
 
-  // Drag & drop
-  setupDragAndDrop(container);
+    // Detail page: edit button
+    if (e.target.closest('#detailEditBtn')) {
+      openModal(state.selectedProjectId);
+      return;
+    }
+
+    // Detail page: tab clicks
+    const detailTab = e.target.closest('.detail-tab');
+    if (detailTab) {
+      state.detailTab = detailTab.dataset.tab;
+      renderDetailPage(container);
+      return;
+    }
+
+    // Project row / card clicks (open detail) — must be last
+    // Skip if click was on a badge (handled by setupBadgeFilterClicks)
+    if (e.target.closest('.badge-phase, .badge-class, .badge-type, .badge-priority, .badge-tag')) return;
+    const item = e.target.closest('[data-id]');
+    if (item) {
+      openDetailPanel(Number(item.dataset.id));
+    }
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -279,18 +321,18 @@ function getListColumns() {
   if (vf.has('jira_key'))      cols.push({ key: 'jira_key',     width: '100px' });
   // Title is always shown
   cols.push({ key: '_title', width: '1fr' });
-  if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '80px' });
-  if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '110px' });
   if (vf.has('phase'))         cols.push({ key: 'phase',        width: '110px' });
-  if (vf.has('type'))          cols.push({ key: 'type',         width: '140px' });
-  if (vf.has('class'))         cols.push({ key: 'class',        width: '90px' });
-  if (vf.has('priority'))      cols.push({ key: 'priority',     width: '80px' });
+  if (vf.has('class'))         cols.push({ key: 'class',        width: '105px' });
+  if (vf.has('type'))          cols.push({ key: 'type',         width: '155px' });
+  if (vf.has('priority'))      cols.push({ key: 'priority',     width: '105px' });
+  if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '120px' });
+  if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '80px' });
   if (vf.has('tags'))           cols.push({ key: 'tags',         width: '150px' });
-  if (vf.has('target_date'))   cols.push({ key: 'target_date',  width: '90px' });
-  if (vf.has('go_decision'))   cols.push({ key: 'go_decision',  width: '90px' });
-  if (vf.has('hermes_phase'))  cols.push({ key: 'hermes_phase', width: '100px' });
-  if (vf.has('dti_required'))  cols.push({ key: 'dti_required', width: '30px' });
-  if (vf.has('created_at'))    cols.push({ key: 'created_at',   width: '90px' });
+  if (vf.has('target_date'))   cols.push({ key: 'target_date',  width: '100px' });
+  if (vf.has('go_decision'))   cols.push({ key: 'go_decision',  width: '100px' });
+  if (vf.has('hermes_phase'))  cols.push({ key: 'hermes_phase', width: '110px' });
+  if (vf.has('dti_required'))  cols.push({ key: 'dti_required', width: '50px' });
+  if (vf.has('created_at'))    cols.push({ key: 'created_at',   width: '100px' });
   return cols;
 }
 
@@ -347,10 +389,14 @@ function renderGalleryCard(p) {
   const infoRight = vf.has('budget_chf') ? `<span class="gallery-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
   const infoRow = (infoLeft || infoRight) ? `<div class="gallery-card-meta-row">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
 
-  // Phase + type row
-  const phaseBadgeHtml = vf.has('phase') ? `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>` : '';
-  const typeBadgeHtml = vf.has('type') ? typeBadge(p.type) : '';
-  const phaseRow = (phaseBadgeHtml || typeBadgeHtml) ? `<div class="gallery-card-meta-row">${phaseBadgeHtml}${typeBadgeHtml}</div>` : '';
+  // Badge row: class + type in card body
+  const badgeParts = [];
+  if (vf.has('class')) badgeParts.push(`<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`);
+  if (vf.has('type')) badgeParts.push(typeBadge(p.type));
+  const badgeRow = badgeParts.length ? `<div class="gallery-card-badges">${badgeParts.join('')}</div>` : '';
+
+  // Phase badge on image overlay
+  const phaseBadgeOverlay = vf.has('phase') ? `<div class="card-badge"><span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span></div>` : '';
 
   // Tags
   const tags = vf.has('tags') ? (p.tags && p.tags.length
@@ -378,13 +424,13 @@ function renderGalleryCard(p) {
   return `<div class="gallery-card" data-id="${p.id}" role="article" aria-label="${esc(p.title)}">
     <div class="gallery-card-image" style="${imageStyle}">
       ${!hasImage ? '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M7 12h10M7 17h6"/></svg>' : ''}
-      ${vf.has('class') ? `<div class="card-badge"><span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span></div>` : ''}
+      ${phaseBadgeOverlay}
     </div>
     <div class="gallery-card-body">
       ${topRow}
       <div class="gallery-card-title">${esc(p.title)}</div>
       ${infoRow}
-      ${phaseRow}
+      ${badgeRow}
       ${tags}
       ${extrasRow}
       ${bottomRow}
@@ -408,7 +454,6 @@ function renderKanbanView(container) {
       const phaseItems = columns[phase];
       html += `<div class="kanban-column" data-phase="${phase}">
         <div class="kanban-column-header">
-          <span class="group-dot" style="background:var(--phase-${phase})"></span>
           ${PHASE_LABELS[phase]}
           <span class="kanban-column-count">${phaseItems.length}</span>
         </div>
@@ -424,13 +469,13 @@ function renderKanbanView(container) {
         const topRight = vf.has('priority') ? priorityBadge(p.priority) : '';
         const topRow = (topLeft || topRight) ? `<div class="kanban-card-meta">${topLeft || '<span></span>'}${topRight || '<span></span>'}</div>` : '';
 
-        // Info: budget + class
-        const infoLeft = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
-        const infoRight = vf.has('class') ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
-        const infoRow = (infoLeft || infoRight) ? `<div class="kanban-card-meta">${infoLeft || '<span></span>'}${infoRight || '<span></span>'}</div>` : '';
+        // Info: budget
+        const budgetHtml = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
 
-        // Type
-        const typeRow = vf.has('type') ? `<div class="kanban-card-meta">${typeBadge(p.type)}</div>` : '';
+        // Class + Type badge row (consistent with gallery overlay)
+        const classBadgeHtml = vf.has('class') ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
+        const typeBadgeHtml = vf.has('type') ? typeBadge(p.type) : '';
+        const badgeRow = (classBadgeHtml || typeBadgeHtml) ? `<div class="kanban-card-meta">${classBadgeHtml}${typeBadgeHtml}${budgetHtml ? `<span style="margin-left:auto">${budgetHtml}</span>` : ''}</div>` : (budgetHtml ? `<div class="kanban-card-meta">${budgetHtml}</div>` : '');
 
         // Tags
         const tags = vf.has('tags') ? (p.tags && p.tags.length
@@ -456,8 +501,7 @@ function renderKanbanView(container) {
         html += `<div class="kanban-card" data-id="${p.id}">
           ${topRow}
           <div class="kanban-card-title">${esc(p.title)}</div>
-          ${infoRow}
-          ${typeRow}
+          ${badgeRow}
           ${tags}
           ${extrasRow}
           ${bottomRow}
@@ -756,12 +800,6 @@ function setupToolbar() {
     render();
   });
 
-  // Show archived
-  document.getElementById('showArchived').addEventListener('change', (e) => {
-    state.showArchived = e.target.checked;
-    render();
-  });
-
   // Fields
   const fieldsMenu = document.getElementById('fieldsMenu');
   fieldsMenu.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -817,13 +855,22 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
   });
 }
 
-// Single global listener to close all dropdowns on outside click
-document.addEventListener('click', () => {
+// Single global listener to close all dropdowns and search on outside click
+document.addEventListener('click', (e) => {
   document.querySelectorAll('.dropdown-menu.open').forEach(m => {
     m.classList.remove('open');
     const btn = m.parentElement.querySelector('[aria-expanded]');
     if (btn) btn.setAttribute('aria-expanded', 'false');
   });
+
+  // Collapse search if click is outside it and query is empty
+  const searchWrap = document.getElementById('toolbarSearch');
+  if (searchWrap.classList.contains('expanded') && !searchWrap.contains(e.target)) {
+    const input = document.getElementById('searchInput');
+    if (!input.value.trim()) {
+      searchWrap.classList.remove('expanded');
+    }
+  }
 });
 
 /* ═══════════════════════════════════════════════════════════
@@ -925,13 +972,37 @@ function renderFilterPanel() {
         <div class="filter-section-title">Tags</div>
         <div class="filter-tags-wrap">${tagChips || '<span style="color:var(--gray-400);font-size:var(--font-size-xs)">Keine Tags</span>'}</div>
       </div>
+      <div>
+        <div class="filter-section-title">Anzeige</div>
+        <div class="filter-section-options">
+          <label class="filter-option"><input type="checkbox" id="showArchived" ${state.showArchived ? 'checked' : ''}>Archivierte anzeigen</label>
+        </div>
+      </div>
     </div>`;
 
-  // Bind checkbox/radio events
-  panel.querySelectorAll('input[data-dim]').forEach(input => {
-    input.addEventListener('change', () => {
-      const dim = input.dataset.dim;
-      const val = input.dataset.val;
+  // Events are delegated via setupFilterPanelEvents() — no per-render binding needed
+}
+
+/* ── Delegated event handler for filterPanel (set up once) ── */
+
+function setupFilterPanelEvents() {
+  const panel = document.getElementById('filterPanel');
+
+  // Checkbox/radio changes (filter dimensions + archived toggle)
+  panel.addEventListener('change', (e) => {
+    const input = e.target;
+
+    // Archived toggle
+    if (input.id === 'showArchived') {
+      state.showArchived = input.checked;
+      render();
+      return;
+    }
+
+    // Filter dimension inputs
+    const dim = input.dataset.dim;
+    const val = input.dataset.val;
+    if (dim) {
       if (dim === 'dti') {
         state.filters.dti = val === 'any' ? null : val === 'true';
       } else {
@@ -940,18 +1011,49 @@ function renderFilterPanel() {
       renderFilterPills();
       updateFilterCountBadge();
       render();
-    });
+    }
   });
 
-  // Bind tag chip clicks
-  panel.querySelectorAll('.filter-tag-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
+  // Tag chip clicks
+  panel.addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-tag-chip');
+    if (chip) {
       toggleFilter('tags', chip.dataset.val);
       chip.classList.toggle('selected');
       renderFilterPills();
       updateFilterCountBadge();
       render();
-    });
+    }
+  });
+
+  // Filter pills: remove individual pill or reset all (delegate on #filterPills)
+  const pillsContainer = document.getElementById('filterPills');
+  pillsContainer.addEventListener('click', (e) => {
+    // Individual pill remove
+    const removeBtn = e.target.closest('.filter-pill-remove');
+    if (removeBtn) {
+      const dim = removeBtn.dataset.dim;
+      const val = removeBtn.dataset.val;
+      if (dim === 'dti') {
+        state.filters.dti = null;
+      } else {
+        state.filters[dim].delete(val);
+      }
+      renderFilterPills();
+      updateFilterCountBadge();
+      if (state.filterPanelOpen) renderFilterPanel();
+      render();
+      return;
+    }
+
+    // Reset all filters
+    if (e.target.closest('#filterResetBtn')) {
+      clearAllFilters();
+      renderFilterPills();
+      updateFilterCountBadge();
+      if (state.filterPanelOpen) renderFilterPanel();
+      render();
+    }
   });
 }
 
@@ -976,7 +1078,7 @@ function renderFilterPills() {
     html += filterPill('class', k, CLASS_LABELS[k], classColors[k]);
   }
   for (const k of f.type) {
-    html += filterPill('type', k, TYPE_LABELS[k], `var(--type-${k})`);
+    html += filterPill('type', k, TYPE_LABELS[k], 'var(--gray-500)');
   }
   for (const k of f.priority) {
     html += filterPill('priority', k, PRIORITY_LABELS[k], prioColors[k]);
@@ -998,37 +1100,12 @@ function renderFilterPills() {
   </button>`;
 
   container.innerHTML = html;
-
-  // Bind pill remove buttons
-  container.querySelectorAll('.filter-pill-remove').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const dim = btn.dataset.dim;
-      const val = btn.dataset.val;
-      if (dim === 'dti') {
-        state.filters.dti = null;
-      } else {
-        state.filters[dim].delete(val);
-      }
-      renderFilterPills();
-      updateFilterCountBadge();
-      if (state.filterPanelOpen) renderFilterPanel();
-      render();
-    });
-  });
-
-  // Bind reset button
-  document.getElementById('filterResetBtn').addEventListener('click', () => {
-    clearAllFilters();
-    renderFilterPills();
-    updateFilterCountBadge();
-    if (state.filterPanelOpen) renderFilterPanel();
-    render();
-  });
 }
 
+/* Filter pills use event delegation — set up once in setupFilterPanelEvents */
+
 function filterPill(dim, val, label, color) {
-  return `<span class="filter-pill">
-    <span class="pill-dot" style="background:${color}"></span>
+  return `<span class="filter-pill" style="background:color-mix(in srgb, ${color} 12%, white); border-color:color-mix(in srgb, ${color} 30%, transparent);">
     ${esc(label)}
     <button class="filter-pill-remove" data-dim="${dim}" data-val="${esc(val)}" aria-label="Filter entfernen">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -1211,17 +1288,17 @@ function renderDetailPage(container) {
     <div class="detail-hero">
       <div class="detail-hero-image" style="${imageStyle}"></div>
       <div class="detail-hero-body">
-        <div class="detail-hero-title">${esc(p.title)}</div>
-        <div class="detail-hero-subtitle">${esc(p.requestor)}${p.responsible ? ' · ' + esc(p.responsible) : ''}</div>
+        <div class="detail-hero-top">
+          <div class="detail-hero-title">${esc(p.title)}</div>
+          <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
+        </div>
+        <div class="detail-hero-subtitle">${esc(p.requestor)}${p.responsible ? ' · ' + esc(p.responsible) : ''}${p.jira_key ? ' · ' + esc(p.jira_key) : ''}</div>
         <div class="detail-hero-badges">
           <span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>
           <span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>
           ${typeBadge(p.type)}
+          ${priorityBadge(p.priority)}
           ${p.dti_required ? '<span class="badge badge-dti">DTI</span>' : ''}
-          ${p.jira_key ? `<span class="detail-hero-jira">${esc(p.jira_key)}</span>` : ''}
-        </div>
-        <div class="detail-hero-actions">
-          <button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>
         </div>
       </div>
     </div>
@@ -1238,21 +1315,19 @@ function renderDetailPage(container) {
       <div class="detail-card">
         <div class="detail-card-header">Projektdetails</div>
         <div class="detail-card-body">
-          ${detailFieldRow('Phase', `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`)}
-          ${detailFieldRow('Klasse', `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`)}
-          ${detailFieldRow('Typ', typeBadge(p.type))}
-          ${detailFieldRow('Priorität', priorityBadge(p.priority))}
-          ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
-          ${detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
-          ${detailFieldRow('Go-Entscheid', p.go_decision === true ? 'Genehmigt' : p.go_decision === false ? 'Abgelehnt' : 'Ausstehend')}
-          ${detailFieldRow('Verantwortlich', p.responsible || '—')}
-          ${detailFieldRow('Auftraggeber', esc(p.requestor))}
-          ${detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
-          ${detailFieldRow('HERMES Phase', p.hermes_phase || '—')}
-          ${detailFieldRow('Jira-Key', p.jira_key || '—')}
-          ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
-          ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
-          ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
+          <div class="detail-fields-grid">
+            ${detailFieldRow('Budget', formatBudget(p.budget_chf))}
+            ${detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
+            ${detailFieldRow('Verantwortlich', p.responsible || '—')}
+            ${detailFieldRow('Auftraggeber', esc(p.requestor))}
+            ${detailFieldRow('Go-Entscheid', p.go_decision === true ? 'Genehmigt' : p.go_decision === false ? 'Abgelehnt' : 'Ausstehend')}
+            ${detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
+            ${detailFieldRow('HERMES Phase', p.hermes_phase || '—')}
+            ${detailFieldRow('Jira-Key', p.jira_key || '—')}
+            ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
+            ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
+            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
+          </div>
         </div>
       </div>
     `;
@@ -1323,22 +1398,6 @@ function renderDetailPage(container) {
   }
 
   container.innerHTML = html;
-
-  // Bind events
-  document.getElementById('detailBackBtn').addEventListener('click', closeDetailPage);
-  document.getElementById('breadcrumbBack').addEventListener('click', (e) => {
-    e.preventDefault();
-    closeDetailPage();
-  });
-  document.getElementById('detailEditBtn').addEventListener('click', () => {
-    openModal(state.selectedProjectId);
-  });
-  container.querySelectorAll('.detail-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      state.detailTab = tab.dataset.tab;
-      renderDetailPage(container);
-    });
-  });
 }
 
 function detailFieldRow(label, value) {
@@ -1443,7 +1502,7 @@ function saveProject() {
     notes: document.getElementById('formNotes').value || null,
   };
 
-  if (state.editingProjectId) {
+  if (state.editingProjectId !== null) {
     // Edit
     const p = state.projects.find(pr => pr.id === state.editingProjectId);
     if (p) {
@@ -1513,6 +1572,7 @@ function exportCSV() {
 function exportPDF() {
   const projects = getFilteredProjects();
   const win = window.open('', '_blank');
+  if (!win) { alert('Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite.'); return; }
   win.document.write(`<!DOCTYPE html><html lang="de"><head>
     <meta charset="UTF-8">
     <title>IKT Projektportfolio DRES — Bericht</title>
@@ -1527,7 +1587,7 @@ function exportPDF() {
       .badge { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 10px; font-weight: 500; }
       .phase-triage { background: #F3F4F6; color: #374151; }
       .phase-analysis { background: #DBEAFE; color: #1E40AF; }
-      .phase-implementation { background: #FEF3C7; color: #92400E; }
+      .phase-implementation { background: #FEF3C7; color: #78350F; }
       .phase-completed { background: #DCFCE7; color: #166534; }
       .phase-rejected { background: #FEE2E2; color: #991B1B; }
       .tags { color: #6B7280; }
@@ -1570,7 +1630,7 @@ function priorityBadge(priority) {
 
 function typeBadge(type) {
   const t = type || 'new';
-  return `<span class="badge badge-type" data-type="${t}">${TYPE_ICONS[t]} ${TYPE_LABELS[t]}</span>`;
+  return `<span class="badge badge-type" data-type="${t}">${TYPE_LABELS[t]}</span>`;
 }
 
 const _escEl = document.createElement('div');
@@ -1589,126 +1649,88 @@ function escCSSUrl(url) {
    DRAG & DROP
    ═══════════════════════════════════════════════════════════ */
 
-function setupDragAndDrop(container) {
-  const view = state.currentView;
+/* ── Drag & drop: set draggable attributes (called each render) ── */
 
+function setupDragAttributes(container) {
+  const view = state.currentView;
   if (view === 'kanban') {
-    setupKanbanDrag(container);
+    container.querySelectorAll('.kanban-card').forEach(card => card.setAttribute('draggable', 'true'));
   } else if (['list', 'gallery', 'gantt'].includes(view) && state.groupBy !== 'none') {
-    setupGroupDrag(container);
+    const sel = getDraggableSelector();
+    if (sel) container.querySelectorAll(sel).forEach(el => el.setAttribute('draggable', 'true'));
   }
 }
 
-/* ── Kanban: drag between phase columns ── */
+/* ── Drag & drop: delegated event handlers (set up once in DOMContentLoaded) ── */
 
-function setupKanbanDrag(container) {
-  // Make cards draggable
-  container.querySelectorAll('.kanban-card').forEach(card => {
-    card.setAttribute('draggable', 'true');
+function setupDragAndDrop() {
+  const container = document.getElementById('viewContainer');
 
-    card.addEventListener('dragstart', (e) => {
-      card.classList.add('drag-item');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', card.dataset.id);
-      // Store the source phase column
-      const sourceColumn = card.closest('.kanban-column');
-      e.dataTransfer.setData('application/x-source', sourceColumn.dataset.phase);
-    });
-
-    card.addEventListener('dragend', () => {
-      card.classList.remove('drag-item');
-      container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-    });
+  container.addEventListener('dragstart', (e) => {
+    const draggable = e.target.closest('[draggable="true"]');
+    if (!draggable) return;
+    draggable.classList.add('drag-item');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggable.dataset.id);
+    const sourceColumn = draggable.closest('.kanban-column');
+    if (sourceColumn) e.dataTransfer.setData('application/x-source', sourceColumn.dataset.phase);
   });
 
-  // Make columns drop zones
-  container.querySelectorAll('.kanban-column').forEach(column => {
-    column.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      column.classList.add('drag-over');
-    });
+  container.addEventListener('dragend', (e) => {
+    const draggable = e.target.closest('[draggable="true"]');
+    if (draggable) draggable.classList.remove('drag-item');
+    container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  });
 
-    column.addEventListener('dragleave', (e) => {
-      // Only remove if actually leaving the column (not entering a child)
-      if (!column.contains(e.relatedTarget)) {
-        column.classList.remove('drag-over');
-      }
-    });
+  container.addEventListener('dragover', (e) => {
+    const dropZone = e.target.closest('.kanban-column, .group-card');
+    if (!dropZone) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    dropZone.classList.add('drag-over');
+  });
 
-    column.addEventListener('drop', (e) => {
-      e.preventDefault();
-      column.classList.remove('drag-over');
-      const projectId = Number(e.dataTransfer.getData('text/plain'));
+  container.addEventListener('dragleave', (e) => {
+    const dropZone = e.target.closest('.kanban-column, .group-card');
+    if (dropZone && !dropZone.contains(e.relatedTarget)) {
+      dropZone.classList.remove('drag-over');
+    }
+  });
+
+  container.addEventListener('drop', (e) => {
+    const dropZone = e.target.closest('.kanban-column, .group-card');
+    if (!dropZone) return;
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const projectId = Number(e.dataTransfer.getData('text/plain'));
+    const project = state.projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    // Kanban column drop
+    const column = dropZone.closest('.kanban-column');
+    if (column) {
       const targetPhase = column.dataset.phase;
-      const project = state.projects.find(p => p.id === projectId);
-      if (project && project.phase !== targetPhase) {
+      if (project.phase !== targetPhase) {
         project.phase = targetPhase;
         project.updated_at = new Date().toISOString();
         render();
       }
-    });
-  });
-}
+      return;
+    }
 
-/* ── List/Gallery/Gantt: drag between group cards ── */
-
-function setupGroupDrag(container) {
-  const draggableSelector = getDraggableSelector();
-  if (!draggableSelector) return;
-
-  // Make items draggable
-  container.querySelectorAll(draggableSelector).forEach(item => {
-    item.setAttribute('draggable', 'true');
-
-    item.addEventListener('dragstart', (e) => {
-      item.classList.add('drag-item');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', item.dataset.id);
-      // Prevent click event from firing after drag
-      e.stopPropagation();
-    });
-
-    item.addEventListener('dragend', () => {
-      item.classList.remove('drag-item');
-      container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-    });
-  });
-
-  // Make group cards drop zones
-  container.querySelectorAll('.group-card').forEach(groupCard => {
-    const header = groupCard.querySelector('.group-header');
-    if (!header) return;
-    const groupKey = header.dataset.group;
-
-    groupCard.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      groupCard.classList.add('drag-over');
-    });
-
-    groupCard.addEventListener('dragleave', (e) => {
-      if (!groupCard.contains(e.relatedTarget)) {
-        groupCard.classList.remove('drag-over');
-      }
-    });
-
-    groupCard.addEventListener('drop', (e) => {
-      e.preventDefault();
-      groupCard.classList.remove('drag-over');
-      const projectId = Number(e.dataTransfer.getData('text/plain'));
-      const project = state.projects.find(p => p.id === projectId);
-      if (!project) return;
-
-      // Update the field that matches the current groupBy
+    // Group card drop
+    const groupCard = dropZone.closest('.group-card');
+    if (groupCard) {
+      const header = groupCard.querySelector('.group-header');
+      if (!header) return;
       const field = state.groupBy;
-      const newValue = convertGroupKeyToValue(field, groupKey);
+      const newValue = convertGroupKeyToValue(field, header.dataset.group);
       if (project[field] !== newValue) {
         project[field] = newValue;
         project.updated_at = new Date().toISOString();
         render();
       }
-    });
+    }
   });
 }
 

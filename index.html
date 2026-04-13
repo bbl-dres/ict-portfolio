@@ -20,7 +20,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
       </button>
       <div class="header-brand">
-        <svg class="header-logo" width="28" height="28" viewBox="0 0 32 32"><rect width="32" height="32" rx="3" fill="#E53935"/><rect x="13" y="6" width="6" height="20" rx="1" fill="#fff"/><rect x="6" y="13" width="20" height="6" rx="1" fill="#fff"/></svg>
+        <img class="header-logo" src="assets/swiss-logo-flag.svg" alt="Schweizerische Eidgenossenschaft" width="28" height="31">
         <span class="header-title">Bundesamt für Bauten und Logistik BBL<br>IKT Projektportfolio DRES</span>
       </div>
     </div>
@@ -157,14 +157,16 @@
           </div>
         </div>
 
+        <span class="toolbar-sep"></span>
+        <button class="toolbar-btn" id="filterToggleBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          Filter
+          <span class="filter-count-badge" id="filterCountBadge"></span>
+        </button>
+
       </div>
 
       <div class="toolbar-right">
-        <label class="checkbox-label">
-          <input type="checkbox" class="checkbox-input" id="showArchived">
-          <span class="checkbox-custom"></span>
-          <span class="checkbox-text">Archivierte anzeigen</span>
-        </label>
         <div class="toolbar-dropdown" id="fieldsDropdown">
           <button class="toolbar-btn" id="fieldsBtn" aria-expanded="false" aria-haspopup="true" aria-controls="fieldsMenu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -178,7 +180,7 @@
             <label class="dropdown-checkbox"><input type="checkbox" data-field="responsible" checked> Verantwortlich</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="phase" checked> Phase</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="class" checked> Klasse</label>
-            <label class="dropdown-checkbox"><input type="checkbox" data-field="type"> Typ</label>
+            <label class="dropdown-checkbox"><input type="checkbox" data-field="type" checked> Typ</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="priority" checked> Priorität</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="tags"> Tags</label>
             <label class="dropdown-checkbox"><input type="checkbox" data-field="target_date" checked> Zieldatum</label>
@@ -188,11 +190,6 @@
             <label class="dropdown-checkbox"><input type="checkbox" data-field="created_at"> Erstellt</label>
           </div>
         </div>
-        <button class="toolbar-btn" id="filterToggleBtn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-          Filter
-          <span class="filter-count-badge" id="filterCountBadge"></span>
-        </button>
       </div>
     </div>
 
@@ -202,12 +199,12 @@
     </div>
 
     <!-- Active Filter Pills -->
-    <div class="filter-pills" id="filterPills">
+    <div class="filter-pills" id="filterPills" aria-live="polite">
       <!-- filled by JS -->
     </div>
 
     <!-- View Container -->
-    <div class="view-container" id="viewContainer">
+    <div class="view-container" id="viewContainer" aria-live="polite">
       <!-- filled by JS -->
     </div>
     </div>
@@ -217,7 +214,7 @@
   <!-- CREATE / EDIT MODAL                                         -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="projectModal">
+    <div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
         <h2 class="modal-title" id="modalTitle">Neues Projekt erfassen</h2>
         <button class="modal-close" id="modalClose" aria-label="Schliessen">
