@@ -1505,7 +1505,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `DRES_PPM_Export_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `IKT_Portfolio_DRES_${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1515,7 +1515,7 @@ function exportPDF() {
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html lang="de"><head>
     <meta charset="UTF-8">
-    <title>DRES PPM — Projektportfolio Bericht</title>
+    <title>IKT Projektportfolio DRES — Bericht</title>
     <style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; color: #111827; margin: 40px; }
       h1 { font-size: 20px; margin-bottom: 4px; }
@@ -1534,7 +1534,7 @@ function exportPDF() {
       @media print { body { margin: 20px; } }
     </style>
   </head><body>
-    <h1>Projektportfolio DRES</h1>
+    <h1>IKT Projektportfolio DRES</h1>
     <div class="subtitle">${projects.length} Projekte · Erstellt am ${new Date().toLocaleDateString('de-CH')}</div>
     <table>
       <thead><tr>
