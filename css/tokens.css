@@ -55,64 +55,58 @@
   --error-600: #DC2626;
   --error-800: #991B1B;
 
-  --info-50:  #EFF6FF;
-  --info-100: #DBEAFE;
-  --info-500: #3B82F6;
-  --info-800: #1E40AF;
-
   /* ── Phase colours ── */
-  --phase-triage:         #6B7280;
-  --phase-triage-bg:      #F3F4F6;
-  --phase-analysis:       #3B82F6;
-  --phase-analysis-bg:    #DBEAFE;
-  --phase-implementation: #F59E0B;
-  --phase-implementation-bg: #FEF3C7;
-  --phase-completed:      #22C55E;
-  --phase-completed-bg:   #DCFCE7;
-  --phase-rejected:       #EF4444;
-  --phase-rejected-bg:    #FEE2E2;
+  --phase-triage:            var(--gray-500);
+  --phase-triage-bg:         var(--gray-100);
+  --phase-triage-text:       var(--gray-700);
+  --phase-analysis:          var(--accent-500);
+  --phase-analysis-bg:       var(--accent-100);
+  --phase-analysis-text:     var(--accent-800);
+  --phase-implementation:    var(--warning-500);
+  --phase-implementation-bg: var(--warning-100);
+  --phase-implementation-text: var(--warning-800);
+  --phase-completed:         var(--success-500);
+  --phase-completed-bg:      var(--success-100);
+  --phase-completed-text:    var(--success-800);
+  --phase-rejected:          var(--error-500);
+  --phase-rejected-bg:       var(--error-100);
+  --phase-rejected-text:     var(--error-800);
 
   /* ── Priority colours ── */
-  --priority-low:       #22C55E;
-  --priority-low-bg:    #DCFCE7;
-  --priority-low-text:  #166534;
-  --priority-medium:    #F59E0B;
-  --priority-medium-bg: #FEF3C7;
-  --priority-medium-text:#78350F;
-  --priority-high:      #EF4444;
-  --priority-high-bg:   #FEE2E2;
-  --priority-high-text: #991B1B;
+  --priority-low-bg:     var(--success-100);
+  --priority-low-text:   var(--success-800);
+  --priority-medium-bg:  var(--warning-100);
+  --priority-medium-text: var(--warning-800);
+  --priority-high-bg:    var(--error-100);
+  --priority-high-text:  var(--error-800);
 
   /* ── Class colours ── */
-  --class-fast-bg:    #DCFCE7;
-  --class-fast-text:  #166534;
-  --class-std-bg:     #DBEAFE;
-  --class-std-text:   #1E40AF;
-  --class-complex-bg: #FEF3C7;
-  --class-complex-text:#78350F;
+  --class-fast-bg:      var(--success-100);
+  --class-fast-text:    var(--success-800);
+  --class-std-bg:       var(--accent-100);
+  --class-std-text:     var(--accent-800);
+  --class-complex-bg:   var(--warning-100);
+  --class-complex-text: var(--warning-800);
 
   /* ── Type colours ── */
-  --type-incident:      #EF4444;
-  --type-incident-bg:   #FEE2E2;
-  --type-incident-text: #991B1B;
+  --type-incident-bg:   var(--error-100);
+  --type-incident-text: var(--error-800);
   --type-change:        #8B5CF6;
   --type-change-bg:     #EDE9FE;
   --type-change-text:   #5B21B6;
   --type-new:           #10B981;
   --type-new-bg:        #D1FAE5;
   --type-new-text:      #065F46;
-  --type-data:          #F59E0B;
-  --type-data-bg:       #FEF3C7;
-  --type-data-text:     #78350F;
-  --type-migration:     #3B82F6;
-  --type-migration-bg:  #DBEAFE;
-  --type-migration-text:#1E40AF;
-  --type-study:         #6B7280;
-  --type-study-bg:      #F3F4F6;
-  --type-study-text:    #374151;
+  --type-data-bg:       var(--warning-100);
+  --type-data-text:     var(--warning-800);
+  --type-migration-bg:  var(--accent-100);
+  --type-migration-text: var(--accent-800);
+  --type-study-bg:      var(--gray-100);
+  --type-study-text:    var(--gray-700);
 
   /* ── Typography ── */
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:   'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
   --font-size-2xs: 0.625rem;  /* 10px */
   --font-size-xs:  0.75rem;   /* 12px */
   --font-size-sm:  0.875rem;  /* 14px */
@@ -120,6 +114,7 @@
   --font-size-lg:  1.125rem;  /* 18px */
   --font-size-xl:  1.25rem;   /* 20px */
   --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.75rem;   /* 28px – KPI values */
   --font-weight-normal:  400;
   --font-weight-medium:  500;
   --font-weight-semi:    600;
@@ -130,6 +125,7 @@
   --letter-spacing-wide:  0.025em;
 
   /* ── Spacing (4px base) ── */
+  --space-0h: 2px;            /* half-step for tight padding */
   --space-1:  0.25rem;  /* 4px */
   --space-2:  0.5rem;   /* 8px */
   --space-3:  0.75rem;  /* 12px */
@@ -145,13 +141,28 @@
   --radius-md:   6px;
   --radius-lg:   8px;
   --radius-xl:   12px;
+  --radius-2xl:  16px;  /* modals */
   --radius-full: 9999px;
 
   /* ── Shadows ── */
-  --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.04);
   --shadow-md:  0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
   --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
   --shadow-xl:  0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+
+  /* Interactive shadow states */
+  --shadow-hover-sm:  0 2px 4px rgba(0,0,0,0.06);
+  --shadow-hover-md:  0 4px 12px rgba(0,0,0,0.08);
+  --shadow-hover-lg:  0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-accent-sm: 0 1px 3px rgba(37,99,235,0.3);
+  --shadow-accent-md: 0 2px 6px rgba(37,99,235,0.35);
+  --shadow-modal:     0 24px 48px rgba(0,0,0,0.16), 0 8px 16px rgba(0,0,0,0.08);
+
+  /* ── Focus Ring ── */
+  --focus-ring-color:  var(--accent-500);
+  --focus-ring-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--focus-ring-color);
+  --focus-ring-inset:  0 0 0 3px rgba(59,130,246,0.12);
 
   /* ── Transitions ── */
   --transition-fast:   150ms ease;
@@ -165,26 +176,14 @@
   --z-overlay:  400;
   --z-modal:    500;
 
-  /* ── Focus Ring ── */
-  --focus-ring-color: var(--accent-500);
-  --focus-ring-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--focus-ring-color);
-  --focus-ring-inset: 0 0 0 3px var(--accent-100);
-
   /* ── Layout ── */
   --header-height: 60px;
   --panel-width:   560px;
   --content-max:   1600px;
 
-  /* ── App Background ── */
-  --bg-app: #f5f7fb;
-  --bg-primary: #ffffff;
-  --bg-surface: #fafbfd;
+  /* ── Surfaces ── */
+  --bg-app:           #f5f7fb;
+  --bg-primary:       #ffffff;
+  --bg-surface:       #fafbfd;
   --bg-surface-hover: #f0f4fa;
-
-  /* ── Card accents (top-border color by phase) ── */
-  --card-accent-triage:         var(--phase-triage);
-  --card-accent-analysis:       var(--phase-analysis);
-  --card-accent-implementation: var(--phase-implementation);
-  --card-accent-completed:      var(--phase-completed);
-  --card-accent-rejected:       var(--phase-rejected);
 }
