@@ -7,8 +7,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   restoreFromURL();
   setupViewTabs();
   setupToolbar();
-  setupDetailPanel();
+  setupFilterToggle();
+  setupBadgeFilterClicks();
   setupModal();
+  renderFilterPills();
+  updateFilterCountBadge();
   render();
 });
 
@@ -25,6 +28,15 @@ function restoreFromURL() {
   if (params.has('dir'))    state.sortDirection = params.get('dir');
   if (params.has('q'))      state.searchQuery = params.get('q');
   if (params.has('assignee')) state.assigneeFilter = params.get('assignee');
+  if (params.has('archived')) state.showArchived = params.get('archived') === '1';
+  if (params.has('mine'))     state.assignedToMe = params.get('mine') === '1';
+
+  // Restore multi-dimensional filters
+  if (params.has('f.phase'))    params.get('f.phase').split(',').forEach(v => state.filters.phase.add(v));
+  if (params.has('f.class'))    params.get('f.class').split(',').forEach(v => state.filters.class.add(v));
+  if (params.has('f.priority')) params.get('f.priority').split(',').forEach(v => state.filters.priority.add(v));
+  if (params.has('f.tags'))     params.get('f.tags').split(',').forEach(v => state.filters.tags.add(v));
+  if (params.has('f.dti'))      state.filters.dti = params.get('f.dti') === '1';
 
   // Sync UI to restored state
   document.querySelectorAll('.view-tab').forEach(t => {
@@ -37,9 +49,24 @@ function restoreFromURL() {
       { phase: 'Phase', class: 'Klasse', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
+  // Sync sort field active state
+  document.querySelectorAll('#sortMenu .dropdown-item[data-sort]').forEach(i => {
+    i.classList.toggle('active', i.dataset.sort === state.sortField);
+  });
+  // Sync sort direction active state
+  document.querySelectorAll('#sortMenu .dropdown-item[data-direction]').forEach(i => {
+    i.classList.toggle('active', i.dataset.direction === state.sortDirection);
+  });
+
   if (state.searchQuery) {
     document.getElementById('searchInput').value = state.searchQuery;
     document.getElementById('toolbarSearch').classList.add('expanded');
+  }
+  if (state.showArchived) {
+    document.getElementById('showArchived').checked = true;
+  }
+  if (state.assignedToMe) {
+    document.getElementById('assignedToMe').checked = true;
   }
 }
 
@@ -54,6 +81,15 @@ function updateURL() {
   if (state.sortDirection !== 'asc')    params.set('dir', state.sortDirection);
   if (state.searchQuery)                params.set('q', state.searchQuery);
   if (state.assigneeFilter)             params.set('assignee', state.assigneeFilter);
+  if (state.showArchived)               params.set('archived', '1');
+  if (state.assignedToMe)               params.set('mine', '1');
+
+  // Multi-dimensional filters
+  if (state.filters.phase.size)    params.set('f.phase', [...state.filters.phase].join(','));
+  if (state.filters.class.size)    params.set('f.class', [...state.filters.class].join(','));
+  if (state.filters.priority.size) params.set('f.priority', [...state.filters.priority].join(','));
+  if (state.filters.tags.size)     params.set('f.tags', [...state.filters.tags].join(','));
+  if (state.filters.dti != null)   params.set('f.dti', state.filters.dti ? '1' : '0');
 
   const qs = params.toString();
   const url = window.location.pathname + (qs ? '?' + qs : '');
@@ -66,7 +102,6 @@ function updateURL() {
 
 function render() {
   renderView();
-  updateURL();
 }
 
 
@@ -98,6 +133,15 @@ function renderView() {
   document.getElementById('groupDropdown').style.display = hideControls ? 'none' : '';
   document.getElementById('fieldsDropdown').style.display = hideControls ? 'none' : '';
 
+  // Show/hide filter panel and pills in detail view
+  if (isDetail) {
+    document.getElementById('filterPanel').classList.remove('open');
+    document.getElementById('filterPills').classList.remove('visible');
+  } else {
+    if (state.filterPanelOpen) document.getElementById('filterPanel').classList.add('open');
+    if (hasActiveFilters()) document.getElementById('filterPills').classList.add('visible');
+  }
+
   // Restore breadcrumb when not in detail
   if (!isDetail) {
     document.querySelector('.breadcrumb-inner').innerHTML = `
@@ -114,8 +158,9 @@ function renderView() {
     case 'gantt':     renderGanttView(container); break;
     case 'dashboard': container.classList.add('view-container--transparent'); renderDashboardView(container); break;
     case 'wiki':      container.classList.add('view-container--transparent'); renderWikiView(container); break;
-    case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); return;
+    case 'detail':    container.classList.add('view-container--transparent'); renderDetailPage(container); updateURL(); return;
   }
+  updateURL();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -290,7 +335,7 @@ function renderGalleryCard(p) {
   const vf = state.visibleFields;
   const hasImage = !!p.thumbnail;
   const imageStyle = hasImage
-    ? `background-image:url('${p.thumbnail}');background-size:cover;background-position:center`
+    ? `background-image:url('${escCSSUrl(p.thumbnail)}');background-size:cover;background-position:center`
     : `background:linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%)`;
 
   // Top row: jira key + priority
@@ -433,8 +478,8 @@ function renderGanttView(container) {
 function renderGanttChart(projects) {
   const today = new Date();
   const durations = { fast_track: 90, standard: 180, complex: 365 };
-  let minDate = new Date('2026-01-01');
-  let maxDate = new Date('2026-12-31');
+  let minDate = new Date(today.getFullYear(), 0, 1);
+  let maxDate = new Date(today.getFullYear(), 11, 31);
 
   const bars = projects.map(p => {
     const start = new Date(p.created_at);
@@ -796,21 +841,305 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
     }
     e.stopPropagation();
   });
+}
 
-  // Close on outside click
-  document.addEventListener('click', () => {
-    menu.classList.remove('open');
-    btn.setAttribute('aria-expanded', 'false');
+// Single global listener to close all dropdowns on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown-menu.open').forEach(m => {
+    m.classList.remove('open');
+    const btn = m.parentElement.querySelector('[aria-expanded]');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   FILTER PANEL & PILLS
+   ═══════════════════════════════════════════════════════════ */
+
+function setupFilterToggle() {
+  document.getElementById('filterToggleBtn').addEventListener('click', () => {
+    state.filterPanelOpen = !state.filterPanelOpen;
+    document.getElementById('filterToggleBtn').classList.toggle('active', state.filterPanelOpen);
+    renderFilterPanel();
+  });
+}
+
+function renderFilterPanel() {
+  const panel = document.getElementById('filterPanel');
+  panel.classList.toggle('open', state.filterPanelOpen);
+
+  if (!state.filterPanelOpen) return;
+
+  const f = state.filters;
+  const allTags = getAllTags();
+
+  const phaseOpts = PHASE_ORDER.map(k => {
+    const checked = f.phase.has(k) ? 'checked' : '';
+    const color = `var(--phase-${k})`;
+    return `<label class="filter-option"><input type="checkbox" data-dim="phase" data-val="${k}" ${checked}><span class="filter-dot" style="background:${color}"></span>${PHASE_LABELS[k]}</label>`;
+  }).join('');
+
+  const classOpts = CLASS_ORDER.map(k => {
+    const checked = f.class.has(k) ? 'checked' : '';
+    const colors = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
+    return `<label class="filter-option"><input type="checkbox" data-dim="class" data-val="${k}" ${checked}><span class="filter-dot" style="background:${colors[k]}"></span>${CLASS_LABELS[k]}</label>`;
+  }).join('');
+
+  const prioOpts = PRIORITY_ORDER.map(k => {
+    const checked = f.priority.has(k) ? 'checked' : '';
+    const colors = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
+    return `<label class="filter-option"><input type="checkbox" data-dim="priority" data-val="${k}" ${checked}><span class="filter-dot" style="background:${colors[k]}"></span>${PRIORITY_LABELS[k]}</label>`;
+  }).join('');
+
+  const dtiVal = f.dti;
+  const dtiOpts = [
+    `<label class="filter-option"><input type="radio" name="filter-dti" data-dim="dti" data-val="any" ${dtiVal == null ? 'checked' : ''}>Alle</label>`,
+    `<label class="filter-option"><input type="radio" name="filter-dti" data-dim="dti" data-val="true" ${dtiVal === true ? 'checked' : ''}>Ja</label>`,
+    `<label class="filter-option"><input type="radio" name="filter-dti" data-dim="dti" data-val="false" ${dtiVal === false ? 'checked' : ''}>Nein</label>`,
+  ].join('');
+
+  const tagChips = allTags.map(t => {
+    const sel = f.tags.has(t) ? ' selected' : '';
+    return `<button class="filter-tag-chip${sel}" data-dim="tags" data-val="${esc(t)}">${esc(t)}</button>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="filter-panel-grid">
+      <div>
+        <div class="filter-section-title">Phase</div>
+        <div class="filter-section-options">${phaseOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">Klasse</div>
+        <div class="filter-section-options">${classOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">Priorität</div>
+        <div class="filter-section-options">${prioOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">DTI-pflichtig</div>
+        <div class="filter-section-options">${dtiOpts}</div>
+      </div>
+      <div>
+        <div class="filter-section-title">Tags</div>
+        <div class="filter-tags-wrap">${tagChips || '<span style="color:var(--gray-400);font-size:var(--font-size-xs)">Keine Tags</span>'}</div>
+      </div>
+    </div>`;
+
+  // Bind checkbox/radio events
+  panel.querySelectorAll('input[data-dim]').forEach(input => {
+    input.addEventListener('change', () => {
+      const dim = input.dataset.dim;
+      const val = input.dataset.val;
+      if (dim === 'dti') {
+        state.filters.dti = val === 'any' ? null : val === 'true';
+      } else {
+        toggleFilter(dim, val);
+      }
+      renderFilterPills();
+      updateFilterCountBadge();
+      render();
+    });
+  });
+
+  // Bind tag chip clicks
+  panel.querySelectorAll('.filter-tag-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      toggleFilter('tags', chip.dataset.val);
+      chip.classList.toggle('selected');
+      renderFilterPills();
+      updateFilterCountBadge();
+      render();
+    });
+  });
+}
+
+function renderFilterPills() {
+  const container = document.getElementById('filterPills');
+  const active = hasActiveFilters();
+  container.classList.toggle('visible', active);
+
+  if (!active) { container.innerHTML = ''; return; }
+
+  const f = state.filters;
+  let html = '<span class="filter-pills-label">Aktive Filter:</span>';
+
+  const phaseColors = { triage: 'var(--phase-triage)', analysis: 'var(--phase-analysis)', implementation: 'var(--phase-implementation)', completed: 'var(--phase-completed)', rejected: 'var(--phase-rejected)' };
+  const classColors = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
+  const prioColors = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
+
+  for (const k of f.phase) {
+    html += filterPill('phase', k, PHASE_LABELS[k], phaseColors[k]);
+  }
+  for (const k of f.class) {
+    html += filterPill('class', k, CLASS_LABELS[k], classColors[k]);
+  }
+  for (const k of f.priority) {
+    html += filterPill('priority', k, PRIORITY_LABELS[k], prioColors[k]);
+  }
+  for (const t of f.tags) {
+    html += filterPill('tags', t, t, 'var(--gray-400)');
+  }
+  if (f.dti != null) {
+    html += filterPill('dti', String(f.dti), f.dti ? 'DTI: Ja' : 'DTI: Nein', 'var(--error-500)');
+  }
+
+  html += `<button class="filter-reset-btn" id="filterResetBtn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    Alle Filter zurücksetzen
+  </button>`;
+
+  container.innerHTML = html;
+
+  // Bind pill remove buttons
+  container.querySelectorAll('.filter-pill-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dim = btn.dataset.dim;
+      const val = btn.dataset.val;
+      if (dim === 'dti') {
+        state.filters.dti = null;
+      } else {
+        state.filters[dim].delete(val);
+      }
+      renderFilterPills();
+      updateFilterCountBadge();
+      if (state.filterPanelOpen) renderFilterPanel();
+      render();
+    });
+  });
+
+  // Bind reset button
+  document.getElementById('filterResetBtn').addEventListener('click', () => {
+    clearAllFilters();
+    renderFilterPills();
+    updateFilterCountBadge();
+    if (state.filterPanelOpen) renderFilterPanel();
+    render();
+  });
+}
+
+function filterPill(dim, val, label, color) {
+  return `<span class="filter-pill">
+    <span class="pill-dot" style="background:${color}"></span>
+    ${esc(label)}
+    <button class="filter-pill-remove" data-dim="${dim}" data-val="${esc(val)}" aria-label="Filter entfernen">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </span>`;
+}
+
+function updateFilterCountBadge() {
+  const f = state.filters;
+  const count = f.phase.size + f.class.size + f.priority.size + f.tags.size + (f.dti != null ? 1 : 0);
+  const badge = document.getElementById('filterCountBadge');
+  badge.textContent = count;
+  badge.classList.toggle('visible', count > 0);
+  document.getElementById('filterToggleBtn').classList.toggle('active', count > 0 || state.filterPanelOpen);
+}
+
+/* ── Badge click → add filter (event delegation) ── */
+
+function setupBadgeFilterClicks() {
+  document.getElementById('viewContainer').addEventListener('click', (e) => {
+    // Don't intercept clicks that should navigate to detail
+    const card = e.target.closest('[data-id]');
+
+    const phaseBadge = e.target.closest('.badge-phase');
+    if (phaseBadge) {
+      e.stopPropagation();
+      const val = phaseBadge.dataset.phase;
+      if (val) { toggleFilter('phase', val); afterBadgeClick(); return; }
+    }
+
+    const classBadge = e.target.closest('.badge-class');
+    if (classBadge) {
+      e.stopPropagation();
+      const val = classBadge.dataset.class;
+      if (val) { toggleFilter('class', val); afterBadgeClick(); return; }
+    }
+
+    const prioBadge = e.target.closest('.badge-priority');
+    if (prioBadge) {
+      e.stopPropagation();
+      const val = prioBadge.dataset.priority;
+      if (val) { toggleFilter('priority', val); afterBadgeClick(); return; }
+    }
+
+    const tagBadge = e.target.closest('.badge-tag');
+    if (tagBadge) {
+      e.stopPropagation();
+      const val = tagBadge.textContent.trim();
+      if (val) { toggleFilter('tags', val); afterBadgeClick(); return; }
+    }
+
+    // Dashboard bar/legend clicks
+    const barRow = e.target.closest('.dashboard-bar-row');
+    if (barRow) {
+      const chartCard = barRow.closest('.dashboard-chart-card');
+      if (chartCard) {
+        const title = chartCard.querySelector('.dashboard-chart-title').textContent;
+        const label = barRow.querySelector('.dashboard-bar-label').textContent.trim();
+        handleDashboardFilterClick(title, label);
+        return;
+      }
+    }
+
+    const legendItem = e.target.closest('.dashboard-legend-item');
+    if (legendItem) {
+      const chartCard = legendItem.closest('.dashboard-chart-card');
+      if (chartCard) {
+        const title = chartCard.querySelector('.dashboard-chart-title').textContent;
+        let label = legendItem.textContent.trim();
+        // Legend items for class have " (N)" suffix — strip it
+        label = label.replace(/\s*\(\d+\)$/, '');
+        handleDashboardFilterClick(title, label);
+        return;
+      }
+    }
+  });
+}
+
+function handleDashboardFilterClick(chartTitle, label) {
+  // Determine dimension and value from chart title and label
+  let key;
+  if (chartTitle.includes('Phase')) {
+    key = Object.entries(PHASE_LABELS).find(([, v]) => v === label)?.[0];
+    if (key) toggleFilter('phase', key);
+  } else if (chartTitle.includes('Klasse') || chartTitle.includes('Budget')) {
+    key = Object.entries(CLASS_LABELS).find(([, v]) => v === label)?.[0];
+    if (key) toggleFilter('class', key);
+  }
+  if (key) {
+    renderFilterPills();
+    updateFilterCountBadge();
+    switchFromDashboard();
+    // If still on dashboard (previousView was dashboard), just re-render in place
+    if (state.currentView === 'dashboard') render();
+  }
+}
+
+function switchFromDashboard() {
+  if (state.currentView === 'dashboard') {
+    const targetView = state.previousView && state.previousView !== 'dashboard' ? state.previousView : 'gallery';
+    state.currentView = targetView;
+    document.querySelectorAll('.view-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.view === state.currentView);
+    });
+    render();
+  }
+}
+
+function afterBadgeClick() {
+  renderFilterPills();
+  updateFilterCountBadge();
+  if (state.filterPanelOpen) renderFilterPanel();
+  render();
 }
 
 /* ═══════════════════════════════════════════════════════════
    DETAIL PAGE
    ═══════════════════════════════════════════════════════════ */
-
-function setupDetailPanel() {
-  // No setup needed — detail page is rendered inline
-}
 
 function openDetailPanel(projectId) {
   state.previousView = state.currentView;
@@ -856,7 +1185,7 @@ function renderDetailPage(container) {
   document.querySelector('.toolbar').style.display = 'none';
 
   const imageStyle = p.thumbnail
-    ? `background-image:url('${p.thumbnail}')`
+    ? `background-image:url('${escCSSUrl(p.thumbnail)}')`
     : `background:var(--gray-100)`;
 
   let html = `
@@ -1050,8 +1379,8 @@ function setupModal() {
 }
 
 function openModal(projectId) {
-  state.editingProjectId = projectId || null;
-  const isEdit = !!projectId;
+  state.editingProjectId = projectId ?? null;
+  const isEdit = projectId != null;
   document.getElementById('modalTitle').textContent = isEdit ? 'Projekt bearbeiten' : 'Neues Projekt erfassen';
   document.getElementById('modalOverlay').classList.add('open');
   document.body.classList.add('modal-open');
@@ -1128,10 +1457,6 @@ function saveProject() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   UTILITY
-   ═══════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════
    EXPORT
    ═══════════════════════════════════════════════════════════ */
 
@@ -1198,14 +1523,14 @@ function exportPDF() {
       </tr></thead>
       <tbody>
         ${projects.map(p => `<tr>
-          <td>${p.jira_key || '—'}</td>
+          <td>${esc(p.jira_key) || '—'}</td>
           <td><strong>${esc(p.title)}</strong><br><span style="color:#6B7280">${esc(p.requestor)}</span></td>
           <td><span class="badge phase-${p.phase}">${PHASE_LABELS[p.phase]}</span></td>
           <td>${CLASS_LABELS[p.class]}</td>
           <td>${PRIORITY_LABELS[p.priority || 'medium']}</td>
-          <td>${p.responsible || '—'}</td>
+          <td>${esc(p.responsible) || '—'}</td>
           <td>${p.target_date ? new Date(p.target_date).toLocaleDateString('de-CH') : '—'}</td>
-          <td class="tags">${(p.tags || []).join(', ') || '—'}</td>
+          <td class="tags">${(p.tags || []).map(t => esc(t)).join(', ') || '—'}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -1223,11 +1548,16 @@ function priorityBadge(priority) {
   return `<span class="badge badge-priority" data-priority="${p}">${PRIORITY_ICONS[p]} ${PRIORITY_LABELS[p]}</span>`;
 }
 
+const _escEl = document.createElement('div');
 function esc(str) {
   if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  _escEl.textContent = str;
+  return _escEl.innerHTML;
+}
+
+function escCSSUrl(url) {
+  if (!url) return '';
+  return url.replace(/['"\\()]/g, '\\$&');
 }
 
 /* ═══════════════════════════════════════════════════════════

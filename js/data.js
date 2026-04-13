@@ -3,16 +3,29 @@
    ═══════════════════════════════════════════════════════════ */
 
 async function loadData() {
-  const [projects, users, comments, changelog] = await Promise.all([
-    fetch('data/projects.json').then(r => r.json()),
-    fetch('data/users.json').then(r => r.json()),
-    fetch('data/comments.json').then(r => r.json()),
-    fetch('data/changelog.json').then(r => r.json()),
-  ]);
-  state.projects  = projects;
-  state.users     = users;
-  state.comments  = comments;
-  state.changelog = changelog;
+  async function fetchJSON(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Failed to load ${url}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  try {
+    const [projects, users, comments, changelog] = await Promise.all([
+      fetchJSON('data/projects.json'),
+      fetchJSON('data/users.json'),
+      fetchJSON('data/comments.json'),
+      fetchJSON('data/changelog.json'),
+    ]);
+    state.projects  = projects;
+    state.users     = users;
+    state.comments  = comments;
+    state.changelog = changelog;
+  } catch (err) {
+    console.error('Data loading failed:', err);
+    document.getElementById('viewContainer').innerHTML =
+      '<div class="placeholder-view"><h2 class="placeholder-title">Fehler beim Laden</h2>' +
+      '<p class="placeholder-text">Die Projektdaten konnten nicht geladen werden. Bitte Seite neu laden.</p></div>';
+  }
 }
 
 /* ── Look-ups ── */
@@ -69,9 +82,18 @@ function formatDateTime(iso) {
 function getFilteredProjects() {
   let list = [...state.projects];
 
-  // Archived (completed/rejected)
+  // Archived (completed/rejected) — bypass if user explicitly filters for those phases
   if (!state.showArchived) {
-    list = list.filter(p => p.phase !== 'completed' && p.phase !== 'rejected');
+    const fp = state.filters.phase;
+    const wantsCompleted = fp.has('completed');
+    const wantsRejected = fp.has('rejected');
+    if (!wantsCompleted && !wantsRejected) {
+      list = list.filter(p => p.phase !== 'completed' && p.phase !== 'rejected');
+    } else if (!wantsCompleted) {
+      list = list.filter(p => p.phase !== 'completed');
+    } else if (!wantsRejected) {
+      list = list.filter(p => p.phase !== 'rejected');
+    }
   }
 
   // Search
@@ -88,7 +110,7 @@ function getFilteredProjects() {
 
   // Assigned to me
   if (state.assignedToMe) {
-    const currentUser = getUserById(1); // Marc Brunner (logged-in user)
+    const currentUser = getUserById(state.currentUserId);
     if (currentUser) {
       list = list.filter(p => p.responsible === currentUser.display_name);
     }
@@ -101,6 +123,26 @@ function getFilteredProjects() {
     } else {
       list = list.filter(p => p.responsible === state.assigneeFilter);
     }
+  }
+
+  // Multi-dimensional filters (OR within dimension, AND across dimensions)
+  const f = state.filters;
+  if (f.phase.size > 0) {
+    list = list.filter(p => f.phase.has(p.phase));
+  }
+  if (f.class.size > 0) {
+    list = list.filter(p => f.class.has(p.class));
+  }
+  if (f.priority.size > 0) {
+    list = list.filter(p => f.priority.has(p.priority || 'medium'));
+  }
+  if (f.tags.size > 0) {
+    list = list.filter(p => (p.tags || []).some(t => f.tags.has(t)));
+  }
+  if (f.dti === true) {
+    list = list.filter(p => p.dti_required);
+  } else if (f.dti === false) {
+    list = list.filter(p => !p.dti_required);
   }
 
   // Sort
@@ -213,4 +255,36 @@ function getUniqueResponsibles() {
     if (p.responsible) set.add(p.responsible);
   });
   return [...set].sort();
+}
+
+/* ── Filter helpers ── */
+
+function getAllTags() {
+  const set = new Set();
+  state.projects.forEach(p => {
+    (p.tags || []).forEach(t => set.add(t));
+  });
+  return [...set].sort();
+}
+
+function hasActiveFilters() {
+  const f = state.filters;
+  return f.phase.size > 0 || f.class.size > 0 || f.priority.size > 0 || f.tags.size > 0 || f.dti != null;
+}
+
+function toggleFilter(dimension, value) {
+  const set = state.filters[dimension];
+  if (set.has(value)) {
+    set.delete(value);
+  } else {
+    set.add(value);
+  }
+}
+
+function clearAllFilters() {
+  state.filters.phase.clear();
+  state.filters.class.clear();
+  state.filters.priority.clear();
+  state.filters.tags.clear();
+  state.filters.dti = null;
 }

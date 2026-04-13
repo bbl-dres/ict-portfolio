@@ -60,20 +60,20 @@
         </div>
       <div class="page-header-right">
         <div class="toolbar-dropdown" id="exportDropdown">
-          <button class="btn btn-outline" id="exportBtn" aria-expanded="false" aria-haspopup="true">
+          <button class="btn btn-outline" id="exportBtn" aria-expanded="false" aria-haspopup="true" aria-controls="exportMenu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Exportieren
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div class="dropdown-menu dropdown-menu--right" id="exportMenu">
-            <div class="dropdown-item" data-export="csv">
+          <div class="dropdown-menu dropdown-menu--right" id="exportMenu" role="menu">
+            <button class="dropdown-item" data-export="csv" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               Excel / CSV
-            </div>
-            <div class="dropdown-item" data-export="pdf">
+            </button>
+            <button class="dropdown-item" data-export="pdf" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               PDF-Bericht
-            </div>
+            </button>
           </div>
         </div>
         <button class="btn btn-primary" id="createProjectBtn">
@@ -114,7 +114,7 @@
         </div>
 
         <div class="toolbar-dropdown" id="sortDropdown">
-          <button class="toolbar-btn" id="sortBtn" aria-expanded="false" aria-haspopup="true">
+          <button class="toolbar-btn" id="sortBtn" aria-expanded="false" aria-haspopup="true" aria-controls="sortMenu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
             <span id="sortLabel">Titel</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -140,7 +140,7 @@
         </div>
 
         <div class="toolbar-dropdown" id="groupDropdown">
-          <button class="toolbar-btn" id="groupBtn" aria-expanded="false" aria-haspopup="true">
+          <button class="toolbar-btn" id="groupBtn" aria-expanded="false" aria-haspopup="true" aria-controls="groupMenu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             <span id="groupLabel">Gruppieren</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -156,7 +156,7 @@
         </div>
 
         <div class="toolbar-dropdown" id="assigneeDropdown">
-          <button class="toolbar-btn" id="assigneeBtn" aria-expanded="false" aria-haspopup="true">
+          <button class="toolbar-btn" id="assigneeBtn" aria-expanded="false" aria-haspopup="true" aria-controls="assigneeMenu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span id="assigneeLabel">Verantwortlich</span>
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -179,7 +179,7 @@
           <span class="checkbox-text">Archivierte anzeigen</span>
         </label>
         <div class="toolbar-dropdown" id="fieldsDropdown">
-          <button class="toolbar-btn" id="fieldsBtn" aria-expanded="false" aria-haspopup="true">
+          <button class="toolbar-btn" id="fieldsBtn" aria-expanded="false" aria-haspopup="true" aria-controls="fieldsMenu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Attribute
             <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -200,7 +200,22 @@
             <label class="dropdown-checkbox"><input type="checkbox" data-field="created_at"> Erstellt</label>
           </div>
         </div>
+        <button class="toolbar-btn" id="filterToggleBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+          Filter
+          <span class="filter-count-badge" id="filterCountBadge"></span>
+        </button>
       </div>
+    </div>
+
+    <!-- Filter Panel (toggled by JS) -->
+    <div class="filter-panel" id="filterPanel">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Active Filter Pills -->
+    <div class="filter-pills" id="filterPills">
+      <!-- filled by JS -->
     </div>
 
     <!-- View Container -->
