@@ -102,6 +102,13 @@ select:focus-visible {
   gap: var(--space-2);
 }
 
+.header-prototype {
+  color: var(--error-500);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
 .header-logo {
   flex-shrink: 0;
 }
@@ -2182,6 +2189,12 @@ select:focus-visible {
 
 .footer-link:hover {
   color: var(--gray-600);
+}
+
+.footer-prototype {
+  color: var(--error-500);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .footer-sep {
