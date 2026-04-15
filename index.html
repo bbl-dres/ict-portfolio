@@ -21,7 +21,7 @@
       </button>
       <a href="#" class="header-brand" id="headerBrandHome" aria-label="Zur Startseite">
         <img class="header-logo" src="assets/swiss-logo-flag.svg" alt="Schweizerische Eidgenossenschaft" width="28" height="31">
-        <span class="header-title">Bundesamt für Bauten und Logistik BBL<br>IKT Projektportfolio DRES</span>
+        <span class="header-title"><span class="header-title-agency">Bundesamt für Bauten und Logistik BBL</span><br><span class="header-title-portfolio">IKT Projektportfolio DRES</span></span>
       </a>
     </div>
     <div class="header-prototype">Prototyp, fiktive Inhalte – nur zur Demonstration</div>
@@ -38,6 +38,95 @@
       <div class="header-avatar" id="userAvatar" title="Marc Brunner (Admin)">MB</div>
     </div>
   </header>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MOBILE NAV DRAWER (proxies existing controls)               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="nav-drawer-scrim" id="navDrawerScrim" hidden></div>
+  <aside class="nav-drawer" id="navDrawer" role="dialog" aria-modal="true" aria-labelledby="navDrawerTitle" aria-hidden="true">
+    <div class="nav-drawer-header">
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Menü schliessen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 class="nav-drawer-title" id="navDrawerTitle">Menü</h2>
+    </div>
+
+    <div class="nav-drawer-body">
+      <div class="nav-drawer-user" id="navDrawerUser">
+        <div class="nav-drawer-user-avatar">MB</div>
+        <div class="nav-drawer-user-meta">
+          <div class="nav-drawer-user-name">Marc Brunner</div>
+          <div class="nav-drawer-user-role">Admin</div>
+        </div>
+      </div>
+
+      <div class="nav-drawer-section">
+        <div class="nav-drawer-section-label">Projekte</div>
+        <button class="nav-drawer-item" data-proxy-action="goHome">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Projekte</span>
+        </button>
+      </div>
+
+      <div class="nav-drawer-section">
+        <div class="nav-drawer-section-label">Ansicht</div>
+        <div id="navDrawerViews"></div>
+      </div>
+
+      <div class="nav-drawer-section">
+        <div class="nav-drawer-section-label">Aktionen</div>
+        <button class="nav-drawer-item nav-drawer-item--primary" data-proxy-click="createProjectBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Neues Projekt</span>
+        </button>
+        <button class="nav-drawer-item" data-proxy-click="exportBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Exportieren</span>
+        </button>
+        <button class="nav-drawer-item" data-proxy-click="shareBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Teilen</span>
+        </button>
+      </div>
+
+      <div class="nav-drawer-section">
+        <div class="nav-drawer-section-label">Werkzeuge</div>
+        <button class="nav-drawer-item" data-proxy-click="globalSearchBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span>Suche</span>
+        </button>
+        <button class="nav-drawer-item" data-proxy-click="notificationsBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span>Benachrichtigungen</span>
+        </button>
+      </div>
+
+      <div class="nav-drawer-section">
+        <div class="nav-drawer-section-label">Hilfe</div>
+        <a class="nav-drawer-item" href="https://github.com/bbl-dres/ict-portfolio" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>Quellencode</span>
+        </a>
+        <a class="nav-drawer-item" href="https://github.com/bbl-dres/ict-portfolio/tree/main/docs" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l9-4 9 4-9 4z"/><path d="M3 10l9 4 9-4"/><path d="M3 14l9 4 9-4"/></svg>
+          <span>Rechtliches</span>
+        </a>
+        <a class="nav-drawer-item" href="https://github.com/bbl-dres/ict-portfolio/tree/main/docs" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          <span>Hilfe</span>
+        </a>
+        <a class="nav-drawer-item" href="https://www.bbl.admin.ch/de/kontakt" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Kontakt</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-drawer-footer">
+      <div class="nav-drawer-footer-badge">Prototyp – fiktive Inhalte</div>
+      <div class="nav-drawer-footer-version">UX Prototype v0.1</div>
+    </div>
+  </aside>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- BREADCRUMB                                                  -->

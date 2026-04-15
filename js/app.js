@@ -130,10 +130,12 @@ function renderView() {
   const showFilter = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
   const showAssign = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
   const showFields = ['gallery', 'list', 'kanban'].includes(view);
+  const showSearch = ['gallery', 'list', 'kanban', 'gantt'].includes(view);
 
   // Show/hide view tabs and toolbar
   document.querySelector('.view-tabs').style.display = isDetail ? 'none' : '';
   document.querySelector('.toolbar').style.display = (isDetail || isWiki) ? 'none' : '';
+  document.getElementById('toolbarSearch').style.display = showSearch ? '' : 'none';
   document.getElementById('sortDropdown').style.display = showSort ? '' : 'none';
   document.getElementById('groupDropdown').style.display = showGroup ? '' : 'none';
   document.getElementById('filterToggleBtn').style.display = showFilter ? '' : 'none';
@@ -2370,3 +2372,135 @@ function convertGroupKeyToValue(field, groupKey) {
   // phase, class — key is the enum value directly
   return groupKey;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE NAV DRAWER
+   Proxies existing header/page-header/toolbar controls.
+   ═══════════════════════════════════════════════════════════ */
+(function initNavDrawer() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const drawer    = document.getElementById('navDrawer');
+  const scrim     = document.getElementById('navDrawerScrim');
+  const closeBtn  = document.getElementById('navDrawerClose');
+  const viewsHost = document.getElementById('navDrawerViews');
+  if (!hamburger || !drawer || !scrim || !viewsHost) return;
+
+  // Build view items by mirroring existing .view-tab buttons
+  const viewTabs = Array.from(document.querySelectorAll('.view-tabs .view-tab'));
+  const viewIcons = {
+    gallery:   '<path d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+    list:      '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+    kanban:    '<rect x="3" y="3" width="5" height="18"/><rect x="10" y="3" width="5" height="12"/><rect x="17" y="3" width="5" height="8"/>',
+    gantt:     '<rect x="3" y="5" width="9" height="3"/><rect x="7" y="10.5" width="11" height="3"/><rect x="5" y="16" width="14" height="3"/>',
+    dashboard: '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
+    wiki:      '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'
+  };
+  viewTabs.forEach(tab => {
+    const view = tab.dataset.view;
+    const label = tab.textContent.trim();
+    const btn = document.createElement('button');
+    btn.className = 'nav-drawer-item';
+    btn.dataset.proxyView = view;
+    btn.innerHTML =
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      (viewIcons[view] || '') +
+      '</svg><span>' + label + '</span>';
+    viewsHost.appendChild(btn);
+  });
+
+  // Sync user card from existing avatar title (e.g. "Marc Brunner (Admin)")
+  const avatar = document.getElementById('userAvatar');
+  if (avatar) {
+    const avatarLabel = drawer.querySelector('.nav-drawer-user-avatar');
+    if (avatarLabel) avatarLabel.textContent = avatar.textContent.trim();
+    const title = avatar.getAttribute('title') || '';
+    const match = title.match(/^(.*?)\s*\((.*?)\)\s*$/);
+    if (match) {
+      drawer.querySelector('.nav-drawer-user-name').textContent = match[1];
+      drawer.querySelector('.nav-drawer-user-role').textContent = match[2];
+    } else if (title) {
+      drawer.querySelector('.nav-drawer-user-name').textContent = title;
+    }
+  }
+
+  let lastFocus = null;
+
+  function syncActiveView() {
+    const activeTab = document.querySelector('.view-tabs .view-tab.active');
+    const activeView = activeTab ? activeTab.dataset.view : null;
+    drawer.querySelectorAll('[data-proxy-view]').forEach(el => {
+      el.classList.toggle('is-active', el.dataset.proxyView === activeView);
+    });
+  }
+
+  function openDrawer() {
+    syncActiveView();
+    lastFocus = document.activeElement;
+    scrim.hidden = false;
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('modal-open');
+    // move focus to close button after transition kicks off
+    requestAnimationFrame(() => closeBtn && closeBtn.focus());
+  }
+
+  function closeDrawer() {
+    scrim.hidden = true;
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('modal-open');
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
+
+  hamburger.addEventListener('click', () => {
+    drawer.classList.contains('is-open') ? closeDrawer() : openDrawer();
+  });
+  scrim.addEventListener('click', closeDrawer);
+  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  // Proxy clicks: any drawer item with data-proxy-* triggers the existing control
+  drawer.addEventListener('click', (e) => {
+    const item = e.target.closest('[data-proxy-click], [data-proxy-view], [data-proxy-action]');
+    if (!item) return;
+
+    // External links (Hilfe section) — let default navigation happen, just close drawer
+    if (item.tagName === 'A' && item.href && !item.dataset.proxyClick && !item.dataset.proxyView) {
+      closeDrawer();
+      return;
+    }
+
+    e.preventDefault();
+
+    if (item.dataset.proxyAction === 'goHome') {
+      const brand = document.getElementById('headerBrandHome');
+      if (brand) brand.click();
+      closeDrawer();
+      return;
+    }
+
+    if (item.dataset.proxyView) {
+      const tab = document.querySelector('.view-tabs .view-tab[data-view="' + item.dataset.proxyView + '"]');
+      if (tab) tab.click();
+      closeDrawer();
+      return;
+    }
+
+    if (item.dataset.proxyClick) {
+      const target = document.getElementById(item.dataset.proxyClick);
+      if (target) target.click();
+      closeDrawer();
+      return;
+    }
+  });
+
+  // Keep drawer's active view in sync when user picks a tab outside the drawer
+  document.querySelector('.view-tabs')?.addEventListener('click', () => {
+    requestAnimationFrame(syncActiveView);
+  });
+})();
