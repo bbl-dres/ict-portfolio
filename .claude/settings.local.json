@@ -34,7 +34,9 @@
       "Bash(grep -n \"const PHASE_LABELS\\\\|const CLASS_LABELS\\\\|const TYPE_LABELS\\\\|const PRIORITY_LABELS\\\\|const PRIORITY_ICONS\\\\|const PHASE_ORDER\\\\|const CLASS_ORDER\\\\|const TYPE_ORDER\\\\|const PRIORITY_ORDER\\\\|const HERMES_LABELS\" /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/js/*.js)",
       "Bash(grep -n \"#[0-9A-Fa-f]\\\\{3,6\\\\}\" /c/Users/DavidRasner/Documents/GitHub/ict-portfolio/css/styles.css)",
       "Bash(xxd)",
-      "Bash(grep -nB 5 -A 5 \"height: 36px\" \"/c/Users/DavidRasner/Documents/GitHub/ict-portfolio/css/styles.css\")"
+      "Bash(grep -nB 5 -A 5 \"height: 36px\" \"/c/Users/DavidRasner/Documents/GitHub/ict-portfolio/css/styles.css\")",
+      "Bash(node --check js/app.js)",
+      "Bash(node --check js/data.js)"
     ]
   }
 }

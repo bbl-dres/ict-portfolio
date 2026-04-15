@@ -429,7 +429,7 @@ function renderProjectRow(p, cols, gridCols) {
       case 'created_at':   cells += `<span class="project-date">${formatDate(p.created_at)}</span>`; break;
     }
   }
-  return `<div class="project-row" data-id="${p.id}" style="grid-template-columns:${gridCols}">${cells}</div>`;
+  return `<div class="project-row" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.title)}" style="grid-template-columns:${gridCols}">${cells}</div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -493,7 +493,7 @@ function renderGalleryCard(p) {
     : `<div class="card-avatar card-avatar--empty" data-responsible="__none__" title="Nicht zugewiesen" role="button" tabindex="0">—</div>`) : '';
   const bottomRow = (showDeadline || showAssignee) ? `<div class="card-separator"></div><div class="gallery-card-meta-row">${deadline || '<span></span>'}${assigneeHTML}</div>` : '';
 
-  return `<div class="gallery-card" data-id="${p.id}" role="article" aria-label="${esc(p.title)}">
+  return `<div class="gallery-card" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.title)}">
     <div class="gallery-card-image" style="${imageStyle}">
       ${!hasImage ? '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M7 12h10M7 17h6"/></svg>' : ''}
       ${typeBadgeOverlay}
@@ -570,7 +570,7 @@ function renderKanbanView(container) {
           : `<div class="card-avatar card-avatar--empty" title="Nicht zugewiesen">—</div>`) : '';
         const bottomRow = (showDeadline || showAssignee) ? `<div class="card-separator"></div><div class="kanban-card-meta">${deadline || '<span></span>'}${assigneeHTML}</div>` : '';
 
-        html += `<div class="kanban-card" data-id="${p.id}">
+        html += `<div class="kanban-card" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.title)}">
           ${topRow}
           <div class="kanban-card-title">${esc(p.title)}</div>
           ${badgeRow}
@@ -618,10 +618,11 @@ function setGanttScrollLeft(left) {
 
 // When multiple Gantt groups are shown, scrolling any one timeline
 // horizontally mirrors the scroll position onto all the others.
+// Guard with data-scroll-bound so re-renders don't stack duplicate listeners.
 function syncGanttTimelineScroll() {
-  const timelines = Array.from(document.querySelectorAll('.gantt-timeline'));
-  if (timelines.length < 2) return;
+  const timelines = Array.from(document.querySelectorAll('.gantt-timeline:not([data-scroll-bound])'));
   timelines.forEach(source => {
+    source.dataset.scrollBound = '1';
     source.addEventListener('scroll', () => {
       if (source.dataset.ganttSyncing) {
         delete source.dataset.ganttSyncing;
@@ -1117,24 +1118,25 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
   });
 }
 
-// Single global listener to close all dropdowns and search on outside click
+// Single global listener to close all dropdowns and search on outside click.
+// Fast path: do nothing unless there's actually something open to close.
 document.addEventListener('click', (e) => {
-  document.querySelectorAll('.dropdown-menu.open').forEach(m => {
-    m.classList.remove('open');
-    // Find the toggle button reliably: it's the sibling with aria-expanded
-    // within the same .toolbar-dropdown wrapper
-    const wrapper = m.closest('.toolbar-dropdown');
-    const btn = wrapper ? wrapper.querySelector('[aria-expanded]') : null;
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-  });
-
-  // Collapse search if click is outside it and query is empty
-  const searchWrap = document.getElementById('toolbarSearch');
-  if (searchWrap.classList.contains('expanded') && !searchWrap.contains(e.target)) {
-    const input = document.getElementById('searchInput');
-    if (!input.value.trim()) {
-      searchWrap.classList.remove('expanded');
+  const openDropdowns = document.getElementsByClassName('dropdown-menu open');
+  if (openDropdowns.length) {
+    // Iterate backwards: removing the class mutates the live HTMLCollection.
+    for (let i = openDropdowns.length - 1; i >= 0; i--) {
+      const m = openDropdowns[i];
+      m.classList.remove('open');
+      const wrapper = m.closest('.toolbar-dropdown');
+      const btn = wrapper ? wrapper.querySelector('[aria-expanded]') : null;
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     }
+  }
+
+  const searchWrap = document.getElementById('toolbarSearch');
+  if (searchWrap && searchWrap.classList.contains('expanded') && !searchWrap.contains(e.target)) {
+    const input = document.getElementById('searchInput');
+    if (!input.value.trim()) searchWrap.classList.remove('expanded');
   }
 });
 
@@ -1637,7 +1639,17 @@ function translateFieldValue(field, raw) {
 
 function renderDetailPage(container) {
   const p = state.projects.find(pr => pr.id === state.selectedProjectId);
-  if (!p) return;
+  if (!p) {
+    container.innerHTML = `<div class="placeholder-view">
+      <svg class="placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="placeholder-title">Projekt nicht gefunden</div>
+      <div class="placeholder-text">Das angeforderte Projekt existiert nicht mehr oder die URL ist ungültig.</div>
+      <button class="btn btn-primary" id="detailNotFoundBack" style="margin-top:16px">Zurück zur Übersicht</button>
+    </div>`;
+    const backBtn = document.getElementById('detailNotFoundBack');
+    if (backBtn) backBtn.addEventListener('click', closeDetailPage);
+    return;
+  }
 
   const creator = getUserById(p.created_by);
   const comments = getCommentsForProject(p.id);
@@ -1917,6 +1929,7 @@ function saveInlineEdit() {
   const tagsRaw = document.getElementById('editTags').value;
   p.tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
   p.updated_at = new Date().toISOString();
+  persistProjects();
 
   state.detailEditing = false;
   render();
@@ -2041,6 +2054,7 @@ function saveProject() {
     updated_at: now,
   });
 
+  persistProjects();
   closeModal();
   render();
 }
@@ -2188,6 +2202,7 @@ function setupImagePreview() {
     reader.onload = (ev) => {
       p.thumbnail = ev.target.result;
       p.updated_at = new Date().toISOString();
+      persistProjects();
       img.src = ev.target.result;
       resetZoom();
       const heroImg = document.querySelector('.detail-hero-image');
@@ -2203,10 +2218,13 @@ function setupImagePreview() {
     if (!p) return;
     p.thumbnail = null;
     p.updated_at = new Date().toISOString();
+    persistProjects();
     closeImagePreview();
     renderDetailPage(document.getElementById('viewContainer'));
   });
 }
+
+let _imagePreviewLastFocus = null;
 
 function openImagePreview() {
   const p = state.projects.find(pr => pr.id === state.selectedProjectId);
@@ -2216,14 +2234,40 @@ function openImagePreview() {
   img.style.transform = '';
   document.getElementById('imagePreviewTitle').textContent = p.title;
   document.getElementById('imagePreviewZoomLabel').textContent = '100%';
-  document.getElementById('imagePreviewOverlay').classList.add('open');
+  const overlay = document.getElementById('imagePreviewOverlay');
+  overlay.classList.add('open');
   document.body.classList.add('modal-open');
+  _imagePreviewLastFocus = document.activeElement;
+  const closeBtn = document.getElementById('imagePreviewClose');
+  if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
 }
 
 function closeImagePreview() {
   document.getElementById('imagePreviewOverlay').classList.remove('open');
   document.body.classList.remove('modal-open');
+  if (_imagePreviewLastFocus && typeof _imagePreviewLastFocus.focus === 'function') {
+    _imagePreviewLastFocus.focus();
+  }
+  _imagePreviewLastFocus = null;
 }
+
+// Trap Tab inside the image preview overlay while it's open.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  const overlay = document.getElementById('imagePreviewOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  const focusables = overlay.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    last.focus(); e.preventDefault();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    first.focus(); e.preventDefault();
+  }
+});
 
 /* ═══════════════════════════════════════════════════════════
    EXPORT
@@ -2232,26 +2276,28 @@ function closeImagePreview() {
 function exportCSV() {
   const projects = getFilteredProjects();
   const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Komplexität', 'Typ', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
+  // Wrap every field: handles semicolons, newlines, and embedded quotes (CSV RFC 4180).
+  const csvField = (val) => `"${String(val == null ? '' : val).replace(/"/g, '""')}"`;
   const rows = projects.map(p => [
     p.id,
-    `"${(p.title || '').replace(/"/g, '""')}"`,
-    `"${(p.requestor || '').replace(/"/g, '""')}"`,
+    p.title,
+    p.requestor,
     p.budget_chf,
     COMPLEXITY_LABELS[p.complexity] || p.complexity,
     TYPE_LABELS[p.type] || p.type || '',
     PHASE_LABELS[p.phase] || p.phase,
     PRIORITY_LABELS[p.priority] || p.priority || 'medium',
-    `"${(p.responsible || '').replace(/"/g, '""')}"`,
+    p.responsible,
     p.dti_required ? 'Ja' : 'Nein',
     p.hermes_phase || '',
     p.jira_key || '',
-    `"${(p.tags || []).join(', ')}"`,
+    (p.tags || []).join(', '),
     p.target_date || '',
     p.created_at ? p.created_at.split('T')[0] : '',
     p.updated_at ? p.updated_at.split('T')[0] : '',
-  ]);
+  ].map(csvField));
 
-  const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+  const csv = [headers.map(csvField).join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2325,11 +2371,10 @@ function typeBadge(type) {
   return `<span class="badge badge-type" data-type="${t}">${TYPE_LABELS[t]}</span>`;
 }
 
-const _escEl = document.createElement('div');
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function esc(str) {
-  if (!str) return '';
-  _escEl.textContent = str;
-  return _escEl.innerHTML;
+  if (str == null || str === '') return '';
+  return String(str).replace(/[&<>"']/g, ch => ESC_MAP[ch]);
 }
 
 function escCSSUrl(url) {
@@ -2406,9 +2451,11 @@ function setupDragAndDrop() {
     const column = dropZone.closest('.kanban-column');
     if (column) {
       const targetPhase = column.dataset.phase;
+      if (!PHASE_ORDER.includes(targetPhase)) return;
       if (project.phase !== targetPhase) {
         project.phase = targetPhase;
         project.updated_at = new Date().toISOString();
+        persistProjects();
         render();
       }
       return;
@@ -2421,9 +2468,11 @@ function setupDragAndDrop() {
       if (!header) return;
       const field = state.groupBy;
       const newValue = convertGroupKeyToValue(field, header.dataset.group);
+      if (!isValidGroupValue(field, newValue)) return;
       if (project[field] !== newValue) {
         project[field] = newValue;
         project.updated_at = new Date().toISOString();
+        persistProjects();
         render();
       }
     }
@@ -2436,6 +2485,18 @@ function getDraggableSelector() {
     case 'gallery': return '.gallery-card';
     case 'gantt':   return '.gantt-sidebar-row';
     default:        return null;
+  }
+}
+
+function isValidGroupValue(field, value) {
+  switch (field) {
+    case 'phase':       return PHASE_ORDER.includes(value);
+    case 'complexity':  return COMPLEXITY_ORDER.includes(value);
+    case 'type':        return TYPE_ORDER.includes(value);
+    case 'priority':    return PRIORITY_ORDER.includes(value);
+    case 'dti_required':return typeof value === 'boolean';
+    case 'responsible': return value === null || typeof value === 'string';
+    default:            return false;
   }
 }
 

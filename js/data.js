@@ -2,6 +2,8 @@
    DRES PPM — Data Loading & Helpers
    ═══════════════════════════════════════════════════════════ */
 
+const STORAGE_KEY = 'dres-ppm:projects:v1';
+
 async function loadData() {
   async function fetchJSON(url) {
     const r = await fetch(url);
@@ -20,12 +22,46 @@ async function loadData() {
     state.users     = users;
     state.comments  = comments;
     state.changelog = changelog;
+
+    // Overlay any locally persisted project edits (drag-drop, inline edits,
+    // new projects, thumbnails). Client-only persistence — no backend.
+    const stored = loadPersistedProjects();
+    if (stored) state.projects = stored;
   } catch (err) {
     console.error('Data loading failed:', err);
     document.getElementById('viewContainer').innerHTML =
       '<div class="placeholder-view"><h2 class="placeholder-title">Fehler beim Laden</h2>' +
       '<p class="placeholder-text">Die Projektdaten konnten nicht geladen werden. Bitte Seite neu laden.</p></div>';
   }
+}
+
+function loadPersistedProjects() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch (err) {
+    console.warn('Persisted projects unreadable, ignoring:', err);
+    return null;
+  }
+}
+
+// Debounced write — drag-drop and inline edits can fire rapidly.
+let _persistTimer = null;
+function persistProjects() {
+  clearTimeout(_persistTimer);
+  _persistTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.projects));
+    } catch (err) {
+      console.warn('Failed to persist projects:', err);
+    }
+  }, 250);
+}
+
+function clearPersistedProjects() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
 }
 
 /* ── Look-ups ── */
