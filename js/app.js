@@ -146,9 +146,11 @@ function renderView() {
   // Restore breadcrumb when not in detail
   if (!isDetail) {
     document.querySelector('.breadcrumb-inner').innerHTML = `
-      <span>Projekte</span>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Übersicht</span>
+      <div class="breadcrumb-trail">
+        <span>Projekte</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Übersicht</span>
+      </div>
     `;
   }
 
@@ -379,21 +381,21 @@ function renderListView(container) {
 function getListColumns() {
   const vf = state.visibleFields;
   const cols = [];
-  if (vf.has('jira_key'))      cols.push({ key: 'jira_key',     width: '100px' });
+  if (vf.has('jira_key'))      cols.push({ key: 'jira_key',     width: '56px' });
   // Title is always shown
-  cols.push({ key: '_title', width: '1fr' });
-  if (vf.has('phase'))         cols.push({ key: 'phase',        width: '110px' });
-  if (vf.has('complexity'))    cols.push({ key: 'complexity',   width: '105px' });
-  if (vf.has('type'))          cols.push({ key: 'type',         width: '155px' });
-  if (vf.has('priority'))      cols.push({ key: 'priority',     width: '105px' });
-  if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '120px' });
-  if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '80px' });
-  if (vf.has('tags'))           cols.push({ key: 'tags',         width: '150px' });
-  if (vf.has('target_date'))   cols.push({ key: 'target_date',  width: '100px' });
-  if (vf.has('go_decision'))   cols.push({ key: 'go_decision',  width: '100px' });
+  cols.push({ key: '_title', width: 'minmax(180px, 2fr)' });
+  if (vf.has('phase'))         cols.push({ key: 'phase',        width: '100px' });
+  if (vf.has('complexity'))    cols.push({ key: 'complexity',   width: '95px' });
+  if (vf.has('type'))          cols.push({ key: 'type',         width: '140px' });
+  if (vf.has('priority'))      cols.push({ key: 'priority',     width: '90px' });
+  if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '130px' });
+  if (vf.has('budget_chf'))    cols.push({ key: 'budget_chf',   width: '72px' });
+  if (vf.has('tags'))          cols.push({ key: 'tags',         width: 'minmax(120px, 1fr)' });
+  if (vf.has('target_date'))   cols.push({ key: 'target_date',  width: '92px' });
+  if (vf.has('go_decision'))   cols.push({ key: 'go_decision',  width: '90px' });
   if (vf.has('hermes_phase'))  cols.push({ key: 'hermes_phase', width: '110px' });
-  if (vf.has('dti_required'))  cols.push({ key: 'dti_required', width: '50px' });
-  if (vf.has('created_at'))    cols.push({ key: 'created_at',   width: '100px' });
+  if (vf.has('dti_required'))  cols.push({ key: 'dti_required', width: '44px' });
+  if (vf.has('created_at'))    cols.push({ key: 'created_at',   width: '92px' });
   return cols;
 }
 
@@ -938,6 +940,26 @@ function setupToolbar() {
 
   // Create project
   document.getElementById('createProjectBtn').addEventListener('click', () => openModal());
+
+  // Share modal
+  setupShareModal();
+
+  // Header brand → home (gallery, clear filters)
+  document.getElementById('headerBrandHome').addEventListener('click', (e) => {
+    e.preventDefault();
+    clearAllFilters();
+    state.searchQuery = '';
+    state.selectedProjectId = null;
+    state.detailEditing = false;
+    state.currentView = 'gallery';
+    document.querySelectorAll('.view-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.view === 'gallery');
+    });
+    renderFilterPills();
+    updateFilterCountBadge();
+    if (state.filterPanelOpen) renderFilterPanel();
+    render();
+  });
 
   // Export
   setupDropdown('exportDropdown', 'exportBtn', 'exportMenu', (item) => {
@@ -1795,6 +1817,57 @@ function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.classList.remove('modal-open');
   state.editingProjectId = null;
+}
+
+function setupShareModal() {
+  const overlay = document.getElementById('shareOverlay');
+  const urlInput = document.getElementById('shareUrl');
+  const embedInput = document.getElementById('shareEmbed');
+  const embedToggle = document.getElementById('shareEmbedToggle');
+  const embedBody = document.getElementById('shareEmbedBody');
+
+  const openShare = () => {
+    const url = window.location.href;
+    urlInput.value = url;
+    embedInput.value = `<iframe src="${url}" width="100%" height="600" frameborder="0"></iframe>`;
+    embedToggle.setAttribute('aria-expanded', 'false');
+    embedBody.hidden = true;
+    overlay.classList.add('open');
+    document.body.classList.add('modal-open');
+  };
+  const closeShare = () => {
+    overlay.classList.remove('open');
+    document.body.classList.remove('modal-open');
+  };
+
+  document.getElementById('shareBtn').addEventListener('click', openShare);
+  document.getElementById('shareClose').addEventListener('click', closeShare);
+  document.getElementById('shareCloseBtn').addEventListener('click', closeShare);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeShare(); });
+
+  embedToggle.addEventListener('click', () => {
+    const open = embedToggle.getAttribute('aria-expanded') === 'true';
+    embedToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+    embedBody.hidden = open;
+  });
+
+  const wireCopy = (btnId, sourceEl) => {
+    document.getElementById(btnId).addEventListener('click', async () => {
+      const btn = document.getElementById(btnId);
+      try {
+        await navigator.clipboard.writeText(sourceEl.value);
+      } catch {
+        sourceEl.select();
+        document.execCommand('copy');
+      }
+      btn.classList.add('btn-copied');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => { btn.innerHTML = original; btn.classList.remove('btn-copied'); }, 1500);
+    });
+  };
+  wireCopy('shareUrlCopy', urlInput);
+  wireCopy('shareEmbedCopy', embedInput);
 }
 
 function saveProject() {

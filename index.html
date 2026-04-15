@@ -19,10 +19,10 @@
       <button class="header-hamburger" id="hamburgerBtn" aria-label="Menü">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
       </button>
-      <div class="header-brand">
+      <a href="#" class="header-brand" id="headerBrandHome" aria-label="Zur Startseite">
         <img class="header-logo" src="assets/swiss-logo-flag.svg" alt="Schweizerische Eidgenossenschaft" width="28" height="31">
         <span class="header-title">Bundesamt für Bauten und Logistik BBL<br>IKT Projektportfolio DRES</span>
-      </div>
+      </a>
     </div>
     <div class="header-prototype">Prototyp, fiktive Inhalte – nur zur Demonstration</div>
     <div class="header-right">
@@ -77,6 +77,10 @@
             </button>
           </div>
         </div>
+        <button class="btn btn-outline" id="shareBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Teilen
+        </button>
         <button class="btn btn-primary" id="createProjectBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
           Neues Projekt
@@ -320,6 +324,50 @@
       <div class="modal-footer">
         <button class="btn btn-outline" id="modalCancel">Abbrechen</button>
         <button class="btn btn-primary" id="modalSave">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SHARE MODAL                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="shareOverlay">
+    <div class="modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="shareTitle">Teilen</h2>
+        <button class="modal-close" id="shareClose" aria-label="Schliessen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="shareUrl">Link teilen</label>
+          <div class="share-input-row">
+            <input class="form-input" type="text" id="shareUrl" readonly>
+            <button class="btn btn-outline" id="shareUrlCopy" aria-label="Link kopieren" title="Link kopieren">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="share-embed-section">
+          <button class="share-embed-toggle" id="shareEmbedToggle" aria-expanded="false">
+            <svg class="share-embed-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            Einbetten
+          </button>
+          <div class="share-embed-body" id="shareEmbedBody" hidden>
+            <div class="share-input-row">
+              <input class="form-input" type="text" id="shareEmbed" readonly>
+              <button class="btn btn-outline" id="shareEmbedCopy" aria-label="Einbettungscode kopieren" title="Einbettungscode kopieren">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <p class="share-embed-hint">Sie können diese Ansicht in Ihre Webseite oder Ihr Blog einbetten.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="shareCloseBtn">Schliessen</button>
       </div>
     </div>
   </div>
