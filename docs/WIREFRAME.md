@@ -101,7 +101,7 @@ Active button gets accent background. Switching views preserves the current sear
 │  Filter                                [Reset][×] │
 ├───────────────────────────────────────────────────┤
 │                                                   │
-│  Phase          Klasse          Budget             │
+│  Phase          Komplexität          Budget             │
 │  ○ Triage       ○ Fast Track    ○ < 50k           │
 │  ○ Analysis     ○ Standard      ○ 50k – 200k     │
 │  ○ Implementa…  ○ Complex       ○ 200k – 500k    │
@@ -129,7 +129,7 @@ Dropdown with options that apply to **all views** consistently:
 |---|---|
 | Keine | No grouping (flat list) |
 | Phase | Group by `phase` enum (Triage → Rejected) |
-| Klasse | Group by `class` (Fast Track, Standard, Complex) |
+| Komplexität | Group by `complexity` (Fast Track, Standard, Complex) |
 | Verantwortlich | Group by `responsible` person |
 | DTI-pflichtig | Group by `dti_required` (Ja / Nein) |
 
@@ -158,7 +158,7 @@ Tabular view inspired by task-canvas. Each row is one project. Clicking a row op
 │                                                                         │
 │  ▾ Triage (3)                                                           │
 │  ┌─────┬────────────────────────┬───────────┬─────────┬──────┬────────┐ │
-│  │ Key │ Titel                  │ Auftragg. │ Budget  │Phase │ Klasse │ │
+│  │ Key │ Titel                  │ Auftragg. │ Budget  │Phase │ Komplexität │ │
 │  ├─────┼────────────────────────┼───────────┼─────────┼──────┼────────┤ │
 │  │ —   │ IoT Sensorik Gebäude…  │ Energie…  │ 1.2 M   │⬤ Tri │ Compl. │ │
 │  │ —   │ E-Signatur BK-Sign     │ Rechts…   │  28k    │⬤ Tri │ Fast   │ │
@@ -188,7 +188,7 @@ Tabular view inspired by task-canvas. Each row is one project. Clicking a row op
 | Auftraggeber | `requestor` | Truncated |
 | Budget | `budget_chf` | CHF formatted (e.g. "620k", "1.2 M") |
 | Phase | `phase` | Coloured dot + abbreviated label |
-| Klasse | `class` | Badge (Fast / Stand. / Compl.) |
+| Komplexität | `complexity` | Badge (Fast / Stand. / Compl.) |
 | Verantwortlich | `responsible` | Name or "—" |
 | DTI | `dti_required` | Flag icon if true |
 
@@ -332,7 +332,7 @@ Columns represent the `phase` enum. Cards move between columns to represent phas
 
 ### Swimlanes (via Group By)
 
-When Group By is active, each column is subdivided into horizontal swimlanes. Example with Group By = "Klasse":
+When Group By is active, each column is subdivided into horizontal swimlanes. Example with Group By = "Komplexität":
 
 ```
 Column: Triage
@@ -436,7 +436,7 @@ A slide-in panel from the right side of the screen (480 px wide). Shows full pro
 │                                      │  ────────────────────    │
 │                                      │                          │
 │                                      │  Phase       ⬤ Analysis  │
-│                                      │  Klasse      Complex     │
+│                                      │  Komplexität      Complex     │
 │                                      │  Budget      CHF 620k   │
 │                                      │  Go-Entsch.  ausstehend  │
 │                                      │  Verantw.    S. Keller   │
@@ -500,7 +500,7 @@ Used for both creating a new project and editing an existing one. Can appear eit
 │  │                            │  │
 │  └────────────────────────────┘  │
 │                                  │
-│  Klasse         ← auto-suggest  │
+│  Komplexität         ← auto-suggest  │
 │  ┌────────────────────────────┐  │
 │  │ [Fast Track ▾]            │  │
 │  └────────────────────────────┘  │
@@ -542,7 +542,7 @@ The suggestion is shown as a hint below the class dropdown. The user can overrid
 | `title` | Required, empty | Editable |
 | `requestor` | Required, empty | Editable |
 | `budget_chf` | Required, empty | Editable |
-| `class` | Auto-suggested, overridable | Editable |
+| `complexity` | Auto-suggested, overridable | Editable |
 | `phase` | Defaults to "Triage", hidden | Not editable here — changed via Go-Entscheid or Kanban drag |
 | `responsible` | Optional | Editable |
 | `dti_required` | Checkbox, default false | Editable |
@@ -594,7 +594,7 @@ How the Group By option renders in each view:
 |---|---|---|---|---|
 | Keine | Flat table | Flat card grid | Columns by phase | Flat timeline |
 | Phase | Grouped table sections | Grouped card sections | *(native — no change)* | Grouped rows |
-| Klasse | Grouped table sections | Grouped card sections | Swimlanes per class | Grouped rows |
+| Komplexität | Grouped table sections | Grouped card sections | Swimlanes per class | Grouped rows |
 | Verantwortlich | Grouped table sections | Grouped card sections | Swimlanes per person | Grouped rows |
 | DTI-pflichtig | Grouped table sections | Grouped card sections | Swimlanes (Ja / Nein) | Grouped rows |
 

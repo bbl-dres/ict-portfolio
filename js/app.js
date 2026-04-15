@@ -35,7 +35,7 @@ function restoreFromURL() {
 
   // Restore multi-dimensional filters
   if (params.has('f.phase'))    params.get('f.phase').split(',').forEach(v => state.filters.phase.add(v));
-  if (params.has('f.class'))    params.get('f.class').split(',').forEach(v => state.filters.class.add(v));
+  if (params.has('f.complexity'))    params.get('f.complexity').split(',').forEach(v => state.filters.complexity.add(v));
   if (params.has('f.type'))     params.get('f.type').split(',').forEach(v => state.filters.type.add(v));
   if (params.has('f.priority')) params.get('f.priority').split(',').forEach(v => state.filters.priority.add(v));
   if (params.has('f.responsible')) params.get('f.responsible').split(',').forEach(v => state.filters.responsible.add(v));
@@ -47,10 +47,10 @@ function restoreFromURL() {
     t.classList.toggle('active', t.dataset.view === state.currentView);
   });
   document.getElementById('sortLabel').textContent =
-    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', class: 'Klasse', type: 'Typ', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
+    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', complexity: 'Komplexität', type: 'Typ', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
   if (state.groupBy !== 'none') {
     document.getElementById('groupLabel').textContent =
-      { phase: 'Phase', class: 'Klasse', type: 'Typ', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
+      { phase: 'Phase', complexity: 'Komplexität', type: 'Typ', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
   // Sync sort field active state
@@ -82,7 +82,7 @@ function updateURL() {
 
   // Multi-dimensional filters
   if (state.filters.phase.size)    params.set('f.phase', [...state.filters.phase].join(','));
-  if (state.filters.class.size)    params.set('f.class', [...state.filters.class].join(','));
+  if (state.filters.complexity.size)    params.set('f.complexity', [...state.filters.complexity].join(','));
   if (state.filters.type.size)     params.set('f.type', [...state.filters.type].join(','));
   if (state.filters.priority.size) params.set('f.priority', [...state.filters.priority].join(','));
   if (state.filters.responsible.size) params.set('f.responsible', [...state.filters.responsible].join(','));
@@ -344,7 +344,7 @@ function setupViewContainerEvents() {
 
     // Project row / card clicks (open detail) — must be last
     // Skip if click was on a badge (handled by setupBadgeFilterClicks)
-    if (e.target.closest('.badge-phase, .badge-class, .badge-type, .badge-priority, .badge-tag')) return;
+    if (e.target.closest('.badge-phase, .badge-complexity, .badge-type, .badge-priority, .badge-tag')) return;
     const item = e.target.closest('[data-id]');
     if (item) {
       openDetailPanel(Number(item.dataset.id));
@@ -383,7 +383,7 @@ function getListColumns() {
   // Title is always shown
   cols.push({ key: '_title', width: '1fr' });
   if (vf.has('phase'))         cols.push({ key: 'phase',        width: '110px' });
-  if (vf.has('class'))         cols.push({ key: 'class',        width: '105px' });
+  if (vf.has('complexity'))    cols.push({ key: 'complexity',   width: '105px' });
   if (vf.has('type'))          cols.push({ key: 'type',         width: '155px' });
   if (vf.has('priority'))      cols.push({ key: 'priority',     width: '105px' });
   if (vf.has('responsible'))   cols.push({ key: 'responsible',  width: '120px' });
@@ -408,7 +408,7 @@ function renderProjectRow(p, cols, gridCols) {
       case 'responsible':  cells += `<span class="project-responsible">${p.responsible || '—'}</span>`; break;
       case 'phase':        cells += `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`; break;
       case 'type':         cells += typeBadge(p.type); break;
-      case 'class':        cells += `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`; break;
+      case 'complexity':   cells += `<span class="badge badge-complexity" data-complexity="${p.complexity}">${COMPLEXITY_LABELS[p.complexity]}</span>`; break;
       case 'priority':     cells += priorityBadge(p.priority); break;
       case 'tags':         cells += `<div class="tag-list">${(p.tags || []).map(t => `<span class="badge-tag">${esc(t)}</span>`).join('')}</div>`; break;
       case 'target_date':  cells += `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>`; break;
@@ -452,7 +452,7 @@ function renderGalleryCard(p) {
 
   // Badge row: class + phase in card body
   const badgeParts = [];
-  if (vf.has('class')) badgeParts.push(`<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>`);
+  if (vf.has('complexity')) badgeParts.push(`<span class="badge badge-complexity" data-complexity="${p.complexity}">${COMPLEXITY_LABELS[p.complexity]}</span>`);
   if (vf.has('phase')) badgeParts.push(`<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase]}</span>`);
   const badgeRow = badgeParts.length ? `<div class="gallery-card-badges">${badgeParts.join('')}</div>` : '';
 
@@ -534,7 +534,7 @@ function renderKanbanView(container) {
         const budgetHtml = vf.has('budget_chf') ? `<span class="kanban-card-budget">${formatBudgetShort(p.budget_chf)}</span>` : '';
 
         // Class + Type badge row (consistent with gallery overlay)
-        const classBadgeHtml = vf.has('class') ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class]}</span>` : '';
+        const classBadgeHtml = vf.has('complexity') ? `<span class="badge badge-complexity" data-complexity="${p.complexity}">${COMPLEXITY_LABELS[p.complexity]}</span>` : '';
         const typeBadgeHtml = vf.has('type') ? typeBadge(p.type) : '';
         const badgeRow = (classBadgeHtml || typeBadgeHtml) ? `<div class="kanban-card-meta">${classBadgeHtml}${typeBadgeHtml}${budgetHtml ? `<span style="margin-left:auto">${budgetHtml}</span>` : ''}</div>` : (budgetHtml ? `<div class="kanban-card-meta">${budgetHtml}</div>` : '');
 
@@ -621,7 +621,7 @@ function renderGanttChart(projects) {
       end = new Date(p.target_date);
     } else {
       end = new Date(start);
-      end.setDate(end.getDate() + (fallbackDurations[p.class] || 180));
+      end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180));
     }
     if (start < minDate) minDate = new Date(start);
     if (end > maxDate) maxDate = new Date(end);
@@ -683,7 +683,7 @@ function renderGanttChart(projects) {
     const left = dayOffset(b.start);
     const width = Math.max(dayOffset(b.end) - left, 4);
     barsHTML += `<div class="gantt-bar-row">
-      <div class="gantt-bar" data-class="${b.project.class}" data-id="${b.project.id}" tabindex="0" role="button" style="left:${left}px;width:${width}px" title="${esc(b.project.title)}: ${formatDate(b.start.toISOString())} – ${formatDate(b.end.toISOString())}">
+      <div class="gantt-bar" data-complexity="${b.project.complexity}" data-id="${b.project.id}" tabindex="0" role="button" style="left:${left}px;width:${width}px" title="${esc(b.project.title)}: ${formatDate(b.start.toISOString())} – ${formatDate(b.end.toISOString())}">
         ${width > 60 ? esc(b.project.title) : ''}
       </div>
     </div>`;
@@ -741,20 +741,20 @@ function renderDashboardView(container) {
     if (p.dti_required) dtiCount++;
     if (p.phase === 'implementation') activeCount++;
     phaseCounts[p.phase] = (phaseCounts[p.phase] || 0) + 1;
-    classCounts[p.class] = (classCounts[p.class] || 0) + 1;
-    classBudgets[p.class] = (classBudgets[p.class] || 0) + p.budget_chf;
+    classCounts[p.complexity] = (classCounts[p.complexity] || 0) + 1;
+    classBudgets[p.complexity] = (classBudgets[p.complexity] || 0) + p.budget_chf;
   }
 
   const phaseData = PHASE_ORDER.map(ph => ({
     key: ph, label: PHASE_LABELS[ph], count: phaseCounts[ph] || 0,
   }));
 
-  const classData = CLASS_ORDER.map(cl => ({
-    key: cl, label: CLASS_LABELS[cl], count: classCounts[cl] || 0, budget: classBudgets[cl] || 0,
+  const classData = COMPLEXITY_ORDER.map(cl => ({
+    key: cl, label: COMPLEXITY_LABELS[cl], count: classCounts[cl] || 0, budget: classBudgets[cl] || 0,
   }));
 
   const phaseColors = PHASE_COLORS;
-  const classColors = CLASS_COLORS;
+  const classColors = COMPLEXITY_COLORS;
 
   container.innerHTML = `
     <div class="dashboard">
@@ -804,7 +804,7 @@ function renderDashboardView(container) {
         </div>
 
         <div class="dashboard-chart-card">
-          <div class="dashboard-chart-title">Budget nach Klasse</div>
+          <div class="dashboard-chart-title">Budget nach Komplexität</div>
           <div class="dashboard-bar-chart">
             ${classData.map(d => `
               <div class="dashboard-bar-row">
@@ -1078,9 +1078,9 @@ function renderFilterPanel() {
     return `<label class="filter-option"><input type="checkbox" data-dim="phase" data-val="${k}" ${checked}>${PHASE_LABELS[k]}</label>`;
   }).join('');
 
-  const classOpts = CLASS_ORDER.map(k => {
-    const checked = f.class.has(k) ? 'checked' : '';
-    return `<label class="filter-option"><input type="checkbox" data-dim="class" data-val="${k}" ${checked}>${CLASS_LABELS[k]}</label>`;
+  const classOpts = COMPLEXITY_ORDER.map(k => {
+    const checked = f.complexity.has(k) ? 'checked' : '';
+    return `<label class="filter-option"><input type="checkbox" data-dim="complexity" data-val="${k}" ${checked}>${COMPLEXITY_LABELS[k]}</label>`;
   }).join('');
 
   const typeOpts = TYPE_ORDER.map(k => {
@@ -1128,7 +1128,7 @@ function renderFilterPanel() {
         <div class="filter-section-options">${phaseOpts}</div>
       </div>
       <div>
-        <div class="filter-section-title">Klasse</div>
+        <div class="filter-section-title">Komplexität</div>
         <div class="filter-section-options">${classOpts}</div>
       </div>
       <div>
@@ -1249,8 +1249,8 @@ function renderFilterPills() {
   for (const k of f.phase) {
     html += filterPill('phase', k, PHASE_LABELS[k], PHASE_COLORS[k]);
   }
-  for (const k of f.class) {
-    html += filterPill('class', k, CLASS_LABELS[k], CLASS_COLORS[k]);
+  for (const k of f.complexity) {
+    html += filterPill('complexity', k, COMPLEXITY_LABELS[k], COMPLEXITY_COLORS[k]);
   }
   for (const k of f.type) {
     html += filterPill('type', k, TYPE_LABELS[k], TYPE_COLORS[k] || 'var(--gray-500)');
@@ -1290,7 +1290,7 @@ function filterPill(dim, val, label, color) {
 
 function updateFilterCountBadge() {
   const f = state.filters;
-  const count = f.phase.size + f.class.size + f.type.size + f.priority.size + f.responsible.size + f.tags.size + (f.dti != null ? 1 : 0);
+  const count = f.phase.size + f.complexity.size + f.type.size + f.priority.size + f.responsible.size + f.tags.size + (f.dti != null ? 1 : 0);
   const badge = document.getElementById('filterCountBadge');
   badge.textContent = count;
   badge.classList.toggle('visible', count > 0);
@@ -1311,11 +1311,11 @@ function setupBadgeFilterClicks() {
       if (val) { toggleFilter('phase', val); afterBadgeClick(); return; }
     }
 
-    const classBadge = e.target.closest('.badge-class');
+    const classBadge = e.target.closest('.badge-complexity');
     if (classBadge) {
       e.stopPropagation();
-      const val = classBadge.dataset.class;
-      if (val) { toggleFilter('class', val); afterBadgeClick(); return; }
+      const val = classBadge.dataset.complexity;
+      if (val) { toggleFilter('complexity', val); afterBadgeClick(); return; }
     }
 
     const typeBadgeEl = e.target.closest('.badge-type');
@@ -1372,9 +1372,9 @@ function handleDashboardFilterClick(chartTitle, label) {
   if (chartTitle.includes('Phase')) {
     key = Object.entries(PHASE_LABELS).find(([, v]) => v === label)?.[0];
     if (key) toggleFilter('phase', key);
-  } else if (chartTitle.includes('Klasse') || chartTitle.includes('Budget')) {
-    key = Object.entries(CLASS_LABELS).find(([, v]) => v === label)?.[0];
-    if (key) toggleFilter('class', key);
+  } else if (chartTitle.includes('Komplexität') || chartTitle.includes('Budget')) {
+    key = Object.entries(COMPLEXITY_LABELS).find(([, v]) => v === label)?.[0];
+    if (key) toggleFilter('complexity', key);
   }
   if (key) {
     renderFilterPills();
@@ -1436,7 +1436,7 @@ function closeDetailPage() {
 
 // Field name translations for changelog display
 const FIELD_LABELS = {
-  phase: 'Phase', class: 'Klasse', type: 'Typ', priority: 'Priorität',
+  phase: 'Phase', complexity: 'Komplexität', type: 'Typ', priority: 'Priorität',
   budget_chf: 'Budget', go_decision: 'Go-Entscheid', go_date: 'Go-Datum',
   responsible: 'Verantwortlich', requestor: 'Auftraggeber', notes: 'Notizen',
   description: 'Beschreibung', tags: 'Tags', target_date: 'Zieldatum',
@@ -1449,7 +1449,7 @@ function translateFieldValue(field, raw) {
   if (raw == null || raw === 'null') return '—';
   const val = String(raw).replace(/^"|"$/g, '');
   if (field === 'phase') return PHASE_LABELS[val] || val;
-  if (field === 'class') return CLASS_LABELS[val] || val;
+  if (field === 'complexity') return COMPLEXITY_LABELS[val] || val;
   if (field === 'type') return TYPE_LABELS[val] || val;
   if (field === 'priority') return PRIORITY_LABELS[val] || val;
   if (field === 'hermes_phase') return HERMES_LABELS[val] || val;
@@ -1468,9 +1468,15 @@ function renderDetailPage(container) {
 
   // Update breadcrumb
   document.querySelector('.breadcrumb-inner').innerHTML = `
-    <a href="#" class="breadcrumb-link" id="breadcrumbBack">Projekte</a>
-    <span class="breadcrumb-sep">/</span>
-    <span class="breadcrumb-current">${esc(p.title)}</span>
+    <div class="breadcrumb-trail">
+      <a href="#" class="breadcrumb-link" id="breadcrumbBack">Projekte</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">${esc(p.title)}</span>
+    </div>
+    <button class="detail-back" id="detailBackBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      Zurück
+    </button>
   `;
 
   // Hide view tabs and toolbar
@@ -1503,30 +1509,17 @@ function renderDetailPage(container) {
     : `<button class="btn btn-outline btn-sm" id="detailEditBtn">Bearbeiten</button>`;
 
   let html = `
-    <button class="detail-back" id="detailBackBtn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-      Zurück
-    </button>
-
     <div class="detail-hero">
       <div class="detail-hero-image" style="${imageStyle}">
         ${p.type ? `<div class="card-badge">${typeBadge(p.type)}</div>` : ''}
       </div>
       <div class="detail-hero-body">
         <div class="detail-hero-top">
-          ${editing
-            ? `<input class="form-input form-input--title" type="text" id="editTitle" value="${esc(p.title)}">`
-            : `<div class="detail-hero-title">${esc(p.title)}</div>`}
+          <div class="detail-hero-title">${esc(p.title)}</div>
           ${actionButtons}
         </div>
-        ${editing
-          ? `<textarea class="form-input form-input--desc" id="editDescription" rows="2" placeholder="Beschreibung...">${esc(p.description || '')}</textarea>`
-          : (p.description ? `<div class="detail-hero-description">${esc(p.description)}</div>` : '')}
-        ${editing ? '' : tagsHTML}
-        ${editing ? `<div class="detail-hero-edit-tags">
-          <label class="form-label--inline">Tags:</label>
-          <input class="form-input form-input--inline" type="text" id="editTags" value="${esc((p.tags || []).join(', '))}" placeholder="z.B. SAP, Migration">
-        </div>` : ''}
+        ${p.description ? `<div class="detail-hero-description">${esc(p.description)}</div>` : ''}
+        ${tagsHTML}
       </div>
     </div>
 
@@ -1542,8 +1535,8 @@ function renderDetailPage(container) {
     const phaseBadgeHTML = p.phase
       ? `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase] || p.phase}</span>`
       : '—';
-    const classBadgeHTML = p.class
-      ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class] || p.class}</span>`
+    const classBadgeHTML = p.complexity
+      ? `<span class="badge badge-complexity" data-complexity="${p.complexity}">${COMPLEXITY_LABELS[p.complexity] || p.complexity}</span>`
       : '—';
 
     // Status & Planung — Summary / KPIs
@@ -1551,27 +1544,42 @@ function renderDetailPage(container) {
       <div class="detail-section">
         <div class="detail-section-header" data-section="status">
           ${sectionChevron}
-          <span class="detail-section-title">Status & Planung</span>
+          <span class="detail-section-title">Zusammenfassung</span>
         </div>
         <div class="detail-section-body">
           <div class="detail-fields-grid">
+            ${detailFieldRow('Projekt-ID', '#' + p.id)}
+            ${editing
+              ? detailEditRow('Verantwortlich', detailInput('editResponsible', p.responsible, 'text'))
+              : detailFieldRow('Verantwortlich', p.responsible || '—')}
+            ${detailFieldRow('Name', esc(p.title))}
+            ${editing
+              ? detailEditRow('Komplexität', detailSelect('editComplexity', COMPLEXITY_LABELS, p.complexity))
+              : detailFieldRow('Komplexität', classBadgeHTML)}
+            ${editing
+              ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
+              : detailFieldRow('Typ', TYPE_LABELS[p.type] || '—')}
+            ${editing
+              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
+              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
             ${detailFieldRow('Phase', phaseBadgeHTML)}
             ${editing
-              ? detailEditRow('Klasse', detailSelect('editClass', CLASS_LABELS, p.class))
-              : detailFieldRow('Klasse', classBadgeHTML)}
+              ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
+              : detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
             ${editing
               ? detailEditRow('Priorität', detailSelect('editPriority', PRIORITY_LABELS, p.priority || 'medium'))
               : detailFieldRow('Priorität', priorityBadge(p.priority))}
             ${detailFieldRow('Go-Entscheid', goIcon)}
             ${editing
-              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
-              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
-            ${editing
-              ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
-              : detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
-            ${editing
-              ? detailEditRow('Verantwortlich', detailInput('editResponsible', p.responsible, 'text'))
-              : detailFieldRow('Verantwortlich', p.responsible || '—')}
+              ? detailEditRow('GEVER Dossier', detailInput('editGeverUrl', p.gever_url, 'text'))
+              : detailFieldRow('GEVER Dossier', p.gever_url
+                ? `<a href="${esc(p.gever_url)}" target="_blank" rel="noopener" class="detail-link">${esc(p.gever_url)}</a>`
+                : '—')}
+            ${detailFieldRow('Erstellt', formatDateTime(p.created_at) + (creator ? ' · ' + esc(creator.display_name) : ''))}
+            <div class="detail-field-row" style="grid-column:2">
+              <span class="detail-field-label">Letzte Änderung</span>
+              <span class="detail-field-value">${formatDateTime(p.updated_at)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1590,11 +1598,11 @@ function renderDetailPage(container) {
               ? detailEditRow('Auftraggeber', detailInput('editRequestor', p.requestor, 'text'))
               : detailFieldRow('Auftraggeber', esc(p.requestor))}
             ${editing
-              ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
-              : detailFieldRow('Typ', TYPE_LABELS[p.type] || '—')}
-            ${detailFieldRow('Projekt-ID', '#' + p.id)}
-            ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
-            ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
+              ? detailEditRow('Beschreibung', `<textarea class="form-input form-input--desc" id="editDescription" rows="3" placeholder="Beschreibung...">${esc(p.description || '')}</textarea>`)
+              : detailFieldRow('Beschreibung', p.description ? esc(p.description) : '—')}
+            ${editing
+              ? detailEditRow('Tags', `<input class="form-input form-input--inline" type="text" id="editTags" value="${esc((p.tags || []).join(', '))}" placeholder="z.B. SAP, Migration">`)
+              : detailFieldRow('Tags', (p.tags && p.tags.length) ? p.tags.map(t => `<span class="badge-tag">${esc(t)}</span>`).join(' ') : '—')}
           </div>
         </div>
       </div>
@@ -1614,29 +1622,9 @@ function renderDetailPage(container) {
               : detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
             ${detailFieldRow('HERMES Phase', (HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'))}
             ${detailFieldRow('Go-Datum', p.go_date ? formatDate(p.go_date) : '—')}
-          </div>
-        </div>
-      </div>
-    `;
-
-    // 3. Umsetzung
-    html += `
-      <div class="detail-section">
-        <div class="detail-section-header" data-section="execution">
-          ${sectionChevron}
-          <span class="detail-section-title">3. Umsetzung</span>
-        </div>
-        <div class="detail-section-body">
-          <div class="detail-fields-grid">
             ${editing
               ? detailEditRow('Jira-Key', detailInput('editJiraKey', p.jira_key, 'text'))
               : detailFieldRow('Jira-Key', p.jira_key || '—')}
-            ${editing
-              ? detailEditRow('GEVER Dossier', detailInput('editGeverUrl', p.gever_url, 'text'))
-              : detailFieldRow('GEVER Dossier', p.gever_url
-                ? `<a href="${esc(p.gever_url)}" target="_blank" rel="noopener" class="detail-link">${esc(p.gever_url)}</a>`
-                : '—')}
-            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
           </div>
         </div>
       </div>
@@ -1741,12 +1729,11 @@ function saveInlineEdit() {
   const p = state.projects.find(pr => pr.id === state.selectedProjectId);
   if (!p) return;
 
-  p.title = document.getElementById('editTitle').value;
   p.description = document.getElementById('editDescription').value || null;
   p.requestor = document.getElementById('editRequestor').value;
   p.budget_chf = Number(document.getElementById('editBudget').value) || 0;
   p.type = document.getElementById('editType').value;
-  p.class = document.getElementById('editClass').value;
+  p.complexity = document.getElementById('editComplexity').value;
   p.priority = document.getElementById('editPriority').value;
   p.target_date = document.getElementById('editTargetDate').value || null;
   p.responsible = document.getElementById('editResponsible').value || null;
@@ -1812,7 +1799,7 @@ function saveProject() {
     type: document.getElementById('formType').value,
     tags,
     budget_chf: 0,
-    class: 'fast_track',
+    complexity: 'fast_track',
     phase: 'triage',
     priority: 'medium',
     go_decision: null,
@@ -2019,13 +2006,13 @@ function closeImagePreview() {
 
 function exportCSV() {
   const projects = getFilteredProjects();
-  const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Klasse', 'Typ', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
+  const headers = ['ID', 'Titel', 'Auftraggeber', 'Budget (CHF)', 'Komplexität', 'Typ', 'Phase', 'Priorität', 'Verantwortlich', 'DTI', 'HERMES', 'Jira-Key', 'Tags', 'Zieldatum', 'Erstellt', 'Geändert'];
   const rows = projects.map(p => [
     p.id,
     `"${(p.title || '').replace(/"/g, '""')}"`,
     `"${(p.requestor || '').replace(/"/g, '""')}"`,
     p.budget_chf,
-    CLASS_LABELS[p.class] || p.class,
+    COMPLEXITY_LABELS[p.complexity] || p.complexity,
     TYPE_LABELS[p.type] || p.type || '',
     PHASE_LABELS[p.phase] || p.phase,
     PRIORITY_LABELS[p.priority] || p.priority || 'medium',
@@ -2078,7 +2065,7 @@ function exportPDF() {
     <div class="subtitle">${projects.length} Projekte · Erstellt am ${new Date().toLocaleDateString('de-CH')}</div>
     <table>
       <thead><tr>
-        <th>Key</th><th>Titel</th><th>Typ</th><th>Phase</th><th>Klasse</th><th>Priorität</th><th>Verantwortlich</th><th>Zieldatum</th><th>Tags</th>
+        <th>Key</th><th>Titel</th><th>Typ</th><th>Phase</th><th>Komplexität</th><th>Priorität</th><th>Verantwortlich</th><th>Zieldatum</th><th>Tags</th>
       </tr></thead>
       <tbody>
         ${projects.map(p => `<tr>
@@ -2086,7 +2073,7 @@ function exportPDF() {
           <td><strong>${esc(p.title)}</strong><br><span style="color:#6B7280">${esc(p.requestor)}</span></td>
           <td>${TYPE_LABELS[p.type] || '—'}</td>
           <td><span class="badge phase-${p.phase}">${PHASE_LABELS[p.phase]}</span></td>
-          <td>${CLASS_LABELS[p.class]}</td>
+          <td>${COMPLEXITY_LABELS[p.complexity]}</td>
           <td>${PRIORITY_LABELS[p.priority || 'medium']}</td>
           <td>${esc(p.responsible) || '—'}</td>
           <td>${p.target_date ? new Date(p.target_date).toLocaleDateString('de-CH') : '—'}</td>

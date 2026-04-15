@@ -21,7 +21,7 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `requestor` | string (200) | yes | Requesting unit or stakeholder |
 | `budget_chf` | integer | yes | Estimated budget in CHF |
 | `type` | enum | yes | See type enum below |
-| `class` | enum | yes | See class enum below |
+| `complexity` | enum | yes | See complexity enum below |
 | `phase` | enum | yes | See phase enum below |
 | `priority` | enum | no | See priority enum below; default `medium` |
 | `go_decision` | boolean / null | no | `null` = pending, `true` = approved |
@@ -50,7 +50,7 @@ Core entity representing a digital initiative tracked through the DRES demand-to
 | `study` | Feasibility study, evaluation, or proof of concept |
 | `data` | Data quality, enrichment, capture, or cleansing initiative (Datenbewirtschaftung) |
 
-**Enum `class`**
+**Enum `complexity`**
 
 | Value | Condition |
 |---|---|
@@ -176,7 +176,7 @@ Best for: production use, multi-user, existing Atlassian tenant at BBL.
 ```
 Jira project:    DRESPPM
 Issue type:      Project
-Custom fields:   class, budget_chf, phase, go_decision, dti_required
+Custom fields:   complexity, budget_chf, phase, go_decision, dti_required
 Comments:        native Jira comments (replaces comment entity)
 Change history:  native Jira audit log (replaces change_log entity)
 ```
@@ -209,7 +209,7 @@ All writes require a manual commit or a GitHub Action triggered by a form submis
     "requestor": "Informatik BBL",
     "budget_chf": 620000,
     "type": "change",
-    "class": "complex",
+    "complexity": "complex",
     "phase": "triage",
     "priority": "high",
     "go_decision": null,

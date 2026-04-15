@@ -125,8 +125,8 @@ function getFilteredProjects() {
   if (f.phase.size > 0) {
     list = list.filter(p => f.phase.has(p.phase));
   }
-  if (f.class.size > 0) {
-    list = list.filter(p => f.class.has(p.class));
+  if (f.complexity.size > 0) {
+    list = list.filter(p => f.complexity.has(p.complexity));
   }
   if (f.type.size > 0) {
     list = list.filter(p => f.type.has(p.type));
@@ -152,9 +152,9 @@ function getFilteredProjects() {
     if (state.sortField === 'phase') {
       va = PHASE_ORDER.indexOf(va);  if (va === -1) va = Infinity;
       vb = PHASE_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
-    } else if (state.sortField === 'class') {
-      va = CLASS_ORDER.indexOf(va);  if (va === -1) va = Infinity;
-      vb = CLASS_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
+    } else if (state.sortField === 'complexity') {
+      va = COMPLEXITY_ORDER.indexOf(va);  if (va === -1) va = Infinity;
+      vb = COMPLEXITY_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
     } else if (state.sortField === 'type') {
       va = TYPE_ORDER.indexOf(va);  if (va === -1) va = Infinity;
       vb = TYPE_ORDER.indexOf(vb);  if (vb === -1) vb = Infinity;
@@ -186,8 +186,8 @@ function getGroupedProjects(projects) {
     let key;
     if (state.groupBy === 'phase') {
       key = p.phase;
-    } else if (state.groupBy === 'class') {
-      key = p.class;
+    } else if (state.groupBy === 'complexity') {
+      key = p.complexity;
     } else if (state.groupBy === 'type') {
       key = p.type || 'new';
     } else if (state.groupBy === 'responsible') {
@@ -205,8 +205,8 @@ function getGroupedProjects(projects) {
   if (state.groupBy === 'phase') {
     return new Map(PHASE_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
   }
-  if (state.groupBy === 'class') {
-    return new Map(CLASS_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
+  if (state.groupBy === 'complexity') {
+    return new Map(COMPLEXITY_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
   }
   if (state.groupBy === 'type') {
     return new Map(TYPE_ORDER.filter(k => groups.has(k)).map(k => [k, groups.get(k)]));
@@ -220,7 +220,7 @@ function getGroupedProjects(projects) {
 
 function getGroupLabel(key) {
   if (state.groupBy === 'phase') return PHASE_LABELS[key] || key;
-  if (state.groupBy === 'class') return CLASS_LABELS[key] || key;
+  if (state.groupBy === 'complexity') return COMPLEXITY_LABELS[key] || key;
   if (state.groupBy === 'type') return TYPE_LABELS[key] || key;
   if (state.groupBy === 'priority') return PRIORITY_LABELS[key] || key;
   return key;
@@ -232,14 +232,14 @@ const PHASE_COLORS = {
   implementation: 'var(--phase-implementation)', completed: 'var(--phase-completed)',
   rejected: 'var(--phase-rejected)',
 };
-const CLASS_COLORS = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
+const COMPLEXITY_COLORS = { fast_track: 'var(--success-500)', standard: 'var(--accent-500)', complex: 'var(--warning-500)' };
 const TYPE_COLORS = {
   incident: 'var(--type-incident)', change: 'var(--type-change)', new: 'var(--type-new)',
   data: 'var(--type-data)', migration: 'var(--type-migration)', study: 'var(--type-study)',
 };
 const PRIORITY_COLORS = { high: 'var(--priority-high)', medium: 'var(--priority-medium)', low: 'var(--priority-low)' };
 
-const COLOR_MAPS = { phase: PHASE_COLORS, class: CLASS_COLORS, type: TYPE_COLORS, priority: PRIORITY_COLORS };
+const COLOR_MAPS = { phase: PHASE_COLORS, complexity: COMPLEXITY_COLORS, type: TYPE_COLORS, priority: PRIORITY_COLORS };
 
 function getGroupColor(key) {
   return (COLOR_MAPS[state.groupBy] || {})[key] || 'var(--gray-400)';
@@ -265,7 +265,7 @@ function getAllTags() {
 
 function hasActiveFilters() {
   const f = state.filters;
-  return f.phase.size > 0 || f.class.size > 0 || f.type.size > 0 || f.priority.size > 0 || f.responsible.size > 0 || f.tags.size > 0 || f.dti != null;
+  return f.phase.size > 0 || f.complexity.size > 0 || f.type.size > 0 || f.priority.size > 0 || f.responsible.size > 0 || f.tags.size > 0 || f.dti != null;
 }
 
 function toggleFilter(dimension, value) {
@@ -279,7 +279,7 @@ function toggleFilter(dimension, value) {
 
 function clearAllFilters() {
   state.filters.phase.clear();
-  state.filters.class.clear();
+  state.filters.complexity.clear();
   state.filters.type.clear();
   state.filters.priority.clear();
   state.filters.responsible.clear();

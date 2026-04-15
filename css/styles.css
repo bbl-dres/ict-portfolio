@@ -209,6 +209,17 @@ select:focus-visible {
   width: 100%;
   margin: 0 auto;
   padding: var(--space-2) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.breadcrumb-trail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .breadcrumb-link {
@@ -857,10 +868,10 @@ select:focus-visible {
 .badge-priority[data-priority="high"]   { background: var(--priority-high-bg);   color: var(--priority-high-text); }
 
 /* Class variants — semantic colors */
-.badge-class { background: var(--gray-100); color: var(--gray-700); }
-.badge-class[data-class="fast_track"] { background: var(--class-fast-bg); color: var(--class-fast-text); }
-.badge-class[data-class="standard"]   { background: var(--class-std-bg); color: var(--class-std-text); }
-.badge-class[data-class="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
+.badge-complexity { background: var(--gray-100); color: var(--gray-700); }
+.badge-complexity[data-complexity="fast_track"] { background: var(--class-fast-bg); color: var(--class-fast-text); }
+.badge-complexity[data-complexity="standard"]   { background: var(--class-std-bg); color: var(--class-std-text); }
+.badge-complexity[data-complexity="complex"]    { background: var(--class-complex-bg); color: var(--class-complex-text); }
 
 /* Type variants — semantic colors */
 .badge-type { background: var(--gray-100); color: var(--gray-700); }
@@ -900,7 +911,7 @@ select:focus-visible {
 
 /* Clickable badges */
 .view-container .badge-phase,
-.view-container .badge-class,
+.view-container .badge-complexity,
 .view-container .badge-type,
 .view-container .badge-priority,
 .view-container .badge-tag,
@@ -910,12 +921,12 @@ select:focus-visible {
 }
 
 .view-container .badge-phase:hover,
-.view-container .badge-class:hover,
+.view-container .badge-complexity:hover,
 .view-container .badge-type:hover,
 .view-container .badge-priority:hover,
 .view-container .badge-tag:hover,
 .view-container .badge-phase:focus-visible,
-.view-container .badge-class:focus-visible,
+.view-container .badge-complexity:focus-visible,
 .view-container .badge-type:focus-visible,
 .view-container .badge-priority:focus-visible,
 .view-container .badge-tag:focus-visible {
@@ -1609,9 +1620,9 @@ select:focus-visible {
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-.gantt-bar[data-class="fast_track"] { background: linear-gradient(90deg, var(--success-600) 0%, var(--success-700) 100%); }
-.gantt-bar[data-class="standard"]   { background: linear-gradient(90deg, var(--accent-500) 0%, var(--accent-600) 100%); }
-.gantt-bar[data-class="complex"]    { background: linear-gradient(90deg, var(--warning-500) 0%, var(--warning-600) 100%); }
+.gantt-bar[data-complexity="fast_track"] { background: linear-gradient(90deg, var(--success-600) 0%, var(--success-700) 100%); }
+.gantt-bar[data-complexity="standard"]   { background: linear-gradient(90deg, var(--accent-500) 0%, var(--accent-600) 100%); }
+.gantt-bar[data-complexity="complex"]    { background: linear-gradient(90deg, var(--warning-500) 0%, var(--warning-600) 100%); }
 
 .gantt-today-line {
   position: absolute;
@@ -1885,17 +1896,17 @@ select:focus-visible {
 .detail-back {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--gray-500);
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-1) 0;
-  margin-bottom: var(--space-4);
+  padding: 0;
   font-family: var(--font-family);
   transition: color var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .detail-back:hover {
@@ -2052,7 +2063,7 @@ select:focus-visible {
 
 .detail-field-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--gray-100);
@@ -2070,7 +2081,7 @@ select:focus-visible {
 }
 
 .detail-field-label::after {
-  content: ':';
+  content: ' :';
 }
 
 .detail-field-value {
@@ -2587,6 +2598,11 @@ select:focus-visible {
   color: var(--gray-500);
   text-decoration: none;
   transition: color var(--transition-fast);
+  margin-left: var(--space-4);
+}
+
+.footer-link:first-child {
+  margin-left: 0;
 }
 
 .footer-link:hover {

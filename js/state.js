@@ -16,7 +16,7 @@ const state = {
   searchQuery: '',
   sortField: 'title',
   sortDirection: 'asc',
-  groupBy: 'none',       // none | phase | class | type | responsible | dti_required
+  groupBy: 'none',       // none | phase | complexity | type | responsible | dti_required
 
   /* ── Filters ── */
   showArchived: false,   // checkbox: include completed/rejected
@@ -24,7 +24,7 @@ const state = {
   /* ── Multi-dimensional filters ── */
   filters: {
     phase:       new Set(),   // e.g. Set(['triage', 'analysis'])
-    class:       new Set(),   // e.g. Set(['complex'])
+    complexity:  new Set(),   // e.g. Set(['complex'])
     type:        new Set(),   // e.g. Set(['new', 'change'])
     priority:    new Set(),   // e.g. Set(['high'])
     responsible: new Set(),   // e.g. Set(['Sandra Keller', '__me__', '__none__'])
@@ -36,7 +36,7 @@ const state = {
   /* ── Field visibility ── */
   visibleFields: new Set([
     'jira_key',
-    'responsible', 'phase', 'class', 'type', 'priority', 'target_date'
+    'responsible', 'phase', 'complexity', 'type', 'priority', 'target_date'
   ]),
 
   /* ── Collapsed groups ── */
@@ -70,13 +70,13 @@ const PHASE_LABELS = {
 
 const PHASE_ORDER = ['triage', 'analysis', 'implementation', 'completed', 'rejected'];
 
-const CLASS_LABELS = {
+const COMPLEXITY_LABELS = {
   fast_track: 'Fast Track',
   standard:   'Standard',
   complex:    'Komplex',
 };
 
-const CLASS_ORDER = ['fast_track', 'standard', 'complex'];
+const COMPLEXITY_ORDER = ['fast_track', 'standard', 'complex'];
 
 const PRIORITY_LABELS = {
   low:    'Tief',
