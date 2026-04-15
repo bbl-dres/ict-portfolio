@@ -15,6 +15,8 @@ html {
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -26,7 +28,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: clip;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body.modal-open {
@@ -1136,6 +1139,7 @@ select:focus-visible {
 }
 
 .filter-pill-remove {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1149,6 +1153,13 @@ select:focus-visible {
   cursor: pointer;
   transition: all var(--transition-fast);
   font-family: inherit;
+}
+
+/* Expanded hit area on touch devices — visual stays 20px, tap zone is 44px */
+.filter-pill-remove::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
 }
 
 .filter-pill-remove:hover {
@@ -2790,16 +2801,15 @@ select:focus-visible {
   /* Breadcrumb: compact padding */
   .breadcrumb-inner { padding: var(--space-1) var(--space-3); }
 
-  /* View tabs: horizontal scroll with right-edge fade affordance */
+  /* View tabs: horizontal scroll with scrollability hint (border fade) */
   .view-tabs {
     position: relative;
     flex-wrap: nowrap;
     overflow-x: auto;
+    max-width: 100%;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
-            mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
   }
   .view-tabs::-webkit-scrollbar { display: none; }
   .view-tab { flex: 0 0 auto; scroll-snap-align: start; }
@@ -2828,7 +2838,6 @@ select:focus-visible {
   .toolbar-right {
     display: flex;
     flex: 1 1 100%;
-    flex-basis: 100%;
     justify-content: flex-start;
     gap: var(--space-2);
     align-items: center;
@@ -2846,14 +2855,16 @@ select:focus-visible {
   .toolbar-search.expanded { flex: 1 1 100%; min-width: 0; }
   .toolbar-search.expanded .toolbar-search-input-wrapper { width: 100%; }
 
-  /* Inputs: prevent iOS auto-zoom on focus (requires ≥16px) */
+  /* Inputs: prevent iOS auto-zoom on focus.
+     DO NOT REMOVE — iOS Safari zooms in on any form field with
+     font-size < 16px, causing layout jump on focus. Keep at 16px
+     regardless of the design's 14px desktop default. */
   .form-input,
   .toolbar-search-input { font-size: 16px; }
 
   /* Dropdowns: prevent overflow + right-anchor when trigger sits near the right edge */
   .dropdown-menu { min-width: 180px; max-width: calc(100vw - var(--space-6)); }
-  .toolbar-right .dropdown-menu,
-  .page-header-right .dropdown-menu { left: auto; right: 0; }
+  .toolbar-right .dropdown-menu { left: auto; right: 0; }
   .dropdown-item,
   .dropdown-checkbox { min-height: 44px; display: flex; align-items: center; }
 
@@ -2941,13 +2952,6 @@ select:focus-visible {
   /* View tabs: smaller padding */
   .view-tab,
   .detail-tab { padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs); min-height: 44px; }
-
-  /* Toolbar: icon-only buttons */
-  .toolbar-btn { gap: var(--space-1); }
-
-  /* Search: full-width when expanded */
-  .toolbar-search.expanded { flex: 1; min-width: 0; }
-  .toolbar-search.expanded .toolbar-search-input-wrapper { width: 100%; }
 
   /* Gallery: single column */
   .gallery-grid { grid-template-columns: 1fr; }
