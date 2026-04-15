@@ -122,17 +122,24 @@ function renderView() {
   const container = document.getElementById('viewContainer');
   container.classList.remove('view-container--transparent');
   const isDetail = state.currentView === 'detail';
-  const hideControls = ['dashboard', 'wiki', 'detail'].includes(state.currentView);
+  const isWiki = state.currentView === 'wiki';
+  const view = state.currentView;
+  // Per-view control visibility
+  const showSort   = ['gallery', 'list', 'kanban'].includes(view);
+  const showGroup  = ['gallery', 'list', 'kanban'].includes(view);
+  const showFilter = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
+  const showAssign = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
+  const showFields = ['gallery', 'list', 'kanban'].includes(view);
 
   // Show/hide view tabs and toolbar
   document.querySelector('.view-tabs').style.display = isDetail ? 'none' : '';
-  document.querySelector('.toolbar').style.display = isDetail ? 'none' : '';
-  document.getElementById('sortDropdown').style.display = hideControls ? 'none' : '';
-  document.getElementById('groupDropdown').style.display = hideControls ? 'none' : '';
-  document.getElementById('filterToggleBtn').style.display = hideControls ? 'none' : '';
-  document.getElementById('assigneeDropdown').style.display = hideControls ? 'none' : '';
-  document.getElementById('fieldsDropdown').style.display = hideControls ? 'none' : '';
-  document.querySelector('.toolbar-sep').style.display = hideControls ? 'none' : '';
+  document.querySelector('.toolbar').style.display = (isDetail || isWiki) ? 'none' : '';
+  document.getElementById('sortDropdown').style.display = showSort ? '' : 'none';
+  document.getElementById('groupDropdown').style.display = showGroup ? '' : 'none';
+  document.getElementById('filterToggleBtn').style.display = showFilter ? '' : 'none';
+  document.getElementById('assigneeDropdown').style.display = showAssign ? '' : 'none';
+  document.getElementById('fieldsDropdown').style.display = showFields ? '' : 'none';
+  document.querySelector('.toolbar-sep').style.display = showFields ? '' : 'none';
 
   // Show/hide filter panel and pills in detail view
   if (isDetail) {
@@ -738,6 +745,8 @@ function renderDashboardView(container) {
   const phaseCounts = {};
   const classCounts = {};
   const classBudgets = {};
+  const prioCounts = {};
+  const typeCounts = {};
   for (const p of projects) {
     totalBudget += p.budget_chf;
     if (p.dti_required) dtiCount++;
@@ -745,6 +754,9 @@ function renderDashboardView(container) {
     phaseCounts[p.phase] = (phaseCounts[p.phase] || 0) + 1;
     classCounts[p.complexity] = (classCounts[p.complexity] || 0) + 1;
     classBudgets[p.complexity] = (classBudgets[p.complexity] || 0) + p.budget_chf;
+    const prio = p.priority || 'medium';
+    prioCounts[prio] = (prioCounts[prio] || 0) + 1;
+    if (p.type) typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
   }
 
   const phaseData = PHASE_ORDER.map(ph => ({
@@ -755,8 +767,18 @@ function renderDashboardView(container) {
     key: cl, label: COMPLEXITY_LABELS[cl], count: classCounts[cl] || 0, budget: classBudgets[cl] || 0,
   }));
 
+  const prioData = PRIORITY_ORDER.map(pr => ({
+    key: pr, label: PRIORITY_LABELS[pr], count: prioCounts[pr] || 0,
+  }));
+
+  const typeData = TYPE_ORDER.map(tp => ({
+    key: tp, label: TYPE_LABELS[tp], count: typeCounts[tp] || 0,
+  }));
+
   const phaseColors = PHASE_COLORS;
   const classColors = COMPLEXITY_COLORS;
+  const prioColors = PRIORITY_COLORS;
+  const typeColors = TYPE_COLORS;
 
   container.innerHTML = `
     <div class="dashboard">
@@ -795,14 +817,6 @@ function renderDashboardView(container) {
               </div>
             `).join('')}
           </div>
-          <div class="dashboard-legend">
-            ${phaseData.map(d => `
-              <span class="dashboard-legend-item">
-                <span class="dashboard-legend-dot" style="background:${phaseColors[d.key]}"></span>
-                ${d.label}
-              </span>
-            `).join('')}
-          </div>
         </div>
 
         <div class="dashboard-chart-card">
@@ -812,7 +826,7 @@ function renderDashboardView(container) {
               <div class="dashboard-bar-row">
                 <span class="dashboard-bar-label">${d.label}</span>
                 <div class="dashboard-bar-track">
-                  <div class="dashboard-bar-fill" style="width:${totalBudget ? (d.budget / totalBudget * 100) : 0}%;background:${classColors[d.key]}">
+                  <div class="dashboard-bar-fill dashboard-bar-fill--neutral" style="width:${totalBudget ? (d.budget / totalBudget * 100) : 0}%">
                     ${d.budget > 0 ? formatBudgetShort(d.budget) : ''}
                   </div>
                 </div>
@@ -820,12 +834,38 @@ function renderDashboardView(container) {
               </div>
             `).join('')}
           </div>
-          <div class="dashboard-legend">
-            ${classData.map(d => `
-              <span class="dashboard-legend-item">
-                <span class="dashboard-legend-dot" style="background:${classColors[d.key]}"></span>
-                ${d.label} (${d.count})
-              </span>
+        </div>
+
+        <div class="dashboard-chart-card">
+          <div class="dashboard-chart-title">Projekte nach Priorität</div>
+          <div class="dashboard-bar-chart">
+            ${prioData.map(d => `
+              <div class="dashboard-bar-row">
+                <span class="dashboard-bar-label">${d.label}</span>
+                <div class="dashboard-bar-track">
+                  <div class="dashboard-bar-fill" style="width:${total ? (d.count / total * 100) : 0}%;background:${prioColors[d.key]}">
+                    ${d.count > 0 ? d.count : ''}
+                  </div>
+                </div>
+                <span class="dashboard-bar-value">${d.count}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="dashboard-chart-card">
+          <div class="dashboard-chart-title">Projekte nach Typ</div>
+          <div class="dashboard-bar-chart">
+            ${typeData.map(d => `
+              <div class="dashboard-bar-row">
+                <span class="dashboard-bar-label">${d.label}</span>
+                <div class="dashboard-bar-track">
+                  <div class="dashboard-bar-fill dashboard-bar-fill--neutral" style="width:${total ? (d.count / total * 100) : 0}%">
+                    ${d.count > 0 ? d.count : ''}
+                  </div>
+                </div>
+                <span class="dashboard-bar-value">${d.count}</span>
+              </div>
             `).join('')}
           </div>
         </div>
@@ -1310,8 +1350,8 @@ function renderFilterPills() {
 
 /* Filter pills use event delegation — set up once in setupFilterPanelEvents */
 
-function filterPill(dim, val, label, color) {
-  return `<span class="filter-pill" style="background:color-mix(in srgb, ${color} 12%, white); border-color:color-mix(in srgb, ${color} 30%, transparent);">
+function filterPill(dim, val, label) {
+  return `<span class="filter-pill">
     ${esc(label)}
     <button class="filter-pill-remove" data-dim="${dim}" data-val="${esc(val)}" aria-label="Filter entfernen">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -1428,13 +1468,18 @@ function handleDashboardFilterClick(chartTitle, label) {
   } else if (chartTitle.includes('Komplexität') || chartTitle.includes('Budget')) {
     key = Object.entries(COMPLEXITY_LABELS).find(([, v]) => v === label)?.[0];
     if (key) toggleFilter('complexity', key);
+  } else if (chartTitle.includes('Priorität')) {
+    key = Object.entries(PRIORITY_LABELS).find(([, v]) => v === label)?.[0];
+    if (key) toggleFilter('priority', key);
+  } else if (chartTitle.includes('Typ')) {
+    key = Object.entries(TYPE_LABELS).find(([, v]) => v === label)?.[0];
+    if (key) toggleFilter('type', key);
   }
   if (key) {
     renderFilterPills();
     updateFilterCountBadge();
-    switchFromDashboard();
-    // If still on dashboard (previousView was dashboard), just re-render in place
-    if (state.currentView === 'dashboard') render();
+    if (state.filterPanelOpen) renderFilterPanel();
+    render();
   }
 }
 

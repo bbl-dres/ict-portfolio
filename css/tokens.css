@@ -73,10 +73,13 @@
   --phase-rejected-text:     var(--error-800);
 
   /* ── Priority colours ── */
+  --priority-low:        var(--success-500);
   --priority-low-bg:     var(--success-100);
   --priority-low-text:   var(--success-800);
+  --priority-medium:     var(--warning-500);
   --priority-medium-bg:  var(--warning-100);
   --priority-medium-text: var(--warning-800);
+  --priority-high:       var(--error-500);
   --priority-high-bg:    var(--error-100);
   --priority-high-text:  var(--error-800);
 
@@ -89,6 +92,7 @@
   --class-complex-text: var(--warning-800);
 
   /* ── Type colours ── */
+  --type-incident:      var(--error-500);
   --type-incident-bg:   var(--error-100);
   --type-incident-text: var(--error-800);
   --type-change:        #8B5CF6;
@@ -97,10 +101,13 @@
   --type-new:           #10B981;
   --type-new-bg:        #D1FAE5;
   --type-new-text:      #065F46;
+  --type-data:          var(--warning-500);
   --type-data-bg:       var(--warning-100);
   --type-data-text:     var(--warning-800);
+  --type-migration:     var(--accent-500);
   --type-migration-bg:  var(--accent-100);
   --type-migration-text: var(--accent-800);
+  --type-study:         var(--gray-500);
   --type-study-bg:      var(--gray-100);
   --type-study-text:    var(--gray-700);
 

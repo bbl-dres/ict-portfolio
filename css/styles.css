@@ -1721,24 +1721,7 @@ select:focus-visible {
   text-align: center;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
 }
-
-.dashboard-kpi::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--gray-200);
-}
-
-.dashboard-kpi:nth-child(1)::before { background: var(--accent-500); }
-.dashboard-kpi:nth-child(2)::before { background: var(--warning-500); }
-.dashboard-kpi:nth-child(3)::before { background: var(--success-500); }
-.dashboard-kpi:nth-child(4)::before { background: var(--primary-500); }
 
 .dashboard-kpi:hover {
   box-shadow: var(--shadow-hover-md);
@@ -1804,7 +1787,11 @@ select:focus-visible {
 .dashboard-bar-label {
   font-size: var(--font-size-sm);
   color: var(--gray-600);
-  min-width: 100px;
+  width: 160px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-bar-track {
@@ -1826,6 +1813,10 @@ select:focus-visible {
   font-weight: var(--font-weight-semi);
   color: #fff;
   min-width: fit-content;
+}
+
+.dashboard-bar-fill--neutral {
+  background: var(--phase-triage);
 }
 
 .dashboard-bar-value {
