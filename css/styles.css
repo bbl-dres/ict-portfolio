@@ -1642,12 +1642,16 @@ select:focus-visible {
 
 .gantt-today-label {
   position: absolute;
-  top: -20px;
-  left: 4px;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: var(--font-size-xs);
-  color: var(--error-500);
+  color: #fff;
+  background: var(--error-500);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
 }
 
 /* ═══════════════════════════════════════════════════════════
