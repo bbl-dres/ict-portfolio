@@ -46,21 +46,12 @@ function restoreFromURL() {
   document.querySelectorAll('.view-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.view === state.currentView);
   });
-  document.getElementById('sortLabel').textContent =
-    { title: 'Titel', budget_chf: 'Budget', phase: 'Phase', complexity: 'Komplexität', type: 'Typ', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert' }[state.sortField] || 'Titel';
+  syncSortUI();
   if (state.groupBy !== 'none') {
     document.getElementById('groupLabel').textContent =
       { phase: 'Phase', complexity: 'Komplexität', type: 'Typ', responsible: 'Verantwortlich', priority: 'Priorität', dti_required: 'DTI-pflichtig' }[state.groupBy] || 'Gruppieren';
     document.getElementById('groupBtn').classList.add('active');
   }
-  // Sync sort field active state
-  document.querySelectorAll('#sortMenu .dropdown-item[data-sort]').forEach(i => {
-    i.classList.toggle('active', i.dataset.sort === state.sortField);
-  });
-  // Sync sort direction active state
-  document.querySelectorAll('#sortMenu .dropdown-item[data-direction]').forEach(i => {
-    i.classList.toggle('active', i.dataset.direction === state.sortDirection);
-  });
 
   if (state.searchQuery) {
     document.getElementById('searchInput').value = state.searchQuery;
@@ -294,17 +285,18 @@ function setupViewContainerEvents() {
       return;
     }
 
-    // Gantt navigation (today, left, right)
+    // Gantt navigation (today, left, right) — synced across all groups
     const navBtn = e.target.closest('.gantt-nav-btn');
     if (navBtn) {
       const action = navBtn.dataset.nav;
       if (action === 'today') {
         scrollGanttToToday(true);
       } else {
-        const timeline = document.querySelector('.gantt-timeline');
-        if (timeline) {
-          const step = timeline.clientWidth * 0.6;
-          timeline.scrollLeft += action === 'right' ? step : -step;
+        const visible = visibleGanttTimelines();
+        if (visible.length) {
+          const step = visible[0].clientWidth * 0.6;
+          const delta = action === 'right' ? step : -step;
+          setGanttScrollLeft(visible[0].scrollLeft + delta);
         }
       }
       return;
@@ -605,21 +597,61 @@ function renderGanttView(container) {
   renderGroupedView(container, (items) => {
     return renderGanttChart(items, sharedRange);
   });
+  syncGanttTimelineScroll();
+}
+
+function visibleGanttTimelines() {
+  return Array.from(document.querySelectorAll('.gantt-timeline'))
+    .filter(t => t.clientWidth > 0);
+}
+
+// Set the same scrollLeft on every Gantt timeline (visible + collapsed, so
+// hidden groups are already in position when re-expanded). Marks each target
+// so its own scroll listener doesn't echo the programmatic change back.
+function setGanttScrollLeft(left) {
+  document.querySelectorAll('.gantt-timeline').forEach(t => {
+    if (t.scrollLeft === left) return;
+    t.dataset.ganttSyncing = '1';
+    t.scrollLeft = left;
+  });
+}
+
+// When multiple Gantt groups are shown, scrolling any one timeline
+// horizontally mirrors the scroll position onto all the others.
+function syncGanttTimelineScroll() {
+  const timelines = Array.from(document.querySelectorAll('.gantt-timeline'));
+  if (timelines.length < 2) return;
+  timelines.forEach(source => {
+    source.addEventListener('scroll', () => {
+      if (source.dataset.ganttSyncing) {
+        delete source.dataset.ganttSyncing;
+        return;
+      }
+      setGanttScrollLeft(source.scrollLeft);
+    }, { passive: true });
+  });
+}
+
+// Fallback bar length (days) when target_date is missing, keyed by complexity.
+const GANTT_FALLBACK_DURATIONS = { fast_track: 90, standard: 180, complex: 365 };
+
+function computeGanttBar(project) {
+  const start = new Date(project.created_at);
+  let end;
+  if (project.phase === 'completed' || project.phase === 'rejected') end = new Date(project.updated_at);
+  else if (project.target_date) end = new Date(project.target_date);
+  else { end = new Date(start); end.setDate(end.getDate() + (GANTT_FALLBACK_DURATIONS[project.complexity] || 180)); }
+  return { project, start, end };
 }
 
 function computeGanttRange(projects) {
   const today = new Date();
-  const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
   let minDate = new Date(today.getFullYear(), 0, 1);
   let maxDate = new Date(today.getFullYear(), 11, 31);
   projects.forEach(p => {
-    const start = new Date(p.created_at);
-    let end;
-    if (p.phase === 'completed' || p.phase === 'rejected') end = new Date(p.updated_at);
-    else if (p.target_date) end = new Date(p.target_date);
-    else { end = new Date(start); end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180)); }
-    if (start < minDate) minDate = new Date(start);
-    if (end > maxDate) maxDate = new Date(end);
+    const { start, end } = computeGanttBar(p);
+    if (start < minDate) minDate = start;
+    if (end > maxDate) maxDate = end;
   });
   return {
     minDate: new Date(minDate.getFullYear(), 0, 1),
@@ -649,18 +681,8 @@ const GANTT_SCALES = {
 
 function renderGanttChart(projects, sharedRange) {
   const today = new Date();
-  const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
-  const range = sharedRange || computeGanttRange(projects);
-  let { minDate, maxDate } = range;
-
-  const bars = projects.map(p => {
-    const start = new Date(p.created_at);
-    let end;
-    if (p.phase === 'completed' || p.phase === 'rejected') end = new Date(p.updated_at);
-    else if (p.target_date) end = new Date(p.target_date);
-    else { end = new Date(start); end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180)); }
-    return { project: p, start, end };
-  });
+  const { minDate, maxDate } = sharedRange || computeGanttRange(projects);
+  const bars = projects.map(computeGanttBar);
 
   const scale = GANTT_SCALES[state.ganttScale] || GANTT_SCALES.quarter;
   const pxPerDay = scale.pxPerDay;
@@ -954,19 +976,21 @@ function setupToolbar() {
     }
   });
 
-  // Sort
-  setupDropdown('sortDropdown', 'sortBtn', 'sortMenu', (item) => {
-    if (item.dataset.sort) {
-      state.sortField = item.dataset.sort;
-      document.getElementById('sortLabel').textContent = item.textContent.trim();
-      document.querySelectorAll('#sortMenu .dropdown-item[data-sort]').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+  // Sort — clicking a row selects that field; clicking the inline arrow
+  // on the active row flips direction only.
+  setupDropdown('sortDropdown', 'sortBtn', 'sortMenu', (item, event) => {
+    const dirBtn = event.target.closest('.dropdown-sort-dir');
+    if (dirBtn && item.dataset.sort === state.sortField) {
+      state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else if (item.dataset.sort) {
+      if (item.dataset.sort !== state.sortField) {
+        state.sortField = item.dataset.sort;
+        state.sortDirection = 'desc';
+      } else {
+        state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+      }
     }
-    if (item.dataset.direction) {
-      state.sortDirection = item.dataset.direction;
-      document.querySelectorAll('#sortMenu .dropdown-item[data-direction]').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    }
+    syncSortUI();
     render();
   });
 
@@ -1030,6 +1054,40 @@ function setupToolbar() {
   });
 }
 
+const SORT_FIELD_LABELS = {
+  title: 'Titel', budget_chf: 'Budget', phase: 'Phase', complexity: 'Komplexität',
+  type: 'Typ', priority: 'Priorität', created_at: 'Erstellt', updated_at: 'Geändert'
+};
+
+function sortDirIconSVG(direction) {
+  const path = direction === 'asc' ? 'm18 15-6-6-6 6' : 'm6 9 6 6 6-6';
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="${path}"/></svg>`;
+}
+
+function syncSortUI() {
+  const field = state.sortField;
+  const dir = state.sortDirection;
+  const label = SORT_FIELD_LABELS[field] || 'Titel';
+
+  // Trigger button: "Erstellt ↓"
+  document.getElementById('sortLabel').innerHTML = `${label} ${sortDirIconSVG(dir)}`;
+
+  // Menu rows: mark active and inject inline direction toggle only on it
+  document.querySelectorAll('#sortMenu .dropdown-item--sort').forEach(row => {
+    const isActive = row.dataset.sort === field;
+    row.classList.toggle('active', isActive);
+    const existing = row.querySelector('.dropdown-sort-dir');
+    if (isActive) {
+      const html = sortDirIconSVG(dir);
+      if (existing) existing.innerHTML = html;
+      else row.insertAdjacentHTML('beforeend',
+        `<button class="dropdown-sort-dir" type="button" aria-label="Richtung wechseln">${html}</button>`);
+    } else if (existing) {
+      existing.remove();
+    }
+  });
+}
+
 function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
   const btn = document.getElementById(btnId);
   const menu = document.getElementById(menuId);
@@ -1052,7 +1110,7 @@ function setupDropdown(wrapperId, btnId, menuId, onSelect, keepOpen = false) {
   menu.addEventListener('click', (e) => {
     const item = e.target.closest('.dropdown-item');
     if (item) {
-      onSelect(item);
+      onSelect(item, e);
       if (!keepOpen) menu.classList.remove('open');
     }
     e.stopPropagation();
