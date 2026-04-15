@@ -73,6 +73,7 @@ select:focus-visible {
    ═══════════════════════════════════════════════════════════ */
 
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,6 +121,10 @@ select:focus-visible {
 }
 
 .header-prototype {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   color: #fff;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semi);
@@ -129,6 +134,7 @@ select:focus-visible {
   padding: var(--space-0h) var(--space-3);
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
+  pointer-events: none;
 }
 
 .header-logo {
@@ -2581,6 +2587,7 @@ select:focus-visible {
    ═══════════════════════════════════════════════════════════ */
 
 .footer {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2610,6 +2617,11 @@ select:focus-visible {
 }
 
 .footer-prototype {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
   color: var(--error-500);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
