@@ -1043,6 +1043,30 @@ select:focus-visible {
   gap: var(--space-1);
 }
 
+.filter-tags-wrap.collapsed {
+  max-height: 140px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+}
+
+.filter-tags-toggle {
+  margin-top: var(--space-1);
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent-600);
+  font-family: var(--font-family);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.filter-tags-toggle:hover {
+  color: var(--accent-700);
+  text-decoration: underline;
+}
+
 .filter-tag-chip {
   display: inline-flex;
   align-items: center;
@@ -1277,6 +1301,18 @@ select:focus-visible {
   width: 28px;
   height: 28px;
   font-size: var(--font-size-2xs);
+}
+
+.view-container .card-avatar {
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.view-container .card-avatar:hover,
+.view-container .card-avatar:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-300);
+  transform: scale(1.05);
+  outline: none;
 }
 
 .card-avatar--empty {

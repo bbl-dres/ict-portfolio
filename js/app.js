@@ -346,7 +346,7 @@ function setupViewContainerEvents() {
 
     // Project row / card clicks (open detail) — must be last
     // Skip if click was on a badge (handled by setupBadgeFilterClicks)
-    if (e.target.closest('.badge-phase, .badge-complexity, .badge-type, .badge-priority, .badge-tag')) return;
+    if (e.target.closest('.badge-phase, .badge-complexity, .badge-type, .badge-priority, .badge-tag, .card-avatar')) return;
     const item = e.target.closest('[data-id]');
     if (item) {
       openDetailPanel(Number(item.dataset.id));
@@ -480,8 +480,8 @@ function renderGalleryCard(p) {
   const deadline = showDeadline ? `<span class="project-date">${p.target_date ? formatDate(p.target_date) : '—'}</span>` : '';
   const assigneeInitials = (showAssignee && p.responsible) ? getUserInitials(p.responsible) : '';
   const assigneeHTML = showAssignee ? (assigneeInitials
-    ? `<div class="card-avatar" title="${esc(p.responsible)}">${assigneeInitials}</div>`
-    : `<div class="card-avatar card-avatar--empty" title="Nicht zugewiesen">—</div>`) : '';
+    ? `<div class="card-avatar" data-responsible="${esc(p.responsible)}" title="${esc(p.responsible)}" role="button" tabindex="0">${assigneeInitials}</div>`
+    : `<div class="card-avatar card-avatar--empty" data-responsible="__none__" title="Nicht zugewiesen" role="button" tabindex="0">—</div>`) : '';
   const bottomRow = (showDeadline || showAssignee) ? `<div class="card-separator"></div><div class="gallery-card-meta-row">${deadline || '<span></span>'}${assigneeHTML}</div>` : '';
 
   return `<div class="gallery-card" data-id="${p.id}" role="article" aria-label="${esc(p.title)}">
@@ -1171,7 +1171,8 @@ function renderFilterPanel() {
       </div>
       <div>
         <div class="filter-section-title">Tags</div>
-        <div class="filter-tags-wrap">${tagChips || '<span style="color:var(--gray-400);font-size:var(--font-size-xs)">Keine Tags</span>'}</div>
+        <div class="filter-tags-wrap${allTags.length > 15 ? ' collapsed' : ''}" id="filterTagsWrap">${tagChips || '<span style="color:var(--gray-400);font-size:var(--font-size-xs)">Keine Tags</span>'}</div>
+        ${allTags.length > 15 ? `<button type="button" class="filter-tags-toggle" id="filterTagsToggle">Alle anzeigen (${allTags.length})</button>` : ''}
       </div>
       <div>
         <div class="filter-section-title">Anzeige</div>
@@ -1215,8 +1216,16 @@ function setupFilterPanelEvents() {
     }
   });
 
-  // Tag chip clicks
+  // Tag chip clicks + show-all toggle
   panel.addEventListener('click', (e) => {
+    const toggle = e.target.closest('#filterTagsToggle');
+    if (toggle) {
+      const wrap = document.getElementById('filterTagsWrap');
+      const collapsed = wrap.classList.toggle('collapsed');
+      const total = wrap.querySelectorAll('.filter-tag-chip').length;
+      toggle.textContent = collapsed ? `Alle anzeigen (${total})` : 'Weniger anzeigen';
+      return;
+    }
     const chip = e.target.closest('.filter-tag-chip');
     if (chip) {
       toggleFilter('tags', chip.dataset.val);
@@ -1374,6 +1383,13 @@ function setupBadgeFilterClicks() {
       e.stopPropagation();
       const val = tagBadge.textContent.trim();
       if (val) { applyBadgeFilter('tags', val); return; }
+    }
+
+    const avatar = e.target.closest('.card-avatar');
+    if (avatar) {
+      e.stopPropagation();
+      const val = avatar.dataset.responsible;
+      if (val) { applyBadgeFilter('responsible', val); return; }
     }
 
     // Dashboard bar/legend clicks
