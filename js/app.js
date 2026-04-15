@@ -124,24 +124,32 @@ function renderView() {
   const isDetail = state.currentView === 'detail';
   const isWiki = state.currentView === 'wiki';
   const view = state.currentView;
-  // Per-view control visibility
-  const showSort   = ['gallery', 'list', 'kanban'].includes(view);
-  const showGroup  = ['gallery', 'list', 'kanban'].includes(view);
-  const showFilter = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
-  const showAssign = ['gallery', 'list', 'kanban', 'gantt', 'dashboard'].includes(view);
-  const showFields = ['gallery', 'list', 'kanban'].includes(view);
-  const showSearch = ['gallery', 'list', 'kanban', 'gantt'].includes(view);
 
-  // Show/hide view tabs and toolbar
+  // Single source of truth: which toolbar controls each view wants.
+  // Group A = data controls (search/sort/group). Group B = filter/assignee.
+  // The divider shows when BOTH groups have at least one visible control.
+  const TOOLBAR_CONFIG = {
+    gallery:   { search: 1, sort: 1, group: 1, filter: 1, assignee: 1, fields: 1 },
+    list:      { search: 1, sort: 1, group: 1, filter: 1, assignee: 1, fields: 1 },
+    kanban:    { search: 1, sort: 1, group: 1, filter: 1, assignee: 1, fields: 1 },
+    gantt:     { search: 1, sort: 1, group: 1, filter: 1, assignee: 1, fields: 0 },
+    dashboard: { search: 0, sort: 0, group: 0, filter: 1, assignee: 1, fields: 0 },
+  };
+  const cfg = TOOLBAR_CONFIG[view] || {};
+  const show = key => (cfg[key] ? '' : 'none');
+
   document.querySelector('.view-tabs').style.display = isDetail ? 'none' : '';
   document.querySelector('.toolbar').style.display = (isDetail || isWiki) ? 'none' : '';
-  document.getElementById('toolbarSearch').style.display = showSearch ? '' : 'none';
-  document.getElementById('sortDropdown').style.display = showSort ? '' : 'none';
-  document.getElementById('groupDropdown').style.display = showGroup ? '' : 'none';
-  document.getElementById('filterToggleBtn').style.display = showFilter ? '' : 'none';
-  document.getElementById('assigneeDropdown').style.display = showAssign ? '' : 'none';
-  document.getElementById('fieldsDropdown').style.display = showFields ? '' : 'none';
-  document.querySelector('.toolbar-sep').style.display = showFields ? '' : 'none';
+  document.getElementById('toolbarSearch').style.display    = show('search');
+  document.getElementById('sortDropdown').style.display     = show('sort');
+  document.getElementById('groupDropdown').style.display    = show('group');
+  document.getElementById('filterToggleBtn').style.display  = show('filter');
+  document.getElementById('assigneeDropdown').style.display = show('assignee');
+  document.getElementById('fieldsDropdown').style.display   = show('fields');
+
+  const hasGroupA = cfg.search || cfg.sort || cfg.group;
+  const hasGroupB = cfg.filter || cfg.assignee;
+  document.querySelector('.toolbar-sep').style.display = (hasGroupA && hasGroupB) ? '' : 'none';
 
   // Show/hide filter panel and pills in detail view
   if (isDetail) {
@@ -591,22 +599,45 @@ function renderKanbanView(container) {
    ═══════════════════════════════════════════════════════════ */
 
 function renderGanttView(container) {
+  // Shared date range across all groups so every timeline aligns on the
+  // same axis (and the "Heute" line is always visible).
+  const sharedRange = computeGanttRange(getFilteredProjects());
   renderGroupedView(container, (items) => {
-    return renderGanttChart(items);
+    return renderGanttChart(items, sharedRange);
   });
+}
+
+function computeGanttRange(projects) {
+  const today = new Date();
+  const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
+  let minDate = new Date(today.getFullYear(), 0, 1);
+  let maxDate = new Date(today.getFullYear(), 11, 31);
+  projects.forEach(p => {
+    const start = new Date(p.created_at);
+    let end;
+    if (p.phase === 'completed' || p.phase === 'rejected') end = new Date(p.updated_at);
+    else if (p.target_date) end = new Date(p.target_date);
+    else { end = new Date(start); end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180)); }
+    if (start < minDate) minDate = new Date(start);
+    if (end > maxDate) maxDate = new Date(end);
+  });
+  return {
+    minDate: new Date(minDate.getFullYear(), 0, 1),
+    maxDate: new Date(maxDate.getFullYear(), 11, 31),
+  };
 }
 
 function scrollGanttToToday(smooth) {
   // Double-rAF: first frame triggers layout, second frame scrolls reliably
   requestAnimationFrame(() => { requestAnimationFrame(() => {
-    const timeline = document.querySelector('.gantt-timeline');
-    if (!timeline) return;
-    const todayLine = timeline.querySelector('.gantt-today-line');
-    if (!todayLine) return;
-    const todayLeft = parseFloat(todayLine.style.left);
-    if (!smooth) timeline.style.scrollBehavior = 'auto';
-    timeline.scrollLeft = Math.max(todayLeft - timeline.clientWidth / 2, 0);
-    if (!smooth) requestAnimationFrame(() => { timeline.style.scrollBehavior = ''; });
+    document.querySelectorAll('.gantt-timeline').forEach(timeline => {
+      const todayLine = timeline.querySelector('.gantt-today-line');
+      if (!todayLine) return;
+      const todayLeft = parseFloat(todayLine.style.left);
+      if (!smooth) timeline.style.scrollBehavior = 'auto';
+      timeline.scrollLeft = Math.max(todayLeft - timeline.clientWidth / 2, 0);
+      if (!smooth) requestAnimationFrame(() => { timeline.style.scrollBehavior = ''; });
+    });
   }); });
 }
 
@@ -616,32 +647,20 @@ const GANTT_SCALES = {
   month:   { pxPerDay: 10, label: 'Monat' },
 };
 
-function renderGanttChart(projects) {
+function renderGanttChart(projects, sharedRange) {
   const today = new Date();
-  // Estimated bar length when target_date is missing, based on project class
   const fallbackDurations = { fast_track: 90, standard: 180, complex: 365 };
-  let minDate = new Date(today.getFullYear(), 0, 1);
-  let maxDate = new Date(today.getFullYear(), 11, 31);
+  const range = sharedRange || computeGanttRange(projects);
+  let { minDate, maxDate } = range;
 
   const bars = projects.map(p => {
     const start = new Date(p.created_at);
     let end;
-    if (p.phase === 'completed' || p.phase === 'rejected') {
-      end = new Date(p.updated_at);
-    } else if (p.target_date) {
-      end = new Date(p.target_date);
-    } else {
-      end = new Date(start);
-      end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180));
-    }
-    if (start < minDate) minDate = new Date(start);
-    if (end > maxDate) maxDate = new Date(end);
+    if (p.phase === 'completed' || p.phase === 'rejected') end = new Date(p.updated_at);
+    else if (p.target_date) end = new Date(p.target_date);
+    else { end = new Date(start); end.setDate(end.getDate() + (fallbackDurations[p.complexity] || 180)); }
     return { project: p, start, end };
   });
-
-  // Pad range to full years
-  minDate = new Date(minDate.getFullYear(), 0, 1);
-  maxDate = new Date(maxDate.getFullYear(), 11, 31);
 
   const scale = GANTT_SCALES[state.ganttScale] || GANTT_SCALES.quarter;
   const pxPerDay = scale.pxPerDay;
