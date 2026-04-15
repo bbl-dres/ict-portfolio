@@ -1915,6 +1915,7 @@ select:focus-visible {
 }
 
 .detail-hero-image {
+  position: relative;
   width: 280px;
   min-height: 200px;
   flex-shrink: 0;
@@ -1922,6 +1923,12 @@ select:focus-visible {
   background-position: center;
   cursor: pointer;
   transition: opacity var(--transition-fast);
+}
+
+.detail-hero-image .card-badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
 }
 
 .detail-hero-image:hover {

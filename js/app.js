@@ -1509,7 +1509,9 @@ function renderDetailPage(container) {
     </button>
 
     <div class="detail-hero">
-      <div class="detail-hero-image" style="${imageStyle}"></div>
+      <div class="detail-hero-image" style="${imageStyle}">
+        ${p.type ? `<div class="card-badge">${typeBadge(p.type)}</div>` : ''}
+      </div>
       <div class="detail-hero-body">
         <div class="detail-hero-top">
           ${editing
@@ -1537,7 +1539,14 @@ function renderDetailPage(container) {
   const sectionChevron = '<svg class="detail-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
 
   if (state.detailTab === 'overview') {
-    // Status & Planung section
+    const phaseBadgeHTML = p.phase
+      ? `<span class="badge badge-phase" data-phase="${p.phase}">${PHASE_LABELS[p.phase] || p.phase}</span>`
+      : '—';
+    const classBadgeHTML = p.class
+      ? `<span class="badge badge-class" data-class="${p.class}">${CLASS_LABELS[p.class] || p.class}</span>`
+      : '—';
+
+    // Status & Planung — Summary / KPIs
     html += `
       <div class="detail-section">
         <div class="detail-section-header" data-section="status">
@@ -1546,50 +1555,79 @@ function renderDetailPage(container) {
         </div>
         <div class="detail-section-body">
           <div class="detail-fields-grid">
+            ${detailFieldRow('Phase', phaseBadgeHTML)}
             ${editing
-              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
-              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
-            ${detailFieldRow('Go-Entscheid', goIcon)}
-            ${editing
-              ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
-              : detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
-            ${detailFieldRow('HERMES Phase', (HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'))}
+              ? detailEditRow('Klasse', detailSelect('editClass', CLASS_LABELS, p.class))
+              : detailFieldRow('Klasse', classBadgeHTML)}
             ${editing
               ? detailEditRow('Priorität', detailSelect('editPriority', PRIORITY_LABELS, p.priority || 'medium'))
               : detailFieldRow('Priorität', priorityBadge(p.priority))}
+            ${detailFieldRow('Go-Entscheid', goIcon)}
             ${editing
-              ? detailEditRow('DTI-pflichtig', `<label class="form-checkbox-inline"><input type="checkbox" id="editDti" ${p.dti_required ? 'checked' : ''}> Ja</label>`)
-              : detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
+              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
+              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
             ${editing
-              ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
-              : ''}
+              ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
+              : detailFieldRow('Zieldatum', p.target_date ? formatDate(p.target_date) : '—')}
             ${editing
-              ? detailEditRow('Klasse', detailSelect('editClass', CLASS_LABELS, p.class))
-              : ''}
+              ? detailEditRow('Verantwortlich', detailInput('editResponsible', p.responsible, 'text'))
+              : detailFieldRow('Verantwortlich', p.responsible || '—')}
           </div>
         </div>
       </div>
     `;
 
-    // Organisation section
+    // 1. Erfassung & Triage
     html += `
       <div class="detail-section">
-        <div class="detail-section-header" data-section="org">
+        <div class="detail-section-header" data-section="triage">
           ${sectionChevron}
-          <span class="detail-section-title">Organisation</span>
+          <span class="detail-section-title">1. Erfassung &amp; Triage</span>
         </div>
         <div class="detail-section-body">
           <div class="detail-fields-grid">
             ${editing
-              ? detailEditRow('Verantwortlich', detailInput('editResponsible', p.responsible, 'text'))
-              : detailFieldRow('Verantwortlich', p.responsible || '—')}
-            ${editing
               ? detailEditRow('Auftraggeber', detailInput('editRequestor', p.requestor, 'text'))
               : detailFieldRow('Auftraggeber', esc(p.requestor))}
+            ${editing
+              ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
+              : detailFieldRow('Typ', TYPE_LABELS[p.type] || '—')}
             ${detailFieldRow('Projekt-ID', '#' + p.id)}
             ${detailFieldRow('Erstellt von', creator ? esc(creator.display_name) : '—')}
             ${detailFieldRow('Erstellt am', formatDate(p.created_at))}
-            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 2. Bewertung, Analyse & Freigabe
+    html += `
+      <div class="detail-section">
+        <div class="detail-section-header" data-section="assessment">
+          ${sectionChevron}
+          <span class="detail-section-title">2. Bewertung, Analyse &amp; Freigabe</span>
+        </div>
+        <div class="detail-section-body">
+          <div class="detail-fields-grid">
+            ${editing
+              ? detailEditRow('DTI-pflichtig', `<label class="form-checkbox-inline"><input type="checkbox" id="editDti" ${p.dti_required ? 'checked' : ''}> Ja</label>`)
+              : detailFieldRow('DTI-pflichtig', p.dti_required ? 'Ja' : 'Nein')}
+            ${detailFieldRow('HERMES Phase', (HERMES_LABELS[p.hermes_phase] || p.hermes_phase || '—'))}
+            ${detailFieldRow('Go-Datum', p.go_date ? formatDate(p.go_date) : '—')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 3. Umsetzung
+    html += `
+      <div class="detail-section">
+        <div class="detail-section-header" data-section="execution">
+          ${sectionChevron}
+          <span class="detail-section-title">3. Umsetzung</span>
+        </div>
+        <div class="detail-section-body">
+          <div class="detail-fields-grid">
             ${editing
               ? detailEditRow('Jira-Key', detailInput('editJiraKey', p.jira_key, 'text'))
               : detailFieldRow('Jira-Key', p.jira_key || '—')}
@@ -1598,6 +1636,7 @@ function renderDetailPage(container) {
               : detailFieldRow('GEVER Dossier', p.gever_url
                 ? `<a href="${esc(p.gever_url)}" target="_blank" rel="noopener" class="detail-link">${esc(p.gever_url)}</a>`
                 : '—')}
+            ${detailFieldRow('Letzte Änderung', formatDate(p.updated_at))}
           </div>
         </div>
       </div>
