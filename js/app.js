@@ -249,7 +249,7 @@ function setupViewContainerEvents() {
 
   // Breadcrumb back link (outside viewContainer, delegate on document)
   document.querySelector('.breadcrumb-inner').addEventListener('click', (e) => {
-    const back = e.target.closest('#breadcrumbBack');
+    const back = e.target.closest('#breadcrumbBack, #detailBackBtn');
     if (back) { e.preventDefault(); closeDetailPage(); }
   });
 
@@ -1304,39 +1304,54 @@ function setupBadgeFilterClicks() {
     // Don't intercept clicks that should navigate to detail
     const card = e.target.closest('[data-id]');
 
+    const applyBadgeFilter = (dim, val) => {
+      if (state.currentView === 'detail') {
+        state.filters[dim].clear();
+        state.filters[dim].add(val);
+        state.previousView = 'gallery';
+        closeDetailPage();
+        renderFilterPills();
+        updateFilterCountBadge();
+        if (state.filterPanelOpen) renderFilterPanel();
+      } else {
+        toggleFilter(dim, val);
+        afterBadgeClick();
+      }
+    };
+
     const phaseBadge = e.target.closest('.badge-phase');
     if (phaseBadge) {
       e.stopPropagation();
       const val = phaseBadge.dataset.phase;
-      if (val) { toggleFilter('phase', val); afterBadgeClick(); return; }
+      if (val) { applyBadgeFilter('phase', val); return; }
     }
 
     const classBadge = e.target.closest('.badge-complexity');
     if (classBadge) {
       e.stopPropagation();
       const val = classBadge.dataset.complexity;
-      if (val) { toggleFilter('complexity', val); afterBadgeClick(); return; }
+      if (val) { applyBadgeFilter('complexity', val); return; }
     }
 
     const typeBadgeEl = e.target.closest('.badge-type');
     if (typeBadgeEl) {
       e.stopPropagation();
       const val = typeBadgeEl.dataset.type;
-      if (val) { toggleFilter('type', val); afterBadgeClick(); return; }
+      if (val) { applyBadgeFilter('type', val); return; }
     }
 
     const prioBadge = e.target.closest('.badge-priority');
     if (prioBadge) {
       e.stopPropagation();
       const val = prioBadge.dataset.priority;
-      if (val) { toggleFilter('priority', val); afterBadgeClick(); return; }
+      if (val) { applyBadgeFilter('priority', val); return; }
     }
 
     const tagBadge = e.target.closest('.badge-tag');
     if (tagBadge) {
       e.stopPropagation();
       const val = tagBadge.textContent.trim();
-      if (val) { toggleFilter('tags', val); afterBadgeClick(); return; }
+      if (val) { applyBadgeFilter('tags', val); return; }
     }
 
     // Dashboard bar/legend clicks
@@ -1558,10 +1573,7 @@ function renderDetailPage(container) {
               : detailFieldRow('Komplexität', classBadgeHTML)}
             ${editing
               ? detailEditRow('Typ', detailSelect('editType', TYPE_LABELS, p.type || 'new'))
-              : detailFieldRow('Typ', TYPE_LABELS[p.type] || '—')}
-            ${editing
-              ? detailEditRow('Budget', detailInput('editBudget', p.budget_chf, 'number'))
-              : detailFieldRow('Budget', `<strong>${formatBudget(p.budget_chf)}</strong>`)}
+              : detailFieldRow('Typ', p.type ? typeBadge(p.type) : '—')}
             ${detailFieldRow('Phase', phaseBadgeHTML)}
             ${editing
               ? detailEditRow('Zieldatum', detailInput('editTargetDate', p.target_date, 'date'))
