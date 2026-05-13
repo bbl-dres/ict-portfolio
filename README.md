@@ -10,15 +10,19 @@
 ![No Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
+> [!CAUTION]
+> **This is an unofficial mockup for demonstration purposes only.**
+> All data is fictional. Not all features are fully functional. This project serves as a visual and conceptual prototype — it is not intended for production use.
+
 Portfolio management tool for the ICT division at DRES (Bundesamt fur Bauten und Logistik BBL). Built as a static single-page application — no build step, no dependencies.
+
+## Views
 
 <p align="center">
   <img src="assets/Preview1.jpg" alt="Gallery View" width="45%">
   &nbsp;&nbsp;
   <img src="assets/Preview2.jpg" alt="List View" width="45%">
 </p>
-
-## Views
 
 | View | Description |
 |------|-------------|
