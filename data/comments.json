@@ -43,7 +43,7 @@
     "id": 6,
     "project_id": 3,
     "user_id": 1,
-    "body": "CDE Bund: Container-Umgebung auf RHOS aufgesetzt. Demaj Egzon hat ADGroup und Application Environment konfiguriert.",
+    "body": "CDE Bund: Container-Umgebung auf RHOS aufgesetzt. Muster Elias hat ADGroup und Application Environment konfiguriert.",
     "created_at": "2026-04-13T09:00:00Z",
     "updated_at": null
   },
@@ -51,7 +51,7 @@
     "id": 7,
     "project_id": 3,
     "user_id": 2,
-    "body": "Fehlende Zugriffsrechte können bei Klonner Maria swisstopo beantragt werden. Onboarding-Dokumentation aktualisiert.",
+    "body": "Fehlende Zugriffsrechte können bei Beispiel Nora swisstopo beantragt werden. Onboarding-Dokumentation aktualisiert.",
     "created_at": "2026-04-13T10:30:00Z",
     "updated_at": null
   },
@@ -59,7 +59,7 @@
     "id": 8,
     "project_id": 3,
     "user_id": 5,
-    "body": "ASTRA meldet Verzögerung bei der IFC-Modell-Validierung. Betrifft den gemeinsamen Datenstandard. Fritz Ofer koordiniert.",
+    "body": "ASTRA meldet Verzögerung bei der IFC-Modell-Validierung. Betrifft den gemeinsamen Datenstandard. Fabio Muster koordiniert.",
     "created_at": "2026-04-14T08:15:00Z",
     "updated_at": null
   },
@@ -139,7 +139,7 @@
     "id": 18,
     "project_id": 8,
     "user_id": 4,
-    "body": "Anbindung an CDE Bund als nächster Meilenstein. Abstimmung mit Strathaus Thorsten geplant.",
+    "body": "Anbindung an CDE Bund als nächster Meilenstein. Abstimmung mit Muster Timo geplant.",
     "created_at": "2026-04-11T16:00:00Z",
     "updated_at": null
   },
@@ -147,7 +147,7 @@
     "id": 19,
     "project_id": 9,
     "user_id": 3,
-    "body": "Experte Hanak: Bewertung architekturhistorischer Pläne abgeschlossen Q4 2025. Viele Pläne in sehr schlechtem Zustand — Restaurierung dringend.",
+    "body": "Experte Beispiel: Bewertung architekturhistorischer Pläne abgeschlossen Q4 2025. Viele Pläne in sehr schlechtem Zustand — Restaurierung dringend.",
     "created_at": "2026-01-20T11:00:00Z",
     "updated_at": null
   },
@@ -171,7 +171,7 @@
     "id": 22,
     "project_id": 10,
     "user_id": 1,
-    "body": "Kreis DS liefert GIS-geschätzte Geschossflächen an hima für WTO-Ausschreibungsunterlagen. Adresskorrekturen EGIDs sind Voraussetzung.",
+    "body": "Kreis DS liefert GIS-geschätzte Geschossflächen an N.N. für WTO-Ausschreibungsunterlagen. Adresskorrekturen EGIDs sind Voraussetzung.",
     "created_at": "2026-03-25T11:00:00Z",
     "updated_at": null
   },
@@ -211,7 +211,7 @@
     "id": 27,
     "project_id": 12,
     "user_id": 1,
-    "body": "Knowledge Transfer an trpa ab 20. April geplant. 140 unklare Fälle müssen einzeln mit OVs/PFM besprechen werden.",
+    "body": "Knowledge Transfer an N.N. ab 20. April geplant. 140 unklare Fälle müssen einzeln mit OVs/PFM besprechen werden.",
     "created_at": "2026-04-10T09:00:00Z",
     "updated_at": null
   },
@@ -323,7 +323,7 @@
     "id": 41,
     "project_id": 18,
     "user_id": 2,
-    "body": "Projekt on-hold. Abhängigkeit zu NettoNull und Absenkungspfad. Kein konkreter Auftrag vorhanden — muda prüft Priorisierung.",
+    "body": "Projekt on-hold. Abhängigkeit zu NettoNull und Absenkungspfad. Kein konkreter Auftrag vorhanden — N.N. prüft Priorisierung.",
     "created_at": "2026-03-01T09:00:00Z",
     "updated_at": null
   },

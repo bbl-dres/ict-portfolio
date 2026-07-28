@@ -2546,7 +2546,7 @@ function convertGroupKeyToValue(field, groupKey) {
     viewsHost.appendChild(btn);
   });
 
-  // Sync user card from existing avatar title (e.g. "Marc Brunner (Admin)")
+  // Sync user card from existing avatar title (e.g. "Max Muster (Admin)")
   const avatar = document.getElementById('userAvatar');
   if (avatar) {
     const avatarLabel = drawer.querySelector('.nav-drawer-user-avatar');
@@ -2641,4 +2641,45 @@ function convertGroupKeyToValue(field, groupKey) {
   document.querySelector('.view-tabs')?.addEventListener('click', () => {
     requestAnimationFrame(syncActiveView);
   });
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   MOCKUP DISCLAIMER — blocking notice, only dismissable via
+   the explicit "Verstanden" confirmation button.
+   ═══════════════════════════════════════════════════════════ */
+(function initMockupNotice() {
+  const overlay = document.getElementById('mockupNoticeOverlay');
+  const confirmBtn = document.getElementById('mockupNoticeConfirm');
+  const dialog = document.getElementById('mockupNotice');
+  if (!overlay || !confirmBtn) return;
+
+  function dismiss() {
+    overlay.classList.remove('open');
+    document.removeEventListener('keydown', trapFocus, true);
+    // Reveal the app to assistive tech / prevent background scroll lock
+    document.body.style.overflow = '';
+    // Move focus somewhere sensible once the gate is gone
+    setTimeout(() => {
+      overlay.setAttribute('hidden', '');
+      document.getElementById('main-content')?.focus?.();
+    }, 250);
+  }
+
+  // Keep keyboard focus inside the notice until it is confirmed — Tab and
+  // Escape must not let the user slip past the disclaimer.
+  function trapFocus(e) {
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); confirmBtn.focus(); return; }
+    if (e.key === 'Tab') { e.preventDefault(); confirmBtn.focus(); }
+  }
+
+  // Prevent background scroll while the notice is up
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', trapFocus, true);
+  confirmBtn.addEventListener('click', dismiss);
+  // The disclaimer must be actively acknowledged: clicking the backdrop does nothing.
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) e.stopPropagation(); });
+
+  // Focus the confirm button so keyboard users land on the only action
+  requestAnimationFrame(() => confirmBtn.focus());
 })();

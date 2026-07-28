@@ -11,7 +11,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-06-15",
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "Zentral für diverse Themen: MIS, Netto Null, EMBAG, Tagesgeschäft. Abhängigkeit zu Adresskorrekturen EGIDs.",
     "tags": [
       "GIS",
@@ -40,7 +40,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2023-01-01",
-    "responsible": "Seidt Franka",
+    "responsible": "Beispiel Fabia",
     "notes": "Grossprojekt mit mehreren LBCs. Multi-Milliarden IT-Programm des Bundes. Fast abgeschlossen. Alle LBCs (#5-#9) gehören hierzu.",
     "tags": [
       "SAP",
@@ -69,8 +69,8 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2024-09-01",
-    "responsible": "Strathaus Thorsten",
-    "notes": "Drei Bauherren: armasuisse, BBL, ASTRA. BIT stellt Betriebsinfrastruktur bereit. RHOS Container-Umgebung. Klonner Maria swisstopo koordiniert Zugriffe.",
+    "responsible": "Muster Timo",
+    "notes": "Drei Bauherren: armasuisse, BBL, ASTRA. BIT stellt Betriebsinfrastruktur bereit. RHOS Container-Umgebung. Beispiel Nora swisstopo koordiniert Zugriffe.",
     "tags": [
       "CDE",
       "BIM",
@@ -252,8 +252,8 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2024-04-01",
-    "responsible": "Weber Janec Noah",
-    "notes": "Projektdauer mind. bis 2029. Budget 200k bei zeitnaher Ausschreibung. Experte Hanak für architekturhistorische Bewertung. 2025 Q4: Ausschreibung Restaurierung/Digitalisierung. Pläne zerfallen zusehends.",
+    "responsible": "Muster Jan Noel",
+    "notes": "Projektdauer mind. bis 2029. Budget 200k bei zeitnaher Ausschreibung. Experte Beispiel für architekturhistorische Bewertung. 2025 Q4: Ausschreibung Restaurierung/Digitalisierung. Pläne zerfallen zusehends.",
     "tags": [
       "Archiv",
       "Digitalisierung",
@@ -282,7 +282,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-01-01",
-    "responsible": "Hischier Maria",
+    "responsible": "Beispiel Mara",
     "notes": "Zentral für diverse Themen: EDM, MIS, Netto Null, Mietermodell, Workspace Management. Adresskorrekturen EGIDs noch nicht fertig. Kreis DS liefert GIS-Geschossflächen.",
     "tags": [
       "Flächen",
@@ -312,7 +312,7 @@
     "priority": "medium",
     "go_decision": null,
     "go_date": null,
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "Vertrag mit SeilerSeiler Ende 2025 abgelaufen (13k bis Kostendach). Projekt pausiert wegen Adresskorrekturen. Plausibilisierung mit bekannten Flächen ausstehend.",
     "tags": [
       "GIS",
@@ -341,8 +341,8 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-09-01",
-    "responsible": "Rasner David",
-    "notes": "Priorität 1: 331 ESTAT-Fälle. 735 EDM-Gebäude bereinigt. Prüfcodes E/K/EK/A-K. Knowledge Transfer ab 20. April an trpa. CR für SAP-Koordinaten und EGIDs vorbereiten. 140 unklare Fälle mit OVs/PFM besprechen.",
+    "responsible": "Muster Dario",
+    "notes": "Priorität 1: 331 ESTAT-Fälle. 735 EDM-Gebäude bereinigt. Prüfcodes E/K/EK/A-K. Knowledge Transfer ab 20. April an N.N. CR für SAP-Koordinaten und EGIDs vorbereiten. 140 unklare Fälle mit OVs/PFM besprechen.",
     "tags": [
       "EGID",
       "Adressen",
@@ -372,7 +372,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-09-01",
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "JavaScript-App verfügbar für AV-Daten. Paradebeispiel: Wald-Grundstück AV 1.3 Mio m² vs SAP 427 m². Auswirkung auf Mn5 BAFU Biodiversität. Massenmutation SAP geplant.",
     "tags": [
       "EGRID",
@@ -403,7 +403,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-06-01",
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "Vom Bundesrat priorisiert. Erste Auswertung mit alten EGRIDs liegt vor — muss mit korrigierten EGRIDs aktualisiert werden. Koordination mit OE Nachhaltigkeit und AG BAFU/BLOs. Grundlage Strategie Nachhaltigkeit BBL.",
     "tags": [
       "BAFU",
@@ -433,7 +433,7 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-03-01",
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "Gesamthafte Modellierung aller Geschäftsobjekte. Grundlage für Integration und Orchestrierung. Teil von SUPERB IMMO LBC Integration.",
     "tags": [
       "Datenkatalog",
@@ -462,8 +462,8 @@
     "priority": "high",
     "go_decision": true,
     "go_date": "2025-03-01",
-    "responsible": "Rasner David",
-    "notes": "Co-PL mit lami. TP1: Schuban/IT-Grundschutz klären. Stammdaten inkl. Flächen, Mappung Nutzkategorien, Energiedaten bereinigen. REIDA-Methode. TP4: Verhandlungen WüestPartner, PowerBI als Alternative testen.",
+    "responsible": "Muster Dario",
+    "notes": "Co-PL mit N.N. TP1: Schuban/IT-Grundschutz klären. Stammdaten inkl. Flächen, Mappung Nutzkategorien, Energiedaten bereinigen. REIDA-Methode. TP4: Verhandlungen WüestPartner, PowerBI als Alternative testen.",
     "tags": [
       "NettoNull",
       "CO2",
@@ -582,7 +582,7 @@
     "go_decision": null,
     "go_date": null,
     "responsible": null,
-    "notes": "On-Hold. Dokumentation nicht vollständig. Kein konkreter Auftrag. Neuer Auftrag von muda/zuda möglich.",
+    "notes": "On-Hold. Dokumentation nicht vollständig. Kein konkreter Auftrag. Neuer Auftrag von N.N. möglich.",
     "tags": [
       "Dokumentation",
       "Bauwerke"
@@ -665,7 +665,7 @@
     "priority": "medium",
     "go_decision": null,
     "go_date": null,
-    "responsible": "Rasner David",
+    "responsible": "Muster Dario",
     "notes": "Lösungsvarianten formulieren. Bestehende BIT-Lösungen bewerten. Als Standard für Profil Datenanalyst definieren.",
     "tags": [
       "Tooling",

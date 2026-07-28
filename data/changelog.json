@@ -48,7 +48,7 @@
   {"id":36,"project_id":12,"user_id":1,"field":"phase","old_value":null,"new_value":"\"triage\"","changed_at":"2025-09-01T08:00:00Z"},
   {"id":37,"project_id":12,"user_id":2,"field":"go_decision","old_value":"null","new_value":"true","changed_at":"2025-09-01T08:00:00Z"},
   {"id":38,"project_id":12,"user_id":1,"field":"phase","old_value":"\"triage\"","new_value":"\"implementation\"","changed_at":"2025-09-15T09:00:00Z"},
-  {"id":39,"project_id":12,"user_id":1,"field":"responsible","old_value":"null","new_value":"\"Rasner David\"","changed_at":"2025-09-15T09:30:00Z"},
+  {"id":39,"project_id":12,"user_id":1,"field":"responsible","old_value":"null","new_value":"\"Muster Dario\"","changed_at":"2025-09-15T09:30:00Z"},
 
   {"id":40,"project_id":13,"user_id":1,"field":"phase","old_value":null,"new_value":"\"triage\"","changed_at":"2025-09-01T08:00:00Z"},
   {"id":41,"project_id":13,"user_id":2,"field":"go_decision","old_value":"null","new_value":"true","changed_at":"2025-09-01T08:00:00Z"},
@@ -84,5 +84,5 @@
   {"id":62,"project_id":22,"user_id":4,"field":"phase","old_value":"\"triage\"","new_value":"\"implementation\"","changed_at":"2025-10-15T09:00:00Z"},
 
   {"id":63,"project_id":23,"user_id":1,"field":"phase","old_value":null,"new_value":"\"triage\"","changed_at":"2026-03-01T08:00:00Z"},
-  {"id":64,"project_id":23,"user_id":1,"field":"responsible","old_value":"null","new_value":"\"Rasner David\"","changed_at":"2026-03-01T08:30:00Z"}
+  {"id":64,"project_id":23,"user_id":1,"field":"responsible","old_value":"null","new_value":"\"Muster Dario\"","changed_at":"2026-03-01T08:30:00Z"}
 ]
