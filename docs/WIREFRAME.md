@@ -41,7 +41,7 @@ Fixed bar at the top. Minimal — branding and user context only.
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  [CH]  DRES PPM                                             │
-│        Bundesamt für Bauten und Logistik        [A. Wyss ▾] │
+│        Bundesamt für Bauten und Logistik        [A. Beispiel ▾] │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -109,9 +109,9 @@ Active button gets accent background. Switching views preserves the current sear
 │  ○ Rejected                                       │
 │                                                   │
 │  Verantwortlich   DTI-pflichtig   HERMES           │
-│  ○ S. Keller      ○ Ja            ○ Initialisation │
-│  ○ L. Meier       ○ Nein          ○ Concept        │
-│  ○ A. Wyss                        ○ Realisation    │
+│  ○ S. Beispiel      ○ Ja            ○ Initialisation │
+│  ○ L. Muster       ○ Nein          ○ Concept        │
+│  ○ A. Beispiel                        ○ Realisation    │
 │  ○ (nicht zug.)                    ○ Introduction   │
 │                                                    │
 └────────────────────────────────────────────────────┘
@@ -227,7 +227,7 @@ Card grid with thumbnail images for visual exploration. Inspired by pm-cockpit g
 │  │  Informatik BBL  │  │  Portfoliomgmt   │  │ Immobilien    │ │
 │  │  CHF 620k        │  │  CHF 480k        │  │ CHF 95k       │ │
 │  │  ⬤ Analysis      │  │  ⬤ Analysis      │  │ ⬤ Analysis    │ │
-│  │  S. Keller       │  │  A. Wyss         │  │ L. Meier      │ │
+│  │  S. Beispiel       │  │  A. Beispiel         │  │ L. Muster      │ │
 │  └──────────────────┘  └──────────────────┘  └────────────────┘ │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -291,7 +291,7 @@ Columns represent the `phase` enum. Cards move between columns to represent phas
 │  │ ────────── │   │ ────────── │   │ ────────────── │   │ ────────── │  │
 │  │ 1.2 M      │   │ 620k       │   │ 85k            │   │ 35k        │  │
 │  │ [Complex]  │   │ [Complex]  │   │ [Standard]     │   │ [Fast]     │  │
-│  │            │   │ S. Keller  │   │ A. Wyss        │   │ L. Meier   │  │
+│  │            │   │ S. Beispiel  │   │ A. Beispiel        │   │ L. Muster   │  │
 │  └────────────┘   └────────────┘   └────────────────┘   └────────────┘  │
 │  ┌────────────┐   ┌────────────┐   ┌────────────────┐                   │
 │  │ E-Signatur │   │ KI-Flächen │   │ Intranet       │    Rejected (1)   │
@@ -439,7 +439,7 @@ A slide-in panel from the right side of the screen (480 px wide). Shows full pro
 │                                      │  Komplexität      Complex     │
 │                                      │  Budget      CHF 620k   │
 │                                      │  Go-Entsch.  ausstehend  │
-│                                      │  Verantw.    S. Keller   │
+│                                      │  Verantw.    S. Beispiel   │
 │                                      │  Auftragg.   Informatik  │
 │                                      │  DTI          Ja         │
 │                                      │  HERMES      Concept     │

@@ -27,7 +27,7 @@ const state = {
     complexity:  new Set(),   // e.g. Set(['complex'])
     type:        new Set(),   // e.g. Set(['new', 'change'])
     priority:    new Set(),   // e.g. Set(['high'])
-    responsible: new Set(),   // e.g. Set(['Sandra Keller', '__me__', '__none__'])
+    responsible: new Set(),   // e.g. Set(['Sonja Beispiel', '__me__', '__none__'])
     tags:        new Set(),   // e.g. Set(['SAP', 'IoT'])
     dti:         null,        // true | false | null (any)
   },
@@ -55,7 +55,7 @@ const state = {
   ganttScale: 'quarter',  // year | quarter | month
 
   /* ── Current user (simulated login) ── */
-  currentUserId: 1,  // Marc Brunner
+  currentUserId: 1,  // Max Muster
 };
 
 /* ── Labels & look-ups ── */
