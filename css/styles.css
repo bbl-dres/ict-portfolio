@@ -3078,12 +3078,14 @@ select:focus-visible {
   }
 
   /* Dashboard */
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .dashboard-kpi { padding: var(--space-3); }
+  /* KPI tiles: keep a 2×2 grid on phones (short values) to cut scrolling */
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+  .dashboard-kpi { padding: var(--space-3) var(--space-2); }
   .dashboard-kpi-value { font-size: var(--font-size-2xl); }
 
-  /* Gantt: compact sidebar, allow chart to scroll horizontally */
-  .gantt-chart { grid-template-columns: 100px 1fr; }
+  /* Gantt: slightly wider sidebar so titles truncate with an ellipsis
+     (kept single-line to stay aligned with the timeline bar rows) */
+  .gantt-chart { grid-template-columns: 120px 1fr; }
   .gantt-sidebar-row { font-size: var(--font-size-2xs); padding: 0 var(--space-2); }
   .gantt-controls { flex-wrap: wrap; gap: var(--space-2); }
 
@@ -3098,10 +3100,10 @@ select:focus-visible {
   .image-preview-btn span:not(#imagePreviewZoomLabel) { display: none; }
   .image-preview-header { padding: var(--space-2) var(--space-3); }
 
-  /* Text: allow wrapping */
+  /* Text: allow wrapping (gantt sidebar excluded — it keeps nowrap + ellipsis
+     so long single words truncate cleanly instead of clipping mid-word) */
   .project-title,
-  .gallery-card-title,
-  .gantt-sidebar-row { white-space: normal; }
+  .gallery-card-title { white-space: normal; }
 
   /* Footer: compact */
   .footer {
@@ -3363,8 +3365,93 @@ select:focus-visible {
   .nav-drawer-scrim { display: none !important; }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   MOBILE DESIGN-REVIEW FIXES
+   ═══════════════════════════════════════════════════════════ */
+
+/* #1 — Persistent mockup disclaimer ribbon (desktop keeps the header banner) */
+.prototype-ribbon { display: none; }
+
+@media (max-width: 768px) {
+  /* Full-width amber banner directly under the header. Kept in normal flow
+     (not sticky): this app's flex/overflow body defeats position:sticky for
+     top-level children on mobile — even the header scrolls away — so a sticky
+     ribbon would be inconsistent. It shows on every load, which together with
+     the mandatory popup is what makes the mockup nature obvious. */
+  .prototype-ribbon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--warning-500);
+    color: var(--primary-900);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semi);
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .prototype-ribbon svg { flex-shrink: 0; }
+
+  /* #3 — Disclaimer popup stays a centered card (not a full-screen sheet) so
+     the dimmed backdrop reads as a real dialog; compound selector beats the
+     generic full-screen .modal rules regardless of source order */
+  .modal-overlay.mockup-notice-overlay {
+    align-items: center;
+    padding: var(--space-4);
+    padding-top: max(var(--space-4), env(safe-area-inset-top));
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  }
+  .modal.mockup-notice {
+    width: 100%;
+    max-width: 440px;
+    height: auto;
+    max-height: calc(100vh - 2 * var(--space-4));
+    border-radius: var(--radius-2xl);
+    overflow-y: auto;
+    margin: auto;
+  }
+
+  /* #2 — Detail "Zusammenfassung": force one column and neutralise the inline
+     grid-column:2 on the last row that otherwise re-creates a clipped 2nd column */
+  .detail-fields-grid { grid-template-columns: 1fr; }
+  .detail-fields-grid > .detail-field-row { grid-column: 1 / -1 !important; }
+  .detail-field-value { min-width: 0; overflow-wrap: anywhere; }
+
+  /* #5 — List rows reflow (title on its own line, meta wraps) instead of
+     forcing horizontal scroll inside the card */
+  .list-card { overflow-x: visible; }
+  .list-card .project-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+  .list-card .project-row-main { flex: 1 1 100%; }
+
+  /* #7 — Scrollability hint: fade the right edge of the view-tab strip */
+  .view-tabs {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+
+  /* #9 — Larger, full-row tap targets for filter options (WCAG 2.5.5) */
+  .filter-option { min-height: 44px; padding: var(--space-2); }
+  .filter-option input[type="checkbox"],
+  .filter-option input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; }
+}
+
+@media (max-width: 480px) {
+  /* #8 — Tighter toolbar so controls fit in fewer rows (labels kept for clarity) */
+  .toolbar-left, .toolbar-right { gap: var(--space-1); }
+  .toolbar-btn { padding: var(--space-2); font-size: var(--font-size-2xs); gap: var(--space-1); }
+}
+
 /* ── Print styles ── */
 @media print {
+  .prototype-ribbon { display: none !important; }
   .header, .toolbar, .filter-panel, .view-tabs,
   .modal-overlay, .image-preview-overlay,
   .detail-back, .detail-hero-actions, #detailEditBtn,
