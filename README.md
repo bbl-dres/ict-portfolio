@@ -16,8 +16,8 @@
 
 Portfolio management tool for the ICT division at DRES (Bundesamt fur Bauten und Logistik BBL). Built as a static single-page application — no build step, no dependencies.
 
-## Preview
-- Live Demo: https://bbl-dres.github.io/ict-portfolio/
+## Demo
+- Live app: https://bbl-dres.github.io/ict-portfolio/
 
 <p align="center">
   <img src="assets/Preview1.jpg" alt="Gallery View" width="45%">
