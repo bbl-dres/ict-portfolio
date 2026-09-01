@@ -18,12 +18,10 @@ Static portfolio-management prototype for the ICT division at DRES (Bundesamt f√
 
 **Live demo:** https://bbl-dres.github.io/ict-portfolio/
 
-<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
-  <tr>
-    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="IKT project portfolio gallery" width="100%"/></td>
-    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="IKT project portfolio Gantt view" width="100%"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="assets/preview-1.jpg" alt="IKT project portfolio gallery" width="49%"/>
+  <img src="assets/preview-2.jpg" alt="IKT project portfolio Gantt view" width="49%"/>
+</p>
 
 ## Features
 
