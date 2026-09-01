@@ -16,21 +16,14 @@
 
 Portfolio management tool for the ICT division at DRES (Bundesamt fur Bauten und Logistik BBL). Built as a static single-page application — no build step, no dependencies.
 
-## Views
+## Preview
+- Live Demo: https://bbl-dres.github.io/service-portal/ 
 
 <p align="center">
   <img src="assets/Preview1.jpg" alt="Gallery View" width="45%">
   &nbsp;&nbsp;
   <img src="assets/Preview2.jpg" alt="List View" width="45%">
 </p>
-
-| View | Description |
-|------|-------------|
-| **Galerie** | Card grid with thumbnails, badges, and key metadata |
-| **Liste** | Sortable data grid with configurable columns |
-| **Kanban** | Phase-based board with drag-and-drop |
-| **Gantt** | Timeline with bars colored by project class |
-| **Dashboard** | KPI cards and bar charts for phase/budget distribution |
 
 ## Features
 
