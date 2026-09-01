@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://bbl-dres.github.io/ict-portfolio/">
-    <img src="assets/Social1.jpg" alt="IKT Projektportfolio DRES" width="100%">
+    <img src="assets/social-preview.jpg" alt="IKT Projektportfolio DRES" width="100%">
   </a>
 </p>
 
@@ -17,6 +17,13 @@ Static portfolio-management prototype for the ICT division at DRES (Bundesamt f√
 ## Demo
 
 **Live demo:** https://bbl-dres.github.io/ict-portfolio/
+
+<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+  <tr>
+    <td width="50%" valign="top"><img src="assets/preview-1.jpg" alt="IKT project portfolio gallery" width="100%"/></td>
+    <td width="50%" valign="top"><img src="assets/preview-2.jpg" alt="IKT project portfolio Gantt view" width="100%"/></td>
+  </tr>
+</table>
 
 ## Features
 
