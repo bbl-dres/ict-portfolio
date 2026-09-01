@@ -1,72 +1,45 @@
 # IKT Projektportfolio DRES
 
 <p align="center">
-  <img src="assets/Social1.jpg" alt="IKT Projektportfolio DRES" width="100%">
+  <a href="https://bbl-dres.github.io/ict-portfolio/">
+    <img src="assets/Social1.jpg" alt="IKT Projektportfolio DRES" width="100%">
+  </a>
 </p>
 
-![HTML](https://img.shields.io/badge/HTML-Static_SPA-E34F26?logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS-Custom_Tokens-1572B6?logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
-![No Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
+[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f?logo=github&logoColor=white)](https://bbl-dres.github.io/ict-portfolio/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > [!CAUTION]
-> **This is an unofficial mockup for demonstration purposes only.**
-> All data is fictional. Not all features are fully functional. This project serves as a visual and conceptual prototype — it is not intended for production use.
+> Unofficial prototype for demonstration only. The data is fictional and not every feature is fully functional.
 
-Portfolio management tool for the ICT division at DRES (Bundesamt fur Bauten und Logistik BBL). Built as a static single-page application — no build step, no dependencies.
+Static portfolio-management prototype for the ICT division at DRES (Bundesamt für Bauten und Logistik BBL).
 
 ## Demo
-- Live app: https://bbl-dres.github.io/ict-portfolio/
 
-<p align="center">
-  <img src="assets/Preview1.jpg" alt="Gallery View" width="45%">
-  &nbsp;&nbsp;
-  <img src="assets/Preview2.jpg" alt="List View" width="45%">
-</p>
+**Live demo:** https://bbl-dres.github.io/ict-portfolio/
 
 ## Features
 
-- Multi-dimensional filtering (phase, class, type, priority, responsible, tags, DTI)
-- Filter by clicking any badge in any view
-- Grouping by any dimension with collapsible sections
-- Drag-and-drop between kanban columns and groups
-- URL state persistence (bookmarkable filtered/sorted views)
-- CSV and PDF export
-- Detail view with overview, comments, and changelog tabs
+- Gallery, list, and kanban views for ICT projects.
+- Filtering, sorting, grouping, and click-to-filter tags.
+- Shareable URLs that preserve the current view and filters.
+- Project details with comments and change history.
+- CSV and PDF exports.
 
-## Project Structure
-
-```
-index.html          Single HTML entry point
-css/
-  tokens.css        Design tokens (colors, spacing, typography, shadows)
-  styles.css        Component styles
-js/
-  state.js          Global state and label/icon constants
-  data.js           Data loading, filtering, sorting, grouping, formatting
-  app.js            Rendering, event delegation, UI logic
-data/
-  projects.json     Project records
-  users.json        User profiles
-  comments.json     Project comments
-  changelog.json    Field change history
-assets/
-  swiss-logo-flag.svg
-```
-
-## Running Locally
-
-Serve the project root with any static file server:
+## Run locally
 
 ```bash
-npx serve .
-# or
-python -m http.server
+python -m http.server 8000
 ```
 
-Open `http://localhost:3000` (or `:8000` for Python).
+Open <http://localhost:8000/>.
+
+## Documentation
+
+- [Data model](docs/DATAMODEL.md)
+- [Requirements](docs/REQUIREMENTS.md)
+- [Wireframes](docs/WIREFRAME.md)
 
 ## License
 
-See [LICENSE](LICENSE).
+[MIT License](LICENSE).
