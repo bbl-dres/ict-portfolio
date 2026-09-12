@@ -3051,7 +3051,7 @@ select:focus-visible {
 @media (max-width: 480px) {
   /* Header: tighter */
   .header { height: 56px; }
-  .header-logo { width: 22px; height: 24px; }
+  .header-logo { width: 22px; height: 22px; }
   .header-title {
     font-size: var(--font-size-xs);
     line-height: 1.2;
