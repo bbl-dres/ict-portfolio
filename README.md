@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://bbl-dres.github.io/ict-portfolio/">
-    <img src="assets/social-preview.jpg" alt="IKT Projektportfolio DRES" width="100%">
+    <img src="assets/social-preview-painted.jpg" alt="Abstract watercolor of software, data, and integration initiatives forming a coordinated ICT portfolio roadmap" width="100%">
   </a>
 </p>
 
